@@ -1,5 +1,5 @@
-name: basic
-description: A basic game built in Flutter.
+name: mojingo
+description: A game about mixing and collecting Emoji's 
 
 # Prevent accidental publishing to pub.dev.
 publish_to: 'none'
