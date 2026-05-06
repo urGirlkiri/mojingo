@@ -6,7 +6,7 @@ class AppTheme {
   static ThemeData buildTheme(Palette palette) {
     return ThemeData.from(
       colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.deepPurple,
+        seedColor: palette.darkPen,
         surface: palette.backgroundMain,
       ),
       useMaterial3: true,
