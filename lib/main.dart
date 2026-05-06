@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 import 'package:mojingo/config/app_theme.dart';
 
-import 'app_lifecycle/app_lifecycle.dart';
+import 'config/app_lifecycle.dart';
 import 'audio/audio_controller.dart';
 import 'player_progress/player_progress.dart';
 import 'router.dart';
