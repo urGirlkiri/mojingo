@@ -1,4 +1,4 @@
-package com.example.basic
+package com.urgirlkiri.mojingo
 
 import io.flutter.embedding.android.FlutterActivity
 
