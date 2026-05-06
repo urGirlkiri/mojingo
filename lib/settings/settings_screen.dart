@@ -24,7 +24,7 @@ class SettingsScreen extends StatelessWidget {
     final palette = context.watch<Palette>();
 
     return Scaffold(
-      backgroundColor: palette.backgroundSettings,
+      backgroundColor: palette.voidBlack,
       body: ResponsiveScreen(
         squarishMainArea: ListView(
           children: [

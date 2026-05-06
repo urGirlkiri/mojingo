@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'game_internals/score.dart';
 import 'level_selection/level_selection_screen.dart';
 import 'level_selection/levels.dart';
-import 'main_menu/main_menu_screen.dart';
+import 'features/main_menu.dart';
 import 'play_session/play_session_screen.dart';
 import 'settings/settings_screen.dart';
 import 'style/my_transition.dart';
@@ -28,7 +28,7 @@ final router = GoRouter(
           path: 'play',
           pageBuilder: (context, state) => buildMyTransition<void>(
             key: const ValueKey('play'),
-            color: context.watch<Palette>().backgroundLevelSelection,
+            color: context.watch<Palette>().midnight,
             child: const LevelSelectionScreen(key: Key('level selection')),
           ),
           routes: [
@@ -41,7 +41,7 @@ final router = GoRouter(
                 );
                 return buildMyTransition<void>(
                   key: const ValueKey('level'),
-                  color: context.watch<Palette>().backgroundPlaySession,
+                  color: context.watch<Palette>().twilight,
                   child: PlaySessionScreen(
                     level,
                     key: const Key('play session'),
@@ -67,7 +67,7 @@ final router = GoRouter(
 
                 return buildMyTransition<void>(
                   key: const ValueKey('won'),
-                  color: context.watch<Palette>().backgroundPlaySession,
+                  color: context.watch<Palette>().twilight,
                   child: WinGameScreen(
                     score: score,
                     key: const Key('win game'),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
@@ -20,7 +19,7 @@ class MainMenuScreen extends StatelessWidget {
     final audioController = context.watch<AudioController>();
 
     return Scaffold(
-      backgroundColor: palette.backgroundMain,
+      backgroundColor: palette.midnight,
       body: ResponsiveScreen(
         squarishMainArea: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -31,11 +30,7 @@ class MainMenuScreen extends StatelessWidget {
               child: Text(
                 'Mojingo!',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.eagleLake(
-                  fontSize: 64,
-                  color: palette.pen,
-                  height: 1
-                ),
+                style: Theme.of(context).textTheme.displayLarge
               ),
             ),
           ],

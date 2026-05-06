@@ -4,30 +4,40 @@ import 'palette.dart';
 
 class AppTheme {
   static ThemeData buildTheme(Palette palette) {
-    return ThemeData.from(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: palette.darkPen,
-        surface: palette.backgroundMain,
-      ),
+    return ThemeData(
       useMaterial3: true,
-    ).copyWith(
+      scaffoldBackgroundColor: palette.voidBlack, 
+      
+      colorScheme: ColorScheme.dark(
+        primary: palette.slate,
+        secondary: palette.mist,
+        tertiary: palette.dusk,
+        surface: palette.midnight,
+        surfaceContainer: palette.twilight,
+        error: palette.crimson,
+        onPrimary: palette.trueWhite,
+        onSurface: palette.moonlight,
+        onSurfaceVariant: palette.moonlightSoft,
+      ),
+      
       textTheme: TextTheme(
         displayLarge: GoogleFonts.eagleLake(
-          fontSize: 65, color: palette.pen, height: 1,
+          fontSize: 65, color: palette.mist, height: 1,
         ),
         headlineLarge: GoogleFonts.eagleLake(
-          fontSize: 32, color: palette.inkFullOpacity, fontWeight: FontWeight.bold,
+          fontSize: 32, color: palette.moonlight, fontWeight: FontWeight.bold,
         ),
         bodyLarge: GoogleFonts.caudex(
-          fontSize: 20, color: palette.ink,
+          fontSize: 20, color: palette.moonlightSoft,
         ),
         bodyMedium: GoogleFonts.caudex(
-          fontSize: 16, color: palette.ink,
+          fontSize: 16, color: palette.moonlightSoft,
         ),
         bodySmall: GoogleFonts.caudex(
-          fontSize: 12, color: palette.ink,
+          fontSize: 12, color: palette.moonlightSoft,
         ),
       ),
+      
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           textStyle: GoogleFonts.eagleLake(

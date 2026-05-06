@@ -23,7 +23,7 @@ class WinGameScreen extends StatelessWidget {
     const gap = SizedBox(height: 10);
 
     return Scaffold(
-      backgroundColor: palette.backgroundPlaySession,
+      backgroundColor: palette.twilight,
       body: ResponsiveScreen(
         squarishMainArea: Column(
           mainAxisAlignment: MainAxisAlignment.center,
