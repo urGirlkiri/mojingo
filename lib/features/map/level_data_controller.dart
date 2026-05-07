@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
@@ -21,10 +20,7 @@ class LevelDataController extends ChangeNotifier {
 
   bool isLevelCompleted(int level) => _levelData.containsKey(level);
 
-  Future<void> completeLevelWithStars(int level) async {
-    final random = Random();
-    final stars = random.nextInt(3) + 1; // Random between 1 and 3
-
+  Future<void> saveLevelCompletion(int level, int stars) async {
     _levelData[level] = LevelData(level: level, stars: stars);
     notifyListeners();
 

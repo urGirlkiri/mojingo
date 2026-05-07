@@ -11,8 +11,7 @@ import 'package:mojingo/widgets/layout_scaffold.dart';
 
 import 'package:mojingo/features/game/play_screen.dart';
 import 'package:mojingo/features/game/win_screen.dart';
-import 'package:mojingo/features/map/levels.dart'; 
-import 'package:mojingo/logic/score.dart';
+import 'package:mojingo/features/game/logic/levels.dart'; 
 
 final _routerNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -104,8 +103,9 @@ final router = GoRouter(
       path: Routes.levelWon,
       builder: (context, state) {
         final map = state.extra as Map<String, dynamic>?;
-        final score = map?['score'] as Score; 
-        return WinGameScreen(score: score);
+        final stars = map?['stars'] as int; 
+        final level = map?['level'] as int;
+        return WinGameScreen(stars: stars, level: level);
       },
     ),
     

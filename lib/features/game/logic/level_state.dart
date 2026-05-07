@@ -9,10 +9,10 @@ import 'package:flutter/foundation.dart';
 /// Tracks only a single variable, [progress], and calls [onWin] when
 /// the value of [progress] reaches [goal].
 class LevelState extends ChangeNotifier {
-  final VoidCallback onWin;
+final void Function(int stars) onWin;
   final VoidCallback onFail;
 
-  final String goal;
+  final int goal;
   final int maxMoves;
 
   LevelState({
@@ -23,7 +23,6 @@ class LevelState extends ChangeNotifier {
   });
 
   int _progress = 0;
-  // ignore: unused_field
   int _movesUsed = 0;
 
   int get progress => _progress;
@@ -35,11 +34,19 @@ class LevelState extends ChangeNotifier {
     evaluate();
   }
 
+  int _calculateStars() {
+    final int movesLeft = maxMoves - _movesUsed;
+    
+    if (movesLeft >= (maxMoves * 0.5)) return 3;
+    if (movesLeft >= (maxMoves * 0.2)) return 2;
+    return 1; 
+  }
+
   void evaluate() {
-    // if (_progress >= goal) {
-    //   onWin();
-    // } else if (_movesUsed >= maxMoves) {
-    //   onFail();
-    // }
+    if (_progress >= goal) {
+      onWin(_calculateStars());
+    } else if (_movesUsed >= maxMoves) {
+      onFail();
+    }
   }
 }

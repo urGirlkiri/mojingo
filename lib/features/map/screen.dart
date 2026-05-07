@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:game_levels_scrolling_map/game_levels_scrolling_map.dart';
 import 'package:game_levels_scrolling_map/model/point_model.dart';
 import 'package:mojingo/features/game/logic/levels.dart';
+import 'package:mojingo/features/map/level_data_controller.dart';
 import 'package:mojingo/features/map/widgets/level_node.dart';
 import 'package:mojingo/features/map/widgets/level_start_dialog.dart';
 
 import 'package:mojingo/utils/responsive.dart';
+import 'package:provider/provider.dart';
 
 class LevelsMapScreen extends StatefulWidget {
   final int? autoOpenLevel;
@@ -19,13 +21,26 @@ class LevelsMapScreen extends StatefulWidget {
 class _LevelsMapScreenState extends State<LevelsMapScreen> {
   late final List<PointModel> _points;
 
-  @override
+@override
   void initState() {
     super.initState();
 
+    final levelData = context.read<LevelDataController>();
+
     _points = List.generate(
       gameLevels.length,
-      (index) => PointModel(100, LevelNode(level: index + 1)),
+      (index) {
+        final levelNum = index + 1;
+        final stars = levelData.getStars(levelNum);
+        
+        final isUnlocked = levelNum == 1 || levelData.isLevelCompleted(levelNum - 1);
+
+        return PointModel(100,
+        isUnlocked ? LevelNode(
+          level: levelNum, 
+          stars: stars, 
+        ) : null);
+      }
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

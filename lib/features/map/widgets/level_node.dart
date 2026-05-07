@@ -7,10 +7,12 @@ import 'package:provider/provider.dart';
 
 class LevelNode extends StatelessWidget {
   final int level;
+  final int stars; 
 
   const LevelNode({
     super.key,
     required this.level,
+    required this.stars,
   });
 
   @override
@@ -19,6 +21,20 @@ class LevelNode extends StatelessWidget {
 
     final double nodeSize = isLarge ? 85.0 : 45.0;
     final double fontSize = isLarge ? 28.0 : 16.0;
+
+    var imagePath = "assets/images/map/level.png";
+
+    switch (stars) {
+      case 1:
+        imagePath = "assets/images/map/level_1_star.png";
+        break;
+      case 2:
+        imagePath = "assets/images/map/level_2_stars.png";
+        break;
+      case 3:
+        imagePath = "assets/images/map/level_3_stars.png";
+        break;
+    }
 
     return InkWell(
       borderRadius: BorderRadius.circular(100),
@@ -30,25 +46,21 @@ class LevelNode extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             Image.asset(
-              "assets/images/map/level.png",
+              imagePath,
               fit: BoxFit.contain,
               width: nodeSize,
               height: nodeSize,
             ),
-            Text(
-              "$level",
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    shadows: const [
-                      Shadow(
-                        blurRadius: 8,
-                        color: Colors.black54,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
+            Positioned(
+              top: stars > 0 ? (isLarge ? 18 : 30) : null,
+
+              child: Text(
+                "$level",
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.w900,
+                    ),
+              ),
             ),
           ],
         ),

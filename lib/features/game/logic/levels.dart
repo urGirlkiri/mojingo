@@ -6,16 +6,18 @@ const gameLevels = [
   GameLevel(
     number: 1,
     difficulty: 5,
+    maxMoves: 5,
     // TODO: When ready, change these achievement IDs.
     // You configure this in App Store Connect.
     achievementIdIOS: 'first_win',
     // You get this string when you configure an achievement in Play Console.
     achievementIdAndroid: 'NhkIwB69ejkMAOOLDb',
   ),
-  GameLevel(number: 2, difficulty: 42),
+  GameLevel(number: 2, difficulty: 42, maxMoves: 1),
   GameLevel(
     number: 3,
     difficulty: 100,
+    maxMoves: 1,
     achievementIdIOS: 'finished',
     achievementIdAndroid: 'CdfIhE96aspNWLGSQg',
   ),
@@ -25,6 +27,8 @@ class GameLevel {
   final int number;
 
   final int difficulty;
+
+  final int maxMoves;
 
   /// The achievement to unlock when the level is finished, if any.
   final String? achievementIdIOS;
@@ -36,6 +40,7 @@ class GameLevel {
   const GameLevel({
     required this.number,
     required this.difficulty,
+    required this.maxMoves,
     this.achievementIdIOS,
     this.achievementIdAndroid,
   }) : assert(

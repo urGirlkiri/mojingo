@@ -7,14 +7,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart' hide Level;
+import 'package:mojingo/features/map/level_data_controller.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/audio/audio_controller.dart';
 import '../../config/audio/sounds.dart';
-import '../map/level_state.dart';
-import '../../logic/score.dart';
-import '../map/levels.dart';
-import '../inventory/player_progress.dart';
+import 'logic/level_state.dart';
+import 'logic/levels.dart';
 import 'widgets/confetti.dart';
 import '../../widgets/custom_button.dart';
 import '../../config/palette.dart';
@@ -43,6 +42,7 @@ class _LevelScreenState extends State<LevelScreen> {
 
   bool _duringCelebration = false;
 
+  // ignore: unused_field
   late DateTime _startOfPlay;
 
   @override
@@ -64,6 +64,7 @@ class _LevelScreenState extends State<LevelScreen> {
         ChangeNotifierProvider(
           create: (context) => LevelState(
             goal: widget.level.difficulty,
+            maxMoves: widget.level.maxMoves,
             onWin: _playerWon,
             onFail: _playerFailed,
           ),
@@ -127,19 +128,13 @@ class _LevelScreenState extends State<LevelScreen> {
     );
   }
 
-  Future<void> _playerWon() async {
-    _log.info('Level ${widget.level.number} won');
+  Future<void> _playerWon(int starsEarned) async {
+    _log.info('Level ${widget.level.number} won with $starsEarned stars!');
 
-    final score = Score(
-      widget.level.number,
-      widget.level.difficulty,
-      DateTime.now().difference(_startOfPlay),
-    );
+    final levelDataController = context.read<LevelDataController>();
 
-    final playerProgress = context.read<PlayerProgress>();
-    playerProgress.setLevelReached(widget.level.number);
+    await levelDataController.saveLevelCompletion(widget.level.number, starsEarned);
 
-    // Let the player see the game just after winning for a bit.
     await Future<void>.delayed(_preCelebrationDuration);
     if (!mounted) return;
 
@@ -150,11 +145,13 @@ class _LevelScreenState extends State<LevelScreen> {
     final audioController = context.read<AudioController>();
     audioController.playSfx(SfxType.congrats);
 
-    /// Give the player some time to see the celebration animation.
     await Future<void>.delayed(_celebrationDuration);
     if (!mounted) return;
 
-    GoRouter.of(context).go('/play/won', extra: {'score': score});
+    GoRouter.of(context).go(
+      '/play/won',
+      extra: {'level': widget.level.number, 'stars': starsEarned},
+    );
   }
 
   void _playerFailed() {
