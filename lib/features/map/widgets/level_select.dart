@@ -7,6 +7,8 @@ import 'package:mojingo/config/audio/audio_controller.dart';
 import 'package:mojingo/config/audio/sounds.dart';
 import 'package:mojingo/config/palette.dart';
 
+import 'package:mojingo/utils/responsive.dart';
+
 class LevelStartDialog extends StatelessWidget {
   final int level;
   final String targetEmoji;
@@ -20,13 +22,14 @@ class LevelStartDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
+    final isLarge = context.isLargeScreen;
 
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
       child: SizedBox(
         width: 677,
-        height: 818,
+        height: isLarge ? 818 : 400,
 
         child: Stack(
           alignment: Alignment.center,
@@ -103,8 +106,8 @@ class LevelStartDialog extends StatelessWidget {
             ),
 
             Positioned(
-              top: 230,
-              right: 30,
+              top: isLarge ? 20 : 15,
+              right: isLarge ? 80 : 28,
               child: GestureDetector(
                 onTap: () {
                   context.read<AudioController>().playSfx(SfxType.buttonTap);

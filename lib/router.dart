@@ -57,7 +57,7 @@ final router = GoRouter(
     GoRoute(
       parentNavigatorKey: _routerNavigatorKey,
       path: Routes.home,
-      builder: (context, state) => const MainMenuScreen(key: Key('main menu')),
+      builder: (context, state) => const MainMenuScreen(),
     ),
     GoRoute(
       path: Routes.settings,

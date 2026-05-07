@@ -11,6 +11,7 @@ import 'package:mojingo/router.dart';
 import 'package:provider/provider.dart';
 
 import 'package:mojingo/config/app_theme.dart';
+import 'package:mojingo/utils/responsive.dart';
 
 import 'config/app_lifecycle.dart';
 import 'config/audio/audio_controller.dart';
@@ -72,13 +73,13 @@ class MyApp extends StatelessWidget {
         child: Builder(
           builder: (context) {
             final palette = context.watch<Palette>();
-            final screenWidth = MediaQuery.sizeOf(context).width;
-            final isLargeScreen = screenWidth > 600;
+               final isLarge = context.isLargeScreen;
+
 
             return MaterialApp.router(
               title: 'Mojingo',
               debugShowCheckedModeBanner: false,
-              theme: AppTheme.buildTheme(palette, isLargeScreen),
+              theme: AppTheme.buildTheme(palette, isLarge),
               routerConfig: router,
             );
           },

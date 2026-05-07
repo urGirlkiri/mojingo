@@ -3,6 +3,8 @@ import 'package:game_levels_scrolling_map/game_levels_scrolling_map.dart';
 import 'package:game_levels_scrolling_map/model/point_model.dart';
 import 'package:mojingo/features/map/widgets/level_node.dart';
 
+import 'package:mojingo/utils/responsive.dart';
+
 class LevelsMapScreen extends StatefulWidget {
   const LevelsMapScreen({super.key});
 
@@ -25,8 +27,8 @@ class _LevelsMapScreenState extends State<LevelsMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLargeScreen = MediaQuery.sizeOf(context).width > 600;
-    final double nudgeX = isLargeScreen ? -15.0 : 0.0;
+    final isLarge = context.isLargeScreen;
+    final double nudgeX = isLarge ? -15.0 : 0.0;
 
     return Scaffold(
       body: GameLevelsScrollingMap.scrollable(
