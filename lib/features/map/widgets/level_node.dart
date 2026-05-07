@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mojingo/config/audio/audio_controller.dart';
 import 'package:mojingo/config/audio/sounds.dart';
+import 'package:mojingo/features/map/widgets/level_select.dart';
+import 'package:mojingo/utils/responsive.dart';
 import 'package:provider/provider.dart';
 
 class LevelNode extends StatelessWidget {
   final int level;
 
-  const LevelNode({super.key, required this.level});
+  const LevelNode({
+    super.key,
+    required this.level,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isLargeScreen = MediaQuery.sizeOf(context).width > 600;
+    final isLarge = context.isLargeScreen;
 
-    final double nodeSize = isLargeScreen ? 85.0 : 45.0;
-
-    final double fontSize = isLargeScreen ? 28.0 : 16.0;
+    final double nodeSize = isLarge ? 85.0 : 45.0;
+    final double fontSize = isLarge ? 28.0 : 16.0;
 
     return InkWell(
+      borderRadius: BorderRadius.circular(100),
       onTap: () => _showLevelDialog(context),
       child: SizedBox(
         width: 100,
@@ -34,9 +38,17 @@ class LevelNode extends StatelessWidget {
             Text(
               "$level",
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontSize: fontSize,
-                fontWeight: FontWeight.bold,
-              ),
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    shadows: const [
+                      Shadow(
+                        blurRadius: 8,
+                        color: Colors.black54,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
             ),
           ],
         ),
@@ -44,31 +56,20 @@ class LevelNode extends StatelessWidget {
     );
   }
 
-  void _showLevelDialog(BuildContext context) {
+void _showLevelDialog(BuildContext context) {
     final audioController = context.read<AudioController>();
+    audioController.playSfx(SfxType.buttonTap); 
 
     showDialog(
       context: context,
+      barrierColor: Colors.black.withValues(alpha: .7), 
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Level $level"),
-          content: const Text("Ready to play this level?"),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            FilledButton(
-              child: const Text("Play"),
-              onPressed: () {
-                audioController.playSfx(SfxType.buttonTap);
-
-                GoRouter.of(context).go('/play/session/$level');
-              },
-            ),
-          ],
+        return LevelStartDialog(
+          level: level, 
+          targetEmoji: "☁️", 
         );
       },
     );
   }
+
 }

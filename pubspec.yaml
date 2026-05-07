@@ -39,6 +39,7 @@ flutter:
     - assets/images/
     - assets/images/map/
     - assets/images/tab/
+    - assets/images/level/
     - assets/icons/
     - assets/music/
     - assets/sfx/
