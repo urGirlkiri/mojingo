@@ -37,6 +37,13 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/map/
+    - assets/images/map/map_visual.png
+    - assets/images/map/map_coordinates.svg
+    - assets/images/map/level.png
+    - assets/images/map/level_1_star.png
+    - assets/images/map/level_2_stars.png
+    - assets/images/map/level_3_stars.png
     - assets/icons/
     - assets/music/
     - assets/sfx/

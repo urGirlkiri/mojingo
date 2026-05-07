@@ -1,68 +1,41 @@
-
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
+import 'package:game_levels_scrolling_map/game_levels_scrolling_map.dart';
+import 'package:game_levels_scrolling_map/model/point_model.dart';
+import 'package:mojingo/features/map/widgets/level_node.dart';
 
-import '../../config/audio/audio_controller.dart';
-import '../../config/audio/sounds.dart';
-import '../inventory/player_progress.dart';
-import '../../widgets/custom_button.dart';
-import '../../config/palette.dart';
-import '../../widgets/responsive_screen.dart';
-import 'levels.dart';
+class LevelsMapScreen extends StatefulWidget {
+  const LevelsMapScreen({super.key});
 
-class LevelMapScreen extends StatelessWidget {
-  const LevelMapScreen({super.key});
+  @override
+  State<LevelsMapScreen> createState() => _LevelsMapScreenState();
+}
+
+class _LevelsMapScreenState extends State<LevelsMapScreen> {
+  late final List<PointModel> _points;
+
+  @override
+  void initState() {
+    super.initState(); 
+    
+    _points = List.generate(
+      1,
+      (index) => PointModel(100, LevelNode(level: index + 1)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.watch<Palette>();
-    final playerProgress = context.watch<PlayerProgress>();
-
     return Scaffold(
-      backgroundColor: palette.midnight,
-      body: ResponsiveScreen(
-        squarishMainArea: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: Text(
-                  'Select level',
-                ),
-              ),
-            ),
-            const SizedBox(height: 50),
-            Expanded(
-              child: ListView(
-                children: [
-                  for (final level in gameLevels)
-                    ListTile(
-                      enabled:
-                          playerProgress.highestLevelReached >=
-                          level.number - 1,
-                      onTap: () {
-                        final audioController = context.read<AudioController>();
-                        audioController.playSfx(SfxType.buttonTap);
-
-                        GoRouter.of(
-                          context,
-                        ).go('/play/session/${level.number}');
-                      },
-                      leading: Text(level.number.toString()),
-                      title: Text('Level #${level.number}'),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        rectangularMenuArea: CustomButton(
-          onPressed: () {
-            GoRouter.of(context).go('/');
-          },
-          child: const Text('Back'),
-        ),
+      body: GameLevelsScrollingMap.scrollable(
+        imageUrl: "assets/images/map/map_visual.png",
+        imageWidth: 755,
+        imageHeight: 1967,
+        direction: Axis.vertical,
+        reverseScrolling: true,
+        pointsPositionDeltaX: 25,
+        pointsPositionDeltaY: 25,
+        svgUrl: 'assets/images/map/map_coordinates.svg',
+        points: _points,
       ),
     );
   }

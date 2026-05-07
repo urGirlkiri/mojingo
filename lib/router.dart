@@ -20,7 +20,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: Routes.levelsMap,
-              builder: (context, state) => const LevelMapScreen(),
+              builder: (context, state) => const LevelsMapScreen(),
             ),
           ],
         ),
