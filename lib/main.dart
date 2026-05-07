@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:mojingo/router.dart';
 import 'package:provider/provider.dart';
 
 import 'package:mojingo/config/app_theme.dart';
@@ -14,7 +15,6 @@ import 'package:mojingo/config/app_theme.dart';
 import 'config/app_lifecycle.dart';
 import 'config/audio/audio_controller.dart';
 import 'features/inventory/player_progress.dart';
-import 'router.dart';
 import 'features/settings/controller.dart';
 import 'config/palette.dart';
 
