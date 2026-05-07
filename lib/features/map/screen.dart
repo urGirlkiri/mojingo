@@ -18,7 +18,7 @@ class _LevelsMapScreenState extends State<LevelsMapScreen> {
     super.initState();
 
     _points = List.generate(
-      83,
+      1,
       (index) => PointModel(100, LevelNode(level: index + 1)),
     );
   }

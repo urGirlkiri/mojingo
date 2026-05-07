@@ -1,17 +1,15 @@
-import 'package:flutter/material.dart';
-
 class Destination {
-  const Destination({required this.label, required this.icon});
+  const Destination({required this.label, required this.imagePath});
 
   final String label;
-  final IconData icon;
+  final String imagePath;
 }
 
 const destinations = [
-  Destination(label: 'Map', icon: Icons.map),
-  Destination(label: 'Recipes', icon: Icons.air), 
-  Destination(label: 'Friends', icon: Icons.people),
-  Destination(label: 'Market', icon: Icons.store),
+Destination(label: 'Map', imagePath: 'assets/images/tab/map.png'),
+Destination(label: 'Recipes', imagePath: 'assets/images/tab/recipes.png'), 
+Destination(label: 'Friends', imagePath: 'assets/images/tab/friends.png'),
+Destination(label: 'Market', imagePath: 'assets/images/tab/market.png'),
 ];
 
 class Routes{
