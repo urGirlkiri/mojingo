@@ -15,8 +15,14 @@ Destination(label: 'Market', imagePath: 'assets/images/tab/market.png'),
 class Routes{
   static const home = '/';
   static const levelsMap = '/play';
-  static const settings = '/settings';
   static const friends = '/friends';
   static const market = '/market';
   static const bounties = '/bounties';
+  static const settings = '/settings';
+
+  static const levelHint = '/play/hint/:level';
+  static const levelPlay = '/play/session/:level';
+  static const levelWon = '/play/won';
+  static const levelFail = '/play/fail/:level';
+
 }

@@ -29,7 +29,6 @@ class GameWidget extends StatelessWidget {
           value: levelState.progress / 100,
           onChanged: (value) => levelState.setProgress((value * 100).round()),
           onChangeEnd: (value) {
-            context.read<AudioController>().playSfx(SfxType.wssh);
             levelState.evaluate();
           },
         ),

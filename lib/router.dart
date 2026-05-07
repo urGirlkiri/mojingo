@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mojingo/config/routes.dart';
+
 import 'package:mojingo/features/main_menu.dart';
 import 'package:mojingo/features/map/screen.dart';
+import 'package:mojingo/features/map/level_fail_screen.dart';
+import 'package:mojingo/features/map/widgets/level_hint.dart';
 import 'package:mojingo/features/settings/screen.dart';
 import 'package:mojingo/widgets/layout_scaffold.dart';
+
+import 'package:mojingo/features/game/play_screen.dart';
+import 'package:mojingo/features/game/win_screen.dart';
+import 'package:mojingo/features/map/levels.dart'; 
+import 'package:mojingo/logic/score.dart';
 
 final _routerNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -65,9 +73,50 @@ final router = GoRouter(
       path: Routes.home,
       builder: (context, state) => const MainMenuScreen(),
     ),
+    
     GoRoute(
+      parentNavigatorKey: _routerNavigatorKey,
       path: Routes.settings,
-      builder: (context, state) => const SettingsScreen(key: Key('settings')),
+      builder: (context, state) => const SettingsScreen(),
     ),
+    
+    GoRoute(
+      parentNavigatorKey: _routerNavigatorKey,
+      path: Routes.levelHint ,
+      builder: (context, state) {
+        final level = int.parse(state.pathParameters['level']!);
+        return LevelHintScreen(level: level);
+      },
+    ),
+    
+    GoRoute(
+      parentNavigatorKey: _routerNavigatorKey,
+      path: Routes.levelPlay,
+      builder: (context, state) {
+        final levelNumber = int.parse(state.pathParameters['level']!);
+        final level = gameLevels.singleWhere((e) => e.number == levelNumber);
+        return LevelScreen(level);
+      },
+    ),
+    
+    GoRoute(
+      parentNavigatorKey: _routerNavigatorKey,
+      path: Routes.levelWon,
+      builder: (context, state) {
+        final map = state.extra as Map<String, dynamic>?;
+        final score = map?['score'] as Score; 
+        return WinGameScreen(score: score);
+      },
+    ),
+    
+    GoRoute(
+      parentNavigatorKey: _routerNavigatorKey,
+      path: Routes.levelFail,
+      builder: (context, state) {
+        final level = int.parse(state.pathParameters['level']!);
+        return LevelFailScreen(level: level);
+      },
+    ),
+    
   ],
 );

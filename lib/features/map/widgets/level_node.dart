@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mojingo/config/audio/audio_controller.dart';
 import 'package:mojingo/config/audio/sounds.dart';
-import 'package:mojingo/features/map/widgets/level_select.dart';
+import 'package:mojingo/features/map/widgets/level_start_dialog.dart';
 import 'package:mojingo/utils/responsive.dart';
 import 'package:provider/provider.dart';
 

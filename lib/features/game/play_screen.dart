@@ -62,8 +62,11 @@ class _LevelScreenState extends State<LevelScreen> {
         // Create and provide the [LevelState] object that will be used
         // by widgets below this one in the widget tree.
         ChangeNotifierProvider(
-          create: (context) =>
-              LevelState(goal: widget.level.difficulty, onWin: _playerWon),
+          create: (context) => LevelState(
+            goal: widget.level.difficulty,
+            onWin: _playerWon,
+            onFail: _playerFailed,
+          ),
         ),
       ],
       child: IgnorePointer(
@@ -152,5 +155,15 @@ class _LevelScreenState extends State<LevelScreen> {
     if (!mounted) return;
 
     GoRouter.of(context).go('/play/won', extra: {'score': score});
+  }
+
+  void _playerFailed() {
+    _log.info('Level ${widget.level.number} failed');
+
+    context.read<AudioController>().playSfx(SfxType.fail);
+
+    if (!mounted) return;
+
+    GoRouter.of(context).go('/play/fail/${widget.level.number}');
   }
 }
