@@ -3,7 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'palette.dart';
 
 class AppTheme {
-  static ThemeData buildTheme(Palette palette) {
+  static ThemeData buildTheme(Palette palette, bool isLargeScreen ){
+    
+    final double scale = isLargeScreen ? 1.5 : 1.0;
+
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: palette.voidBlack, 
@@ -22,19 +25,19 @@ class AppTheme {
       
       textTheme: TextTheme(
         displayLarge: GoogleFonts.eagleLake(
-          fontSize: 65, color: palette.mist, height: 1,
+          fontSize: 65 * scale, color: palette.mist, height: 1,
         ),
         headlineLarge: GoogleFonts.eagleLake(
-          fontSize: 32, color: palette.moonlight, fontWeight: FontWeight.bold,
+          fontSize: 32 * scale, color: palette.moonlight, fontWeight: FontWeight.bold,
         ),
         bodyLarge: GoogleFonts.caudex(
-          fontSize: 20, color: palette.moonlightSoft,
+          fontSize: 20 * scale, color: palette.moonlightSoft,
         ),
         bodyMedium: GoogleFonts.caudex(
-          fontSize: 16, color: palette.moonlightSoft,
+          fontSize: 16 * scale, color: palette.moonlightSoft,
         ),
         bodySmall: GoogleFonts.caudex(
-          fontSize: 12, color: palette.moonlightSoft,
+          fontSize: 12 * scale, color: palette.moonlightSoft,
         ),
       ),
       
@@ -42,7 +45,7 @@ class AppTheme {
         style: FilledButton.styleFrom(
           textStyle: GoogleFonts.eagleLake(
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: 20 * scale, 
           ),
         ),
       ),

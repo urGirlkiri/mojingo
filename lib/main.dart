@@ -72,11 +72,13 @@ class MyApp extends StatelessWidget {
         child: Builder(
           builder: (context) {
             final palette = context.watch<Palette>();
+            final screenWidth = MediaQuery.sizeOf(context).width;
+            final isLargeScreen = screenWidth > 600;
 
             return MaterialApp.router(
               title: 'Mojingo',
               debugShowCheckedModeBanner: false,
-              theme: AppTheme.buildTheme(palette),
+              theme: AppTheme.buildTheme(palette, isLargeScreen),
               routerConfig: router,
             );
           },

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:mojingo/config/routes.dart';
 import 'package:mojingo/config/palette.dart'; 
+import 'package:mojingo/utils/responsive.dart'; 
 
 class LayoutScaffold extends StatelessWidget {
   const LayoutScaffold({required this.navigationShell, super.key});
@@ -14,16 +15,22 @@ class LayoutScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
+    final isLarge = context.isLargeScreen;
+
+    final double navHeight = isLarge ? 120.0 : 85.0;
+    
+    final double iconBaseSize = isLarge ? 100.0 : 60.0;
+    final double iconSelectedSize = isLarge ? 120.0 : 80.0;
 
     return Scaffold(
       backgroundColor: palette.voidBlack,
       body: navigationShell,
       bottomNavigationBar: Container(
-        height: 85, 
+        height: navHeight, 
         decoration: BoxDecoration(
           color: palette.midnight,
           border: Border(
-            top: BorderSide(color: palette.twilight, width: 3),
+            top: BorderSide(color: palette.twilight, width: isLarge ? 10 : 3),
           ),
         ),
         child: Row(
@@ -38,24 +45,30 @@ class LayoutScaffold extends StatelessWidget {
                 behavior: HitTestBehavior.opaque, 
                 onTap: () => navigationShell.goBranch(index),
                 child: SizedBox(
-                  height: 85,
+                  height: navHeight,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
+                      
                       AnimatedPositioned(
                         duration: const Duration(milliseconds: 350),
                         curve: Curves.easeOutBack, 
-                        top: 10.0, 
-                        child: Image.asset(
-                          dest.imagePath,
-                          width: isSelected ? 45 : 60,
+                        top: isSelected ? -15.0 : 20.0, 
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 350),
+                          curve: Curves.easeOutBack,
+                          width: isSelected ? iconSelectedSize : iconBaseSize,
+                          child: Image.asset(
+                            dest.imagePath,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
 
                       AnimatedPositioned(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeOut,
-                        bottom: isSelected ? 10.0 : -20.0, 
+                        bottom: isSelected ? 5.0 : -20.0, 
                         child: AnimatedOpacity(
                           duration: const Duration(milliseconds: 200),
                           opacity: isSelected ? 1.0 : 0.0,
@@ -68,6 +81,7 @@ class LayoutScaffold extends StatelessWidget {
                           ),
                         ),
                       ),
+                      
                     ],
                   ),
                 ),
