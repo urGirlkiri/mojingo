@@ -24,28 +24,31 @@ class Header extends StatelessWidget {
               borderRadius: BorderRadius.circular(40),
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildInfoBox('Moves', '10'),
-              const SizedBox(width: 16),
-              Expanded(child: _buildTargetBox()),
-              const SizedBox(width: 16),
-              Container(
-                width: 60,
-                height: 60,
-                decoration: ShapeDecoration(
-                  color: palette.dusk,
-                  shape: CircleBorder(
-                    side: BorderSide(width: 3, color: palette.dusk),
-                  ),
-                  image: const DecorationImage(
-                    image: AssetImage("assets/mascot/wizard.png"),
-                    fit: BoxFit.cover,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildInfoBox('Moves', '10'),
+                const SizedBox(width: 16),
+                _buildTargetBox(),
+                const SizedBox(width: 16),
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: ShapeDecoration(
+                    color: palette.dusk,
+                    shape: CircleBorder(
+                      side: BorderSide(width: 3, color: palette.dusk),
+                    ),
+                    image: const DecorationImage(
+                      image: AssetImage("assets/mascot/wizard.png"),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 24),

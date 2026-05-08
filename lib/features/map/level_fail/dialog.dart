@@ -60,6 +60,7 @@ class LevelFailDialog extends StatelessWidget {
                   EmojiWidget.lottie(
                     path: Emojis.fireBurst.lottie,
                     size: 90,
+                    useDropShadow: true,
                   ),
                   const SizedBox(height: 12),
                   Text(

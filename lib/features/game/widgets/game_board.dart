@@ -10,64 +10,86 @@ class GameBoard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
-    return Center(
-      child: AspectRatio(
-        aspectRatio: 5 / 8,
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: ShapeDecoration(
-            color: palette.mist,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              const double spacing = 2.0;
 
-              final double exactTileWidth =
-                  (constraints.maxWidth - (spacing * 4)) / 5;
-              final double exactTileHeight =
-                  (constraints.maxHeight - (spacing * 7)) / 8;
+    const double maxAllowedBoardWidth = 350.0;
+    const int gridColumns = 5;
+    const int gridRows = 8;
+    const int totalTiles = gridColumns * gridRows;
 
-              final double dynamicRatio = exactTileWidth / exactTileHeight;
+    return LayoutBuilder(
+      builder: (context, screenConstraints) {
+        final double constrainedBoardWidth = screenConstraints.maxWidth > maxAllowedBoardWidth
+            ? maxAllowedBoardWidth
+            : screenConstraints.maxWidth;
 
-              return GridView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
-                  crossAxisSpacing: spacing,
-                  mainAxisSpacing: spacing,
-                  childAspectRatio: dynamicRatio,
+        final double proportionalBoardHeight =
+            (constrainedBoardWidth * gridRows) / gridColumns;
+
+        return Center(
+          child: SizedBox(
+            width: constrainedBoardWidth,
+            height: proportionalBoardHeight,
+            child: Container(
+              padding: const EdgeInsets.all(8.0), // Outer board padding
+              decoration: ShapeDecoration(
+                color: palette.mist,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                itemCount: 40,
-                itemBuilder: (context, index) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: palette.twilight.withValues(alpha: 0.38),
-                      border: Border.all(color: palette.dusk, width: 1),
-                      borderRadius: BorderRadius.circular(4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: palette.voidBlack.withValues(alpha: 0.4),
-                          blurRadius: 4,
-                          offset: const Offset(0, 4),
+              ),
+              child: LayoutBuilder(
+                builder: (context, gridAreaConstraints) {
+                  const double tileSpacingGap = 2.0;
+
+                  const int horizontalGapsCount = gridColumns - 1; 
+                  const int verticalGapsCount = gridRows - 1;     
+
+                  final double calculatedSingleTileWidth =
+                      (gridAreaConstraints.maxWidth - (tileSpacingGap * horizontalGapsCount)) / gridColumns;
+                  final double calculatedSingleTileHeight =
+                      (gridAreaConstraints.maxHeight - (tileSpacingGap * verticalGapsCount)) / gridRows;
+
+                  final double dynamicTileAspectRatio =
+                      calculatedSingleTileWidth / calculatedSingleTileHeight;
+
+                  return GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: gridColumns,
+                      crossAxisSpacing: tileSpacingGap,
+                      mainAxisSpacing: tileSpacingGap,
+                      childAspectRatio: dynamicTileAspectRatio,
+                    ),
+                    itemCount: totalTiles,
+                    itemBuilder: (context, tileIndex) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: palette.twilight.withValues(alpha: 0.38),
+                          border: Border.all(color: palette.dusk, width: 1),
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: palette.voidBlack.withValues(alpha: 0.4),
+                              blurRadius: 4,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Center(
-                      child: EmojiWidget(
-                        assetPath: Emojis.seedling.svg,
-                        size: 48,
-                      ),
-                    ),
+                        child: const Center(
+                          child: EmojiWidget(
+                            assetPath: Emojis.seedling.svg, 
+                            size: 48,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
-              );
-            },
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

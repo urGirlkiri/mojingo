@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mojingo/config/palette.dart';
+import 'package:mojingo/config/emojis.dart';
 import 'package:mojingo/widgets/emoji_widget.dart'; 
 
 class PowerUps extends StatelessWidget {
@@ -22,13 +23,13 @@ class PowerUps extends StatelessWidget {
           children: [
             _buildPowerUpBtn("assets/icons/app/settings_gear.png", isSmall: true),
             const SizedBox(width: 12),
-            _buildPowerUpBtn("assets/emojis/svg/1f52e.svg"),
+            _buildPowerUpBtn(Emojis.crystalBall.svg),
             const SizedBox(width: 12),
-            _buildPowerUpBtn("assets/emojis/svg/2697.svg"),
+            _buildPowerUpBtn(Emojis.alembic.svg),
             const SizedBox(width: 12),
-            _buildPowerUpBtn("assets/emojis/svg/1f3fa.svg"),
+            _buildPowerUpBtn(Emojis.amphora.svg),
             const SizedBox(width: 12),
-            _buildPowerUpBtn("assets/emojis/svg/2604_fe0f.svg"),
+            _buildPowerUpBtn(Emojis.shootingStar.svg),
           ],
         ),
       ),
