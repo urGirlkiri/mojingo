@@ -40,7 +40,10 @@ flutter:
     - assets/images/map/
     - assets/images/tab/
     - assets/images/level/
+    - assets/emojis/lottie
+    - assets/emojis/svg
     - assets/icons/
+    - assets/icons/app
     - assets/music/
     - assets/sfx/
 
