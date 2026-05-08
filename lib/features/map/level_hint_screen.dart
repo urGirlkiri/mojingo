@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:mojingo/config/emojis.dart';
 import 'package:mojingo/config/palette.dart';
+import 'package:mojingo/widgets/lottie_emoji_widget.dart';
 
 class LevelHintScreen extends StatefulWidget {
   final int level;
@@ -41,7 +43,10 @@ class _LevelHintScreenState extends State<LevelHintScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("🧪", style: TextStyle(fontSize: 80)),
+                LottieEmojiWidget.lottie(
+                  path: Emojis.cooking.lottie,
+                  size: 120,
+                ),
                 const SizedBox(height: 20),
                 Text(
                   "Gathering ingredients...",

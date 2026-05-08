@@ -52,14 +52,14 @@ class LevelFailDialog extends StatelessWidget {
               ),
             ),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   LottieEmojiWidget.lottie(
                     path: Emojis.fireBurst.lottie,
-                    size: 120,
+                    size: 90,
                   ),
                   const SizedBox(height: 12),
                   Text(

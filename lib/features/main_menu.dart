@@ -32,7 +32,12 @@ class MainMenuScreen extends StatelessWidget {
             squarishMainArea: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/icons/icon.png'),
+                Image.asset(
+                  'assets/icons/icon-adaptive-foreground.png',
+                  fit: BoxFit.cover,
+                  width: 512,
+                  height: 512,
+                  ),
                 Transform.rotate(
                   angle: -0.1,
                   child: Text(
