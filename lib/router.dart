@@ -4,8 +4,8 @@ import 'package:mojingo/config/routes.dart';
 
 import 'package:mojingo/features/main_menu.dart';
 import 'package:mojingo/features/map/screen.dart';
-import 'package:mojingo/features/map/level_fail_screen.dart';
-import 'package:mojingo/features/map/widgets/level_hint.dart';
+import 'package:mojingo/features/map/level_fail/screen.dart';
+import 'package:mojingo/features/map/level_hint_screen.dart';
 import 'package:mojingo/features/settings/screen.dart';
 import 'package:mojingo/widgets/layout_scaffold.dart';
 
