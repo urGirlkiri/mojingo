@@ -13,7 +13,7 @@ const gameLevels = [
     achievementIdAndroid: 'NhkIwB69ejkMAOOLDb',
   ),
   GameLevel(number: 2, difficulty: 42, maxMoves: 1, targetEmoji: Emojis.fire),
-  GameLevel(number: 3, difficulty: 100, maxMoves: 1, targetEmoji: Emojis.water,
+  GameLevel(number: 3, difficulty: 100, maxMoves: 1, targetEmoji: Emojis.droplet,
     achievementIdIOS: 'finished',
     achievementIdAndroid: 'CdfIhE96aspNWLGSQg',
   ),

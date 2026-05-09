@@ -58,7 +58,7 @@ class LevelFailDialog extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   EmojiWidget.lottie(
-                    path: Emojis.fireBurst.lottie,
+                    path: Emojis.collision.lottie,
                     size: 90,
                     useDropShadow: true,
                   ),

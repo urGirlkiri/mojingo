@@ -5,20 +5,30 @@ A game where you mix emojis to create new emojis!!
 
 ## Screenshots
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="assets/screenshots/small.png" alt="Mobile Screenshot" width="250"/>
-      <br/>
-      <sub>Mobile</sub>
-    </td>
-    <td align="center">
-      <img src="assets/screenshots/large.png" alt="Desktop Screenshot" width="400"/>
-      <br/>
-      <sub>Desktop</sub>
-    </td>
-  </tr>
-</table>
+<div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: stretch;">
+
+  <div style="flex: 1; min-width: 250px; text-align: center;">
+    <img 
+      src="assets/screenshots/small.png" 
+      alt="Mobile Screenshot"
+      style="width: 100%; height: auto; max-width: 250px; border-radius: 12px;"
+    />
+    <br/>
+    <sub>Mobile</sub>
+  </div>
+
+  <div style="flex: 2; min-width: 300px; text-align: center; display: flex; flex-direction: column;">
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+      <img 
+        src="assets/screenshots/large.png" 
+        alt="Desktop Screenshot"
+        style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px;"
+      />
+    </div>
+    <sub>Desktop</sub>
+  </div>
+
+</div>
 
 ## Setup
 

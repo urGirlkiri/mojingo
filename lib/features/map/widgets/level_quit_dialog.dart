@@ -46,7 +46,7 @@ class LevelQuitDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             EmojiWidget.lottie(
-              path: Emojis.cryingCat.lottie,
+              path: Emojis.cryingCatFace.lottie,
               useDropShadow: true,
               size: 80,
             ),
