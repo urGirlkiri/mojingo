@@ -1,16 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:grimoji/config/levels.dart';
 import 'package:logging/logging.dart';
 
 class LevelState extends ChangeNotifier {
   final void Function(int stars) onWin;
   final VoidCallback onFail;
+  final GameLevel level;
   final Logger _log = Logger('LevelState');
 
   LevelState({
     required this.onWin,
     required this.onFail,
+    required this.level,
   });
 
   final Stopwatch _stopwatch = Stopwatch();

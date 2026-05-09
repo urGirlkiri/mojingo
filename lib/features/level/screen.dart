@@ -4,7 +4,7 @@ import 'package:grimoji/config/audio/audio_controller.dart';
 import 'package:grimoji/config/audio/sounds.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/level/logic/level_state.dart';
-import 'package:grimoji/features/level/logic/levels.dart';
+import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/level/widgets/confetti.dart';
 import 'package:grimoji/features/level/game/board.dart';
 import 'package:grimoji/features/level/header.dart';
@@ -105,6 +105,7 @@ class _LevelScreenState extends State<LevelScreen> {
             final state = LevelState(
               onWin: _playerWon,
               onFail: _playerFailed,
+              level: widget.level,
             );
             
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -135,7 +136,7 @@ class _LevelScreenState extends State<LevelScreen> {
                 body: Stack(
                   children: [
                     ResponsiveScreen(
-                      topMessageArea: Header(level: widget.level),
+                      topMessageArea: const Header(),
                       squarishMainArea: const GameBoard(),
                       rectangularMenuArea:  Foooter(),
                       mobileBackgroundImage: const AssetImage(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:grimoji/features/level/logic/levels.dart';
+import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';
 import 'package:grimoji/widgets/scroll_dialog.dart';
 import 'package:provider/provider.dart';

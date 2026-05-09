@@ -11,7 +11,7 @@ import 'package:grimoji/widgets/layout_scaffold.dart';
 
 import 'package:grimoji/features/level/screen.dart';
 import 'package:grimoji/features/level/win/screen.dart';
-import 'package:grimoji/features/level/logic/levels.dart'; 
+import 'package:grimoji/config/levels.dart'; 
 
 final _routerNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 

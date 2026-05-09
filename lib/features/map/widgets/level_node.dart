@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/audio/audio_controller.dart';
 import 'package:grimoji/config/audio/sounds.dart';
-import 'package:grimoji/features/level/logic/levels.dart';
+import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/map/widgets/level_start_dialog.dart';
 import 'package:grimoji/utils/responsive.dart';
 import 'package:provider/provider.dart';
