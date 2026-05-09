@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.urgirlkiri.mojingo"
+    namespace = "com.urgirlkiri.grimoji"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.urgirlkiri.mojingo"
+        applicationId = "com.urgirlkiri.grimoji"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:mojingo/config/emojis.dart';
+import 'package:grimoji/config/emojis.dart';
 
 const gameLevels = [
   GameLevel(    number: 1, difficulty: 5,  maxMoves: 5,  targetEmoji: Emojis.cloud, 

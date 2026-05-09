@@ -41,7 +41,7 @@ class MainMenuScreen extends StatelessWidget {
                 Transform.rotate(
                   angle: -0.1,
                   child: Text(
-                    'Mojingo!',
+                    'Grimoji!',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.displayLarge
                   ),

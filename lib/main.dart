@@ -7,12 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import 'package:mojingo/router.dart';
+import 'package:grimoji/router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:mojingo/config/app_theme.dart';
-import 'package:mojingo/utils/responsive.dart';
-import 'package:mojingo/features/map/level_data_controller.dart';
+import 'package:grimoji/config/app_theme.dart';
+import 'package:grimoji/utils/responsive.dart';
+import 'package:grimoji/features/map/level_data_controller.dart';
 
 import 'config/app_lifecycle.dart';
 import 'config/audio/audio_controller.dart';
@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
 
 
             return MaterialApp.router(
-              title: 'Mojingo',
+              title: 'Grimoji',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.buildTheme(palette, isLarge),
               routerConfig: router,

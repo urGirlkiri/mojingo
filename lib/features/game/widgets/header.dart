@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mojingo/config/palette.dart';
-import 'package:mojingo/features/game/logic/levels.dart';
-import 'package:mojingo/widgets/emoji_widget.dart';
+import 'package:grimoji/config/palette.dart';
+import 'package:grimoji/features/game/logic/levels.dart';
+import 'package:grimoji/widgets/emoji_widget.dart';
 
 class Header extends StatelessWidget {
   static const double progress = 0.65;

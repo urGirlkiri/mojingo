@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mojingo/config/emojis.dart';
-import 'package:mojingo/widgets/emoji_widget.dart';
+import 'package:grimoji/config/emojis.dart';
+import 'package:grimoji/widgets/emoji_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:mojingo/config/audio/audio_controller.dart';
-import 'package:mojingo/config/audio/sounds.dart';
-import 'package:mojingo/config/palette.dart';
-import 'package:mojingo/widgets/scroll_dialog.dart';
+import 'package:grimoji/config/audio/audio_controller.dart';
+import 'package:grimoji/config/audio/sounds.dart';
+import 'package:grimoji/config/palette.dart';
+import 'package:grimoji/widgets/scroll_dialog.dart';
 
 class LevelFailDialog extends StatelessWidget {
   final int level;

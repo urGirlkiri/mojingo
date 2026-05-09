@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mojingo/config/audio/audio_controller.dart';
-import 'package:mojingo/config/audio/sounds.dart';
-import 'package:mojingo/features/game/logic/levels.dart';
-import 'package:mojingo/features/map/widgets/level_start_dialog.dart';
-import 'package:mojingo/utils/responsive.dart';
+import 'package:grimoji/config/audio/audio_controller.dart';
+import 'package:grimoji/config/audio/sounds.dart';
+import 'package:grimoji/features/game/logic/levels.dart';
+import 'package:grimoji/features/map/widgets/level_start_dialog.dart';
+import 'package:grimoji/utils/responsive.dart';
 import 'package:provider/provider.dart';
 
 class LevelNode extends StatelessWidget {

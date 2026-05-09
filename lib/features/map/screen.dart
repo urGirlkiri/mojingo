@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:game_levels_scrolling_map/game_levels_scrolling_map.dart';
 import 'package:game_levels_scrolling_map/model/point_model.dart';
-import 'package:mojingo/features/game/logic/levels.dart';
-import 'package:mojingo/features/map/level_data_controller.dart';
-import 'package:mojingo/features/map/widgets/level_node.dart';
-import 'package:mojingo/features/map/widgets/level_start_dialog.dart';
+import 'package:grimoji/features/game/logic/levels.dart';
+import 'package:grimoji/features/map/level_data_controller.dart';
+import 'package:grimoji/features/map/widgets/level_node.dart';
+import 'package:grimoji/features/map/widgets/level_start_dialog.dart';
 
-import 'package:mojingo/utils/responsive.dart';
+import 'package:grimoji/utils/responsive.dart';
 import 'package:provider/provider.dart';
 
 class LevelsMapScreen extends StatefulWidget {

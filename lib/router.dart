@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mojingo/config/routes.dart';
+import 'package:grimoji/config/routes.dart';
 
-import 'package:mojingo/features/main_menu.dart';
-import 'package:mojingo/features/map/screen.dart';
-import 'package:mojingo/features/map/level_fail/screen.dart';
-import 'package:mojingo/features/map/level_hint_screen.dart';
-import 'package:mojingo/features/settings/screen.dart';
-import 'package:mojingo/widgets/layout_scaffold.dart';
+import 'package:grimoji/features/main_menu.dart';
+import 'package:grimoji/features/map/screen.dart';
+import 'package:grimoji/features/map/level_fail/screen.dart';
+import 'package:grimoji/features/map/level_hint_screen.dart';
+import 'package:grimoji/features/settings/screen.dart';
+import 'package:grimoji/widgets/layout_scaffold.dart';
 
-import 'package:mojingo/features/game/level_screen.dart';
-import 'package:mojingo/features/game/win_screen.dart';
-import 'package:mojingo/features/game/logic/levels.dart'; 
+import 'package:grimoji/features/game/level_screen.dart';
+import 'package:grimoji/features/game/win_screen.dart';
+import 'package:grimoji/features/game/logic/levels.dart'; 
 
 final _routerNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 

@@ -1,6 +1,6 @@
 {
-    "name": "mojingo",
-    "short_name": "mojingo",
+    "name": "grimoji",
+    "short_name": "grimoji",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#1a1a24",

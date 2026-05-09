@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mojingo/config/palette.dart';
-import 'package:mojingo/config/emojis.dart';
-import 'package:mojingo/widgets/emoji_widget.dart'; 
+import 'package:grimoji/config/palette.dart';
+import 'package:grimoji/config/emojis.dart';
+import 'package:grimoji/widgets/emoji_widget.dart'; 
 
 class PowerUps extends StatelessWidget {
   const PowerUps({super.key});

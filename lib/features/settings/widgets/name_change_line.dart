@@ -3,8 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:mojingo/features/settings/controller.dart';
-import 'package:mojingo/features/settings/widgets/custom_name_dialog.dart';
+import 'package:grimoji/features/settings/controller.dart';
+import 'package:grimoji/features/settings/widgets/custom_name_dialog.dart';
 import 'package:provider/provider.dart';
 
 class NameChangeLine extends StatelessWidget {

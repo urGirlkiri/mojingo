@@ -1,4 +1,4 @@
-# Mojingo
+# Grimoji
 
 
 A game where you mix emojis to create new emojis!!

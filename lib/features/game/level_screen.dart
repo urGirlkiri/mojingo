@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mojingo/features/game/logic/levels.dart';
-import 'package:mojingo/features/game/widgets/game_board.dart';
-import 'package:mojingo/features/game/widgets/header.dart';
-import 'package:mojingo/features/game/widgets/power_ups.dart';
-import 'package:mojingo/features/map/widgets/level_quit_dialog.dart';
-import 'package:mojingo/widgets/responsive_screen.dart';
+import 'package:grimoji/features/game/logic/levels.dart';
+import 'package:grimoji/features/game/widgets/game_board.dart';
+import 'package:grimoji/features/game/widgets/header.dart';
+import 'package:grimoji/features/game/widgets/power_ups.dart';
+import 'package:grimoji/features/map/widgets/level_quit_dialog.dart';
+import 'package:grimoji/widgets/responsive_screen.dart';
 
 class LevelScreen extends StatefulWidget {
   final GameLevel level;

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart' hide Level;
-import 'package:mojingo/features/map/level_data_controller.dart';
+import 'package:grimoji/features/map/level_data_controller.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/audio/audio_controller.dart';

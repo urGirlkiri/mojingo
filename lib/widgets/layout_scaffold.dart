@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import 'package:mojingo/config/routes.dart';
-import 'package:mojingo/config/palette.dart'; 
-import 'package:mojingo/utils/responsive.dart'; 
+import 'package:grimoji/config/routes.dart';
+import 'package:grimoji/config/palette.dart'; 
+import 'package:grimoji/utils/responsive.dart'; 
 
 class LayoutScaffold extends StatelessWidget {
   const LayoutScaffold({required this.navigationShell, super.key});

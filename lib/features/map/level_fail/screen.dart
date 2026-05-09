@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mojingo/config/palette.dart';
-import 'package:mojingo/features/map/level_fail/dialog.dart';
+import 'package:grimoji/config/palette.dart';
+import 'package:grimoji/features/map/level_fail/dialog.dart';
 import 'package:provider/provider.dart';
 
 class LevelFailScreen extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mojingo/utils/responsive.dart';
+import 'package:grimoji/utils/responsive.dart';
 
 class ScrollDialog extends StatelessWidget {
   final Widget child;
