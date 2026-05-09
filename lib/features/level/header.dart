@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/level/logic/level_state.dart';
-import 'package:grimoji/features/level/logic/levels.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';
 import 'package:provider/provider.dart';
 
 class Header extends StatelessWidget {
   static const double progress = 0.65;
-  final GameLevel level;
 
   Palette get palette => Palette();
 
-  const Header({super.key, required this.level});
+  const Header({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +30,12 @@ class Header extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildInfoBox('Time', context.watch<LevelState>().secondsRemaining.toString()),
+                _buildInfoBox(
+                  'Time',
+                  context.watch<LevelState>().secondsRemaining.toString(),
+                ),
                 const SizedBox(width: 16),
-                _buildTargetBox(),
+                _buildTargetBox(context.watch<LevelState>().level.targetEmoji),
                 const SizedBox(width: 16),
                 Container(
                   width: 60,
@@ -54,16 +56,19 @@ class Header extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        _buildProgressbar(),
+        _buildProgressbar(
+          context.watch<LevelState>().level.number.toString(),
+          65,
+        ),
       ],
     );
   }
 
-  Widget _buildProgressbar() {
+  Widget _buildProgressbar(String level, double progress) {
     return Row(
       children: [
         Text(
-          'Level ${level.number}',
+          'Level $level',
           style: TextStyle(
             color: palette.trueWhite,
             fontSize: 20,
@@ -150,7 +155,7 @@ class Header extends StatelessWidget {
     );
   }
 
-  Widget _buildTargetBox() {
+  Widget _buildTargetBox(GameEmoji targetEmoji) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       decoration: ShapeDecoration(
@@ -174,7 +179,7 @@ class Header extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           EmojiWidget.lottie(
-            path: level.targetEmoji.lottie,
+            path: targetEmoji.lottie,
             useDropShadow: true,
             size: 40,
             blurRadius: 4,

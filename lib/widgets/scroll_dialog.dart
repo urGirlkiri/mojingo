@@ -3,12 +3,14 @@ import 'package:grimoji/utils/responsive.dart';
 
 class ScrollDialog extends StatelessWidget {
   final Widget child;
-  final Widget? closeButton;
+  final Widget? rightButton;
+  final Widget? leftButton;
 
   const ScrollDialog({
     super.key,
     required this.child,
-    this.closeButton,
+    this.rightButton,
+    this.leftButton,
   });
 
   @override
@@ -37,11 +39,17 @@ class ScrollDialog extends StatelessWidget {
             child: child, 
           ),
 
-          if (closeButton != null)
+          if (rightButton != null)
             Positioned(
-              top: isLarge ? 20 : -1,
-              right: isLarge ? 80 : -1,
-              child: closeButton!,
+              top: isLarge ? -15 : -1,
+              right: isLarge ? -1 : -1,
+              child: rightButton!,
+            ),
+          if (leftButton != null)
+            Positioned(
+              top: isLarge ? -15 : -1,
+              left: isLarge ? -1 : -1,
+              child: leftButton!,
             ),
         ],
       ),

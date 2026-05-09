@@ -28,27 +28,16 @@ class LevelFailDialog extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           ScrollDialog(
-            closeButton: GestureDetector(
+            rightButton: GestureDetector(
               onTap: () {
                 context.read<AudioController>().playSfx(SfxType.buttonTap);
                 Navigator.of(context).pop();
-                                GoRouter.of(context).go('/play');
-
+                GoRouter.of(context).go('/play');
               },
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: palette.crimson,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: palette.voidBlack, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: palette.voidBlack.withValues(alpha: 0.5),
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(Icons.close, color: palette.mist, size: 48),
+              child: Image.asset(
+                'assets/icons/app/close.png',
+                width: 80,
+                height: 80,
               ),
             ),
             child: SingleChildScrollView(
@@ -75,7 +64,9 @@ class LevelFailDialog extends StatelessWidget {
 
                   GestureDetector(
                     onTap: () {
-                      context.read<AudioController>().playSfx(SfxType.buttonTap);
+                      context.read<AudioController>().playSfx(
+                        SfxType.buttonTap,
+                      );
                       Navigator.of(context).pop();
                       GoRouter.of(context).go('/play?autoOpen=$level');
                     },
@@ -113,4 +104,3 @@ class LevelFailDialog extends StatelessWidget {
     );
   }
 }
-

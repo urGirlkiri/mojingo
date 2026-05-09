@@ -22,25 +22,27 @@ class PauseDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       child: ScrollDialog(
-        closeButton: GestureDetector(
+        leftButton: GestureDetector(
           onTap: () {
             context.read<AudioController>().playSfx(SfxType.buttonTap);
             Navigator.of(context).pop();
           },
-          child: Container(
-            decoration: BoxDecoration(
-              color: palette.twilight,
-              shape: BoxShape.circle,
-              border: Border.all(color: palette.mist, width: 3),
-              boxShadow: [
-                BoxShadow(
-                  color: palette.voidBlack.withValues(alpha: 0.5),
-                  offset: const Offset(0, 4),
-                ),
-              ],
+          child:Image.asset(
+              'assets/icons/app/close.png',
+              width: 80,
+              height: 80,
             ),
-            child: Icon(Icons.close, color: palette.trueWhite, size: 48),
-          ),
+        ),
+        rightButton: GestureDetector(
+          onTap: () {
+            context.read<AudioController>().playSfx(SfxType.buttonTap);
+            Navigator.of(context).pop();
+          },
+          child:Image.asset(
+              'assets/icons/app/settings.png',
+              width: 80,
+              height: 80,
+            ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

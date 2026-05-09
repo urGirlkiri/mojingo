@@ -37,6 +37,7 @@ class Foooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPaused = context.watch<LevelState>().isPaused;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: ShapeDecoration(
@@ -49,7 +50,7 @@ class Foooter extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildPowerUpBtn(
-              "assets/icons/app/pause.png",
+              isPaused ? 'assets/icons/app/resume.png' : 'assets/icons/app/pause.png',
               isSmall: true,
               onTap: () => _handlePauseTap(context),
             ),
