@@ -9,8 +9,8 @@ import 'package:grimoji/features/map/level_hint/screen.dart';
 import 'package:grimoji/features/settings/screen.dart';
 import 'package:grimoji/widgets/layout_scaffold.dart';
 
-import 'package:grimoji/features/level/level_screen.dart';
-import 'package:grimoji/features/level/win_screen.dart';
+import 'package:grimoji/features/level/screen.dart';
+import 'package:grimoji/features/level/win/screen.dart';
 import 'package:grimoji/features/level/logic/levels.dart'; 
 
 final _routerNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
