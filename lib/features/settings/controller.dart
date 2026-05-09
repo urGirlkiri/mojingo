@@ -7,7 +7,7 @@ import 'package:logging/logging.dart';
 import 'persistence/local_storage_settings_persistence.dart';
 import 'persistence/settings_persistence.dart';
 
-/// An class that holds settings like [playerName] or [musicOn],
+/// An class that holds settings like [musicOn],
 /// and saves them to an injected persistence store.
 class SettingsController {
   static final _log = Logger('SettingsController');
@@ -15,8 +15,6 @@ class SettingsController {
   final SettingsPersistence _store;
 
   ValueNotifier<bool> audioOn = ValueNotifier(true);
-
-  ValueNotifier<String> playerName = ValueNotifier('Player');
 
   ValueNotifier<bool> soundsOn = ValueNotifier(true);
 
@@ -36,14 +34,21 @@ class SettingsController {
     _loadStateFromPersistence();
   }
 
-  void setPlayerName(String name) {
-    playerName.value = name;
-    _store.savePlayerName(playerName.value);
-  }
-
   void toggleAudioOn() {
-    audioOn.value = !audioOn.value;
-    _store.saveAudioOn(audioOn.value);
+    final newValue = !audioOn.value;
+    audioOn.value = newValue;
+    _store.saveAudioOn(newValue);
+    
+    if (!newValue) {
+      musicOn.value = false;
+      _store.saveSoundsOn(false);
+      _store.saveMusicOn(false);
+    } else {
+      soundsOn.value = true;
+      musicOn.value = true;
+      _store.saveSoundsOn(true);
+      _store.saveMusicOn(true);
+    }
   }
 
   void toggleMusicOn() {
@@ -84,7 +89,6 @@ class SettingsController {
       _store
           .getMusicOn(defaultValue: true)
           .then((value) => musicOn.value = value),
-      _store.getPlayerName().then((value) => playerName.value = value),
       _store.getSfxVolume(defaultValue: 1.0).then((value) => sfxVolume.value = value),
       _store.getMusicVolume(defaultValue: 1.0).then((value) => musicVolume.value = value),
     ]);

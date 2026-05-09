@@ -5,6 +5,9 @@ import 'package:grimoji/config/audio/audio_controller.dart';
 import 'package:grimoji/config/audio/sounds.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/settings/controller.dart';
+import 'package:grimoji/features/settings/widgets/icon_toggle.dart';
+import 'package:grimoji/features/settings/widgets/pill_button.dart';
+import 'package:grimoji/features/settings/widgets/volume_slider.dart';
 import 'package:grimoji/widgets/scroll_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -61,11 +64,10 @@ class SettingsDialog extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildIconToggle(
-                            settings.soundsOn.value
+                          IconToggle(
+                            imagePath: settings.soundsOn.value
                                 ? 'assets/icons/app/vibration_on.png'
                                 : 'assets/icons/app/vibration_off.png',
-                            palette,
                             isActive: settings.soundsOn.value && settings.audioOn.value,
                             onTap: () {
                               context.read<AudioController>().playSfx(
@@ -74,11 +76,10 @@ class SettingsDialog extends StatelessWidget {
                               settings.toggleSoundsOn();
                             },
                           ),
-                          _buildIconToggle(
-                            settings.musicOn.value
+                          IconToggle(
+                            imagePath: settings.musicOn.value
                                 ? 'assets/icons/app/sfx_on.png'
                                 : 'assets/icons/app/sfx_off.png',
-                            palette,
                             isActive: settings.musicOn.value && settings.audioOn.value,
                             onTap: () {
                               context.read<AudioController>().playSfx(
@@ -87,11 +88,10 @@ class SettingsDialog extends StatelessWidget {
                               settings.toggleMusicOn();
                             },
                           ),
-                          _buildIconToggle(
-                            settings.audioOn.value
+                          IconToggle(
+                            imagePath: settings.audioOn.value
                                 ? 'assets/icons/app/music_on.png'
                                 : 'assets/icons/app/music_off.png',
-                            palette,
                             isActive: settings.audioOn.value,
                             onTap: () {
                               context.read<AudioController>().playSfx(
@@ -102,10 +102,8 @@ class SettingsDialog extends StatelessWidget {
                           ),
                         ],
                       ),
-                      
                       const SizedBox(height: 24),
-                      
-                      _buildVolumeSlider(
+                      VolumeSlider(
                         label: "SFX Volume",
                         value: settings.sfxVolume.value,
                         palette: palette,
@@ -113,10 +111,8 @@ class SettingsDialog extends StatelessWidget {
                           settings.setSfxVolume(val);
                         } : null,
                       ),
-                      
                       const SizedBox(height: 16),
-                      
-                      _buildVolumeSlider(
+                      VolumeSlider(
                         label: "Music Volume",
                         value: settings.musicVolume.value,
                         palette: palette,
@@ -128,25 +124,9 @@ class SettingsDialog extends StatelessWidget {
                   );
                 },
               ),
-
-              const SizedBox(height: 24),
-
               const SizedBox(height: 32),
-
               const SizedBox(height: 40),
-
-              // _buildPillButton(
-              //   text: "Save progress",
-              //   color: palette.twilight,
-              //   palette: palette,
-              //   onTap: () {
-              //     context.read<AudioController>().playSfx(SfxType.buttonTap);
-              //     // TODO: implement cloud saving
-              //   },
-              // ),
-              const SizedBox(height: 16),
-
-              _buildPillButton(
+              PillButton(
                 text: "Quit level",
                 color: palette.crimson,
                 palette: palette,
@@ -158,127 +138,6 @@ class SettingsDialog extends StatelessWidget {
               ),
               const SizedBox(height: 8),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIconToggle(
-    String imagePath,
-    Palette palette, {
-    bool isActive = true,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: isActive ? 1.0 : 0.4,
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.contain,
-          width: 80,
-          height: 80,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVolumeSlider({
-    required String label,
-    required double value,
-    required ValueChanged<double>? onChanged,
-    required Palette palette,
-  }) {
-    final bool isEnabled = onChanged != null;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 12.0, bottom: 4.0),
-          child: Text(
-            label,
-            style: GoogleFonts.eagleLake(
-              color: isEnabled ? palette.midnight : palette.slate,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: palette.mist,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: palette.slate, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: palette.voidBlack.withValues(alpha: 0.2),
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: SliderTheme(
-            data: SliderThemeData(
-              activeTrackColor: isEnabled ? palette.midnight : palette.slate,
-              inactiveTrackColor: palette.twilight.withValues(alpha: 0.3),
-              thumbColor: isEnabled ? palette.trueWhite : palette.mist,
-              overlayColor: isEnabled ? palette.midnight.withValues(alpha: 0.2) : Colors.transparent,
-              trackHeight: 8.0,
-              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
-              overlayShape: RoundSliderOverlayShape(overlayRadius: 16.0),
-            ),
-            child: Slider(
-              value: value,
-              min: 0.0,
-              max: 1.0,
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPillButton({
-    required String text,
-    required Color color,
-    required Palette palette,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(color: palette.trueWhite, width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: palette.voidBlack.withValues(alpha: 0.4),
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: GoogleFonts.eagleLake(
-              fontSize: 22,
-              color: palette.trueWhite,
-              fontWeight: FontWeight.bold,
-              shadows: [
-                Shadow(
-                  color: palette.voidBlack.withValues(alpha: 0.5),
-                  offset: const Offset(1, 2),
-                  blurRadius: 2,
-                ),
-              ],
-            ),
           ),
         ),
       ),
