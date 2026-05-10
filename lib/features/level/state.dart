@@ -10,13 +10,16 @@ class LevelState extends ChangeNotifier {
   final VoidCallback onFail;
   final GameLevel level;
   final Logger _log = Logger('LevelState');
-  late GameController gameController;
+  late final GameController gameController;
 
   LevelState({
     required this.onWin,
     required this.onFail,
     required this.level,
-  });
+  }){
+    gameController = GameController(level);
+    gameController.initialize();
+  }
 
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _ticker;
@@ -27,8 +30,6 @@ class LevelState extends ChangeNotifier {
   bool get isPaused => !_stopwatch.isRunning;
 
   void startLevel() {
-    gameController = GameController(level);
-    gameController.initialize();
     _stopwatch.start();
     _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_stopwatch.isRunning) {

@@ -49,7 +49,8 @@ class _GameBoardState extends State<GameBoard> {
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
 
-    final gameController = context.watch<LevelState>().gameController;
+    final levelstate = context.watch<LevelState>();
+    final gameController = levelstate.gameController;
 
     final int gridColumns = gameController.getColCount();
     final int gridRows = gameController.getRowCount();
