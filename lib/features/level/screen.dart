@@ -3,10 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:grimoji/config/audio/audio_controller.dart';
 import 'package:grimoji/config/audio/sounds.dart';
 import 'package:grimoji/config/palette.dart';
+import 'package:grimoji/features/level/game/board/metrics.dart';
 import 'package:grimoji/features/level/state.dart';
 import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/level/widgets/confetti.dart';
-import 'package:grimoji/features/level/game/board.dart';
+import 'package:grimoji/features/level/game/board/index.dart';
 import 'package:grimoji/features/level/header.dart';
 import 'package:grimoji/features/level/footer.dart';
 import 'package:grimoji/features/map/level_data_controller.dart';
@@ -114,6 +115,9 @@ class _LevelScreenState extends State<LevelScreen> {
             
             return state;
           },
+        ),
+        ChangeNotifierProvider(
+          create: (_) => BoardMetrics(),
         ),
       ],
 

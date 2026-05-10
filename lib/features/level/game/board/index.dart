@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/palette.dart';
-import 'package:grimoji/features/level/game/board/controller.dart';
+import 'package:grimoji/features/level/game/board/metrics.dart';
+import 'package:grimoji/features/level/game/board/tile_grid.dart';
 import 'package:provider/provider.dart';
 
 class GameBoard extends StatefulWidget {
@@ -124,6 +125,7 @@ class _GameBoardState extends State<GameBoard> {
                           );
                         },
                       ),
+                      const TileGrid(),
                     ],
                   );
                 },

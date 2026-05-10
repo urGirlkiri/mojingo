@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/features/level/game/controller.dart';
 import 'package:logging/logging.dart';
 
 class LevelState extends ChangeNotifier {
@@ -9,6 +10,7 @@ class LevelState extends ChangeNotifier {
   final VoidCallback onFail;
   final GameLevel level;
   final Logger _log = Logger('LevelState');
+  late GameController gameController;
 
   LevelState({
     required this.onWin,
@@ -25,6 +27,8 @@ class LevelState extends ChangeNotifier {
   bool get isPaused => !_stopwatch.isRunning;
 
   void startLevel() {
+    gameController = GameController();
+    gameController.initialize();
     _stopwatch.start();
     _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_stopwatch.isRunning) {
