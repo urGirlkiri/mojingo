@@ -19,7 +19,7 @@ class LevelState extends ChangeNotifier {
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _ticker;
 
-  int _secondsRemaining = 60; 
+  late int _secondsRemaining = level.timeLimit; 
 
   int get secondsRemaining => _secondsRemaining;
   bool get isPaused => !_stopwatch.isRunning;

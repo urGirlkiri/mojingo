@@ -5,15 +5,15 @@
 import 'package:grimoji/config/emojis.dart';
 
 const gameLevels = [
-  GameLevel(    number: 1, difficulty: 5,  maxMoves: 5,  targetEmoji: Emojis.cloud, 
+  GameLevel(    number: 1, difficulty: 5,  timeLimit: 500,  targetEmoji: Emojis.cloud, 
     // TODO: When ready, change these achievement IDs.
     // You configure this in App Store Connect.
     achievementIdIOS: 'first_win',
     // You get this string when you configure an achievement in Play Console.
     achievementIdAndroid: 'NhkIwB69ejkMAOOLDb',
   ),
-  GameLevel(number: 2, difficulty: 42, maxMoves: 1, targetEmoji: Emojis.fire),
-  GameLevel(number: 3, difficulty: 100, maxMoves: 1, targetEmoji: Emojis.droplet,
+  GameLevel(number: 2, difficulty: 42, timeLimit: 200, targetEmoji: Emojis.fire),
+  GameLevel(number: 3, difficulty: 100, timeLimit: 100, targetEmoji: Emojis.droplet,
     achievementIdIOS: 'finished',
     achievementIdAndroid: 'CdfIhE96aspNWLGSQg',
   ),
@@ -24,7 +24,7 @@ class GameLevel {
 
   final int difficulty;
 
-  final int maxMoves;
+  final int timeLimit;
 
   final GameEmoji targetEmoji;
 
@@ -38,7 +38,7 @@ class GameLevel {
   const GameLevel({
     required this.number,
     required this.difficulty,
-    required this.maxMoves,
+    required this.timeLimit,
     required this.targetEmoji,
     this.achievementIdIOS,
     this.achievementIdAndroid,
