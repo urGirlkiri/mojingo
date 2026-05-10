@@ -91,7 +91,7 @@ class GameController {
     );
   }
 
-  void spawnTiles(Set<TileCoordinate> matches, GameState state, {TileCoordinate? mergePoint}) {
+void spawnTiles(Set<TileCoordinate> matches, GameState state, {TileCoordinate? mergePoint}) {
     Map<GameEmoji, Set<TileCoordinate>> groupedMatches = {};
     for (var match in matches) {
       GameEmoji emoji = grid[match.row][match.col].emoji;
@@ -107,7 +107,11 @@ class GameController {
 
       if (recipe != null && recipe.type == RecipeType.merge && recipe.yields != null) {
         TileCoordinate spawnPoint = coords.contains(mergePoint) ? mergePoint! : coords.first;
+        
         grid[spawnPoint.row][spawnPoint.col].emoji = recipe.yields!;
+        
+        grid[spawnPoint.row][spawnPoint.col].reset(); 
+
         if (recipe.yields == state.level.targetEmoji) {
           state.resolveEmoji(recipe.yields!, 1); 
         }
@@ -115,21 +119,21 @@ class GameController {
       } 
       
       else if (recipe != null && recipe.type == RecipeType.volatile) {
-        _log.info('💥 SPELL DETONATED! Calculating AOE Transmutations...');
-        
+        _log.info('💥 SPELL DETONATED!');
         tilesToDestroy.addAll(coords);
 
         for (var bombCoord in coords) {
           for (int r = bombCoord.row - 1; r <= bombCoord.row + 1; r++) {
             for (int c = bombCoord.col - 1; c <= bombCoord.col + 1; c++) {
-              
               if (r >= 0 && r < rows && c >= 0 && c < cols) {
                 Tile targetTile = grid[r][c];
                 TileCoordinate targetCoord = TileCoordinate(row: r, col: c);
 
                 if (RecipeBook.transmutations.containsKey(targetTile.emoji)) {
-                  _log.info('Alchemy Success: Transmuted ${targetTile.emoji.visual} into ${RecipeBook.transmutations[targetTile.emoji]!.visual}!');
                   targetTile.emoji = RecipeBook.transmutations[targetTile.emoji]!;
+                  
+                  targetTile.reset(); 
+                  
                   transmutedTiles.add(targetCoord);
                 } else if (!coords.contains(targetCoord)) {
                   tilesToDestroy.add(targetCoord);
@@ -139,7 +143,6 @@ class GameController {
           }
         }
       } 
-      
       else {
         tilesToDestroy.addAll(coords);
       }
@@ -176,6 +179,7 @@ class GameController {
       }
     }
   }
+  
   GameEmoji _getRandomSafeEmoji(int row, int col) {
     GameEmoji candidate = level.availableEmojis[0];
     bool isSafe = false;

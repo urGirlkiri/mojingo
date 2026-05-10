@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:grimoji/config/board.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/level/game/controller.dart';
+import 'package:grimoji/features/level/game/model/alchemy/book.dart';
 import 'package:grimoji/features/level/game/model/coordinate.dart';
 import 'package:grimoji/features/level/game/model/match_detector.dart';
 import 'package:logging/logging.dart';
@@ -10,7 +12,7 @@ import 'package:logging/logging.dart';
 class GameState extends ChangeNotifier {
   final GameLevel level;
   final void Function(GameEmoji, int) onEmojiDestroyed;
-  final bool Function()onComboFinished;
+  final bool Function() onComboFinished;
 
   late final GameController gameController;
   final Logger _log = Logger('GameState');
@@ -34,7 +36,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> resolveSwipe(
+Future<void> resolveSwipe(
     TileCoordinate draggedCoordinate,
     TileCoordinate targetCoordinate,
   ) async {
@@ -55,16 +57,15 @@ class GameState extends ChangeNotifier {
     await Future.delayed(const Duration(milliseconds: 300));
     if (_isDisposed) return;
 
-    Set<TileCoordinate> matches = MatchDetector.findMatches(
+    List<MatchGroup> matchGroups = MatchDetector.findMatchGroups(
       gameController.grid,
     );
 
-    if (matches.isEmpty) {
+    if (matchGroups.isEmpty) {
       _log.info('Invalid Move! Reverting swap.');
       gameController.swapTiles(originalT, originalD);
       notifyListeners();
       await Future.delayed(const Duration(milliseconds: 300));
-      if (_isDisposed) return;
 
       isProcessing = false;
       notifyListeners();
@@ -75,25 +76,54 @@ class GameState extends ChangeNotifier {
     bool isFirstMatch = true;
 
     while (hasCombos) {
-      _log.info('Found ${matches.length} matches! Triggering Avalanche...');
+      _log.info('Processing ${matchGroups.length} groups...');
+
+      for (var group in matchGroups) {
+        final recipe = RecipeBook.getRecipeFor(group.emoji);
+
+        if (recipe != null && recipe.type == RecipeType.merge) {
+          TileCoordinate catalyst =
+              (isFirstMatch && group.coordinates.contains(targetCoordinate))
+                  ? targetCoordinate
+                  : group.coordinates.first;
+
+          for (var coord in group.coordinates) {
+            final tile = gameController.grid[coord.row][coord.col];
+            if (coord == catalyst) {
+              tile.isMerging = true;
+            } else {
+              tile.isExploding = true;
+            }
+          }
+        } else {
+          for (var coord in group.coordinates) {
+            gameController.grid[coord.row][coord.col].isExploding = true;
+          }
+        }
+      }
+
+      notifyListeners();
+      await Future.delayed(clearAnimationTime);
+      if (_isDisposed) return;
+
+      final Set<TileCoordinate> allMatchedCoords = 
+          matchGroups.expand((g) => g.coordinates).toSet();
 
       gameController.spawnTiles(
-        matches,
+        allMatchedCoords,
         this,
         mergePoint: isFirstMatch ? targetCoordinate : null,
       );
-
       notifyListeners();
-      await Future.delayed(const Duration(milliseconds: 50));
-      if (_isDisposed) return;
 
       gameController.triggerInitialFall();
       notifyListeners();
+
       await Future.delayed(const Duration(milliseconds: 800));
       if (_isDisposed) return;
 
-      matches = MatchDetector.findMatches(gameController.grid);
-      if (matches.isEmpty) {
+      matchGroups = MatchDetector.findMatchGroups(gameController.grid);
+      if (matchGroups.isEmpty) {
         hasCombos = false;
       } else {
         isFirstMatch = false;
@@ -103,14 +133,14 @@ class GameState extends ChangeNotifier {
     bool isGameOver = onComboFinished();
 
     if (!isGameOver) {
-      hasTargetCombo = false; 
+      hasTargetCombo = false;
     }
+
     isProcessing = false;
     if (_isDisposed) return;
 
     notifyListeners();
   }
-
   void resolveEmoji(GameEmoji emoji, int count) {
     if (emoji == level.targetEmoji) {
       hasTargetCombo = true;
@@ -119,6 +149,7 @@ class GameState extends ChangeNotifier {
     notifyListeners();
   }
 
+  
   @override
   void dispose() {
     _isDisposed = true;

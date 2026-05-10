@@ -13,12 +13,9 @@ class Tile {
   Tile({required this.coordinate, required this.emoji, String? id})
     : id = id ?? const Uuid().v4();
 
-  Tile copyWith({TileCoordinate? coordinate, GameEmoji? emoji}) {
-    return Tile(
-      id: id,
-      coordinate: coordinate ?? this.coordinate,
-      emoji: emoji ?? this.emoji,
-    );
+  void reset() {
+    isExploding = false;
+    isMerging = false;
   }
 
   @override
