@@ -5,15 +5,49 @@
 import 'package:grimoji/config/emojis.dart';
 
 const gameLevels = [
-  GameLevel(    number: 1, difficulty: 5,  timeLimit: 500,  targetEmoji: Emojis.cloud, 
+  GameLevel(
+    number: 1,
+    difficulty: 5,
+    timeLimit: 500,
+    targetEmoji: Emojis.cloud,
+    availableEmojis: [
+      Emojis.droplet,
+      Emojis.fire,
+      Emojis.bomb,
+      Emojis.exhale,
+      Emojis.salt,
+    ],
     // TODO: When ready, change these achievement IDs.
     // You configure this in App Store Connect.
     achievementIdIOS: 'first_win',
     // You get this string when you configure an achievement in Play Console.
     achievementIdAndroid: 'NhkIwB69ejkMAOOLDb',
   ),
-  GameLevel(number: 2, difficulty: 42, timeLimit: 200, targetEmoji: Emojis.fire),
-  GameLevel(number: 3, difficulty: 100, timeLimit: 100, targetEmoji: Emojis.droplet,
+  GameLevel(
+    number: 2,
+    difficulty: 42,
+    timeLimit: 200,
+    targetEmoji: Emojis.fire,
+    availableEmojis: [
+      Emojis.droplet,
+      Emojis.fire,
+      Emojis.bomb,
+      Emojis.exhale,
+      Emojis.salt,
+    ],
+  ),
+  GameLevel(
+    number: 3,
+    difficulty: 100,
+    timeLimit: 100,
+    targetEmoji: Emojis.droplet,
+    availableEmojis: [
+      Emojis.droplet,
+      Emojis.fire,
+      Emojis.bomb,
+      Emojis.exhale,
+      Emojis.salt,
+    ],
     achievementIdIOS: 'finished',
     achievementIdAndroid: 'CdfIhE96aspNWLGSQg',
   ),
@@ -28,6 +62,8 @@ class GameLevel {
 
   final GameEmoji targetEmoji;
 
+  final List<GameEmoji> availableEmojis;
+
   /// The achievement to unlock when the level is finished, if any.
   final String? achievementIdIOS;
 
@@ -40,6 +76,7 @@ class GameLevel {
     required this.difficulty,
     required this.timeLimit,
     required this.targetEmoji,
+    required this.availableEmojis,
     this.achievementIdIOS,
     this.achievementIdAndroid,
   }) : assert(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grimoji/config/board.dart';
 import 'package:grimoji/features/level/game/board/metrics.dart';
 import 'package:grimoji/features/level/state.dart';
 import 'package:provider/provider.dart';
@@ -18,9 +19,7 @@ class TileGrid extends StatelessWidget {
 
     final double tWidth = metrics.tileWidth!;
     final double tHeight = metrics.tileHeight!;
-    
-    const double tileSpacingGap = 2.0; 
-    
+        
     List<Widget> tileWidgets = [];
 
     int nRow = levelState.gameController.getRowCount();

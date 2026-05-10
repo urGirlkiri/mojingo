@@ -27,7 +27,7 @@ class LevelState extends ChangeNotifier {
   bool get isPaused => !_stopwatch.isRunning;
 
   void startLevel() {
-    gameController = GameController();
+    gameController = GameController(level);
     gameController.initialize();
     _stopwatch.start();
     _ticker = Timer.periodic(const Duration(seconds: 1), (timer) {

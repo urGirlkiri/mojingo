@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:grimoji/config/emojis.dart';
+import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/level/game/model/coordinate.dart';
 import 'package:grimoji/features/level/game/model/tile.dart';
 import 'package:logging/logging.dart';
@@ -9,21 +10,17 @@ class GameController {
   static const int cols = 5;
   
   late List<List<Tile>> grid;
-  late List<GameEmoji> availableEmojis;
+  late GameLevel level;
 
   final Random _random = Random();
   final Logger _log = Logger('GameController');
 
+  GameController(this.level);
+
   void initialize() {
     _log.info('Initializing GameController');
-    availableEmojis = [
-      Emojis.droplet, 
-      Emojis.fire, 
-      Emojis.bomb, 
-      Emojis.exhale, 
-      Emojis.salt
-    ];
-    _log.info('Available Emojis: ${availableEmojis.length}, Emojis: ${availableEmojis.map((e) => e.visual).join(', ')}');
+    
+    _log.info('Available Emojis: ${level.availableEmojis.length}, Emojis: ${level.availableEmojis.map((e) => e.visual).join(', ')}');
 
     grid = List.generate(
       rows, 
@@ -31,7 +28,7 @@ class GameController {
         cols, 
         (c) => Tile(
           coordinate: TileCoordinate(row: r, col: c), 
-          emoji: availableEmojis[0])
+          emoji: level.availableEmojis[0])
       )
     );
 
@@ -51,11 +48,11 @@ class GameController {
   
   GameEmoji _getRandomSafeEmoji(int row, int col) {
     
-    GameEmoji candidate = availableEmojis[0];
+    GameEmoji candidate = level.availableEmojis[0];
     bool isSafe = false;
 
     while (!isSafe) {
-      candidate = availableEmojis[_random.nextInt(availableEmojis.length)];
+      candidate = level.availableEmojis[_random.nextInt(level.availableEmojis.length)];
       isSafe = true;
 
       if (col <= 1) {

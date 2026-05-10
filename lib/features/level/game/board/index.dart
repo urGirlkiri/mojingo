@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:grimoji/config/board.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/level/game/board/metrics.dart';
 import 'package:grimoji/features/level/game/board/tile_grid.dart';
+import 'package:grimoji/features/level/state.dart';
 import 'package:provider/provider.dart';
 
 class GameBoard extends StatefulWidget {
@@ -47,10 +49,13 @@ class _GameBoardState extends State<GameBoard> {
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
 
+    final gameController = context.watch<LevelState>().gameController;
+
+    final int gridColumns = gameController.getColCount();
+    final int gridRows = gameController.getRowCount();
+
     const double maxAllowedBoardWidth = 350.0;
-    const int gridColumns = 5;
-    const int gridRows = 8;
-    const int totalTiles = gridColumns * gridRows;
+    final int totalTiles = gridColumns * gridRows;
 
     return LayoutBuilder(
       builder: (context, screenConstraints) {
@@ -76,10 +81,9 @@ class _GameBoardState extends State<GameBoard> {
               ),
               child: LayoutBuilder(
                 builder: (context, gridAreaConstraints) {
-                  const double tileSpacingGap = 2.0;
 
-                  const int horizontalGapsCount = gridColumns - 1;
-                  const int verticalGapsCount = gridRows - 1;
+                  int horizontalGapsCount = gridColumns - 1;
+                  int verticalGapsCount = gridRows - 1;
 
                   final double calculatedSingleTileWidth =
                       (gridAreaConstraints.maxWidth -
