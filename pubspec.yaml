@@ -48,6 +48,7 @@ flutter:
     - assets/images/level/
     - assets/emojis/lottie/
     - assets/emojis/svg/
+    - assets/lottie/
     - assets/mascot/
     - assets/icons/
     - assets/icons/app/

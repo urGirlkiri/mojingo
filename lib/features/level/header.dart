@@ -6,14 +6,13 @@ import 'package:grimoji/widgets/emoji_widget.dart';
 import 'package:provider/provider.dart';
 
 class Header extends StatelessWidget {
-
   Palette get palette => Palette();
 
   const Header({super.key});
 
   @override
   Widget build(BuildContext context) {
-    
+    final levelState = context.watch<LevelState>();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -31,12 +30,9 @@ class Header extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildInfoBox(
-                  'Time',
-                  context.watch<LevelState>().secondsRemaining.toString(),
-                ),
+                _buildInfoBox('Time', levelState.secondsRemaining.toString()),
                 const SizedBox(width: 16),
-                _buildTargetBox(context.watch<LevelState>().level.targetEmoji),
+                _buildTargetBox(levelState.level.targetEmoji),
                 const SizedBox(width: 16),
                 Container(
                   width: 60,
@@ -57,16 +53,20 @@ class Header extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        _buildProgressbar(
-          context.watch<LevelState>().level.number.toString(),
-          context.watch<LevelState>().progress,
-          context.watch<LevelState>().gameState.hasTargetCombo,
+        _buildTargetProgress(
+          levelState.level.number.toString(),
+          levelState.progress,
+          levelState.gameState.hasTargetCombo,
         ),
       ],
     );
   }
 
-  Widget _buildProgressbar(String level, double progress, bool hasTargetCombo) {
+  Widget _buildTargetProgress(
+    String level,
+    double progress,
+    bool hasTargetCombo,
+  ) {
     return Row(
       children: [
         Text(
@@ -79,45 +79,62 @@ class Header extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              Container(
-                width: double.infinity,
-                height: 12,
-                decoration: ShapeDecoration(
-                  color: palette.twilight,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(60),
-                  ),
-                ),
-              ),
-              FractionallySizedBox(
-                widthFactor: progress.clamp(0.0, 1.0),
-                child: Container(
-                  height: 12,
-                  decoration: ShapeDecoration(
-                    color: hasTargetCombo ?
-                     palette.moonlight : palette.mist,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildStar(isActive: progress >= 0.33), 
-                  _buildStar(isActive: progress >= 0.66),
-                  _buildStar(isActive: progress >= 1.00),
-                ],
-              ),
-            ],
-          ),
+          child: _buildProgressBar(progress, hasTargetCombo),
         ),
       ],
     );
+  }
+
+  Widget _buildProgressBar(double progress, bool hasTargetCombo) {
+    return Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            Container(
+              width: double.infinity,
+              height: 14,
+              decoration: ShapeDecoration(
+                color: palette.twilight,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(60),
+                ),
+              ),
+            ),
+
+            AnimatedFractionallySizedBox(
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutBack,
+              widthFactor: progress.clamp(0.0, 1.0),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 400),
+                height: 14,
+                decoration: ShapeDecoration(
+                  color: hasTargetCombo ? palette.moonlight : palette.mist,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(60),
+                  ),
+                  shadows: hasTargetCombo
+                      ? [
+                          BoxShadow(
+                            color: palette.moonlight.withValues(alpha: .8),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ]
+                      : [],
+                ),
+              ),
+            ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildStar(isActive: progress >= 0.33),
+                _buildStar(isActive: progress >= 0.66),
+                _buildStar(isActive: progress >= 1.00),
+              ],
+            ),
+          ],
+        );
   }
 
   Widget _buildInfoBox(String label, String value) {
@@ -143,7 +160,6 @@ class Header extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-
           Text(
             value,
             style: TextStyle(
@@ -194,14 +210,20 @@ class Header extends StatelessWidget {
   }
 
   Widget _buildStar({required bool isActive}) {
-    return Opacity(
-      opacity: isActive ? 1.0 : 0.3,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/level/star.png"),
+    return AnimatedScale(
+      scale: isActive ? 1.0 : 0.8,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.elasticOut,
+      child: AnimatedOpacity(
+        opacity: isActive ? 1.0 : 0.3,
+        duration: const Duration(milliseconds: 300),
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/level/star.png"),
+            ),
           ),
         ),
       ),

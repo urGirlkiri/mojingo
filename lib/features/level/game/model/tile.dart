@@ -7,6 +7,9 @@ class Tile {
   TileCoordinate coordinate;
   GameEmoji emoji;
 
+  bool isExploding = false; 
+  bool isMerging = false;
+
   Tile({required this.coordinate, required this.emoji, String? id})
     : id = id ?? const Uuid().v4();
 

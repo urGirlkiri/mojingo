@@ -52,10 +52,8 @@ class LevelState extends ChangeNotifier {
 void _onTimerTick() {
     if (_isDisposed || !_stopwatch.isRunning) return; 
 
-    // Always notify the UI so the clock face updates every second
     notifyListeners();
 
-    // Only check for "Game Over" when the board isn't mid-explosion
     if (secondsRemaining <= 0 && !gameState.isProcessing) {
       _evaluateGameEnd(); 
     }
@@ -67,8 +65,8 @@ void _onTimerTick() {
     }
   }
 
-  void _evaluateGameEnd() {
-    if (_isGameOver) return;
+  bool _evaluateGameEnd() {
+    if (_isGameOver) return true;
 
     if (progress >= 1.0 || (secondsRemaining <= 0 && !gameState.isProcessing)) {
       _isGameOver = true;
@@ -84,6 +82,8 @@ void _onTimerTick() {
         onLose.call();
       }
     }
+
+    return true; 
   }
 
   void togglePause() {
