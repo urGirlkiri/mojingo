@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/board.dart';
 import 'package:grimoji/config/palette.dart';
-import 'package:grimoji/features/level/game/board/board_grid.dart';
-import 'package:grimoji/features/level/game/board/metrics.dart';
-import 'package:grimoji/features/level/game/board/tile_grid.dart';
+import 'package:grimoji/features/level/game/widgets/board_grid.dart';
+import 'package:grimoji/features/level/game/metrics.dart';
+import 'package:grimoji/features/level/game/widgets/tile_grid.dart';
 import 'package:grimoji/features/level/game/model/tile.dart';
 import 'package:grimoji/features/level/game/model/coordinate.dart'; // Added for TileCoordinate
 import 'package:grimoji/features/level/state.dart';

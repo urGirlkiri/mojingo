@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/board.dart';
-import 'package:grimoji/features/level/game/board/metrics.dart';
+import 'package:grimoji/features/level/game/metrics.dart';
 import 'package:grimoji/features/level/state.dart';
 import 'package:provider/provider.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';
