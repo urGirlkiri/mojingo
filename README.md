@@ -11,6 +11,14 @@ A game where you mix emojis to create new emojis!!
 
 ## Setup
 
+### Env Var
+
+[See the example file](.env.example)
+
+> Copy that fil and rename it to `.env` 
+
+> Then enter your own values
+
 ### Install Flutter
 
 ```bash
@@ -79,6 +87,12 @@ flutter run -d macos
 - [Gemini](https://gemini.google.com/) for the music
 
 - [Vecteezy](https://vecteezy.com/) for the background and pattern images
+
+## Tools
+
+### Generating Emoji Visuals
+
+> Run : `dart run tool/generate_emoji_icons.dart`
 
 ## Logging
 
