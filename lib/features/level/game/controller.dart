@@ -62,6 +62,31 @@ class GameController {
     }
   }
 
+void swapTiles(TileCoordinate A, TileCoordinate B) {
+    _log.info(' Swapping ${grid[A.row][A.col]}, ${A.col}) with  ${grid[B.row][B.col]}');
+
+    Tile tileA = grid[A.row][A.col];
+    Tile tileB = grid[B.row][B.col];
+
+    int originalARow = A.row;
+    int originalACol = A.col;
+    
+    int originalBRow = B.row;
+    int originalBCol = B.col;
+
+    grid[originalARow][originalACol] = tileB;
+    grid[originalBRow][originalBCol] = tileA;
+
+    tileA.coordinate.row = originalBRow;
+    tileA.coordinate.col = originalBCol;
+    
+    tileB.coordinate.row = originalARow;
+    tileB.coordinate.col = originalACol;
+
+    _log.info('${grid[tileA.coordinate.row][tileA.coordinate.col]} is now at (${tileA.coordinate.row}, ${tileA.coordinate.col})');
+    _log.info('${grid[tileB.coordinate.row][tileB.coordinate.col]} is now at (${tileB.coordinate.row}, ${tileB.coordinate.col})');
+  }
+
   GameEmoji _getRandomSafeEmoji(int row, int col) {
     GameEmoji candidate = level.availableEmojis[0];
     bool isSafe = false;

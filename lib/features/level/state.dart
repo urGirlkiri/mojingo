@@ -57,6 +57,10 @@ class LevelState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void onBoardUpdated() {
+    notifyListeners();
+  }
+
   void stopLevel() {
     _stopwatch.stop();
     _ticker?.cancel();

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/board.dart';
 import 'package:grimoji/config/palette.dart';
+import 'package:grimoji/features/level/game/board/board_grid.dart';
 import 'package:grimoji/features/level/game/board/metrics.dart';
 import 'package:grimoji/features/level/game/board/tile_grid.dart';
+import 'package:grimoji/features/level/game/model/tile.dart';
+import 'package:grimoji/features/level/game/model/coordinate.dart'; // Added for TileCoordinate
 import 'package:grimoji/features/level/state.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 class GameBoard extends StatefulWidget {
@@ -16,6 +20,10 @@ class GameBoard extends StatefulWidget {
 class _GameBoardState extends State<GameBoard> {
   final GlobalKey _boardKey = GlobalKey();
   final GlobalKey _tileKey = GlobalKey();
+  final Logger _log = Logger('Game Board');
+
+  Tile? _draggedTile;
+  Offset? _dragStartPosition;
 
   @override
   void initState() {
@@ -28,13 +36,12 @@ class _GameBoardState extends State<GameBoard> {
   void _measureBoard() {
     if (!mounted) return;
 
-    final boardcontex = _boardKey.currentContext;
+    final boardContext = _boardKey.currentContext;
     final cellContext = _tileKey.currentContext;
 
-    if (boardcontex != null && cellContext != null) {
-      final boardBox = boardcontex.findRenderObject() as RenderBox;
+    if (boardContext != null && cellContext != null) {
+      final boardBox = boardContext.findRenderObject() as RenderBox;
       final cellBox = cellContext.findRenderObject() as RenderBox;
-
       final boardRect = boardBox.localToGlobal(Offset.zero) & boardBox.size;
 
       context.read<BoardMetrics>().updateMetrics(
@@ -45,10 +52,69 @@ class _GameBoardState extends State<GameBoard> {
     }
   }
 
+  void onPanStart(DragStartDetails details, BuildContext context) {
+    _log.info('Touch Detected');
+    final metrics = context.read<BoardMetrics>();
+    final gameController = context.read<LevelState>().gameController;
+
+    if (!metrics.isReady) return;
+
+    int col = (details.localPosition.dx / metrics.tileWidth!).floor();
+    int row = (details.localPosition.dy / metrics.tileHeight!).floor();
+
+    _log.info('Touch Coordinates -> row: $row, col: $col');
+
+    if (row >= 0 &&
+        row < gameController.getRowCount() &&
+        col >= 0 &&
+        col < gameController.getColCount()) {
+      _draggedTile = gameController.grid[row][col];
+      _dragStartPosition = details.localPosition;
+    }
+  }
+
+void onPanUpdate(DragUpdateDetails details, LevelState levelState) {
+    if (_draggedTile == null || _dragStartPosition == null) return;
+
+    final dx = details.localPosition.dx - _dragStartPosition!.dx;
+    final dy = details.localPosition.dy - _dragStartPosition!.dy;
+    final gameController = levelState.gameController;
+
+    if (dx.abs() > 20 || dy.abs() > 20) {
+      int targetRow = _draggedTile!.coordinate.row;
+      int targetCol = _draggedTile!.coordinate.col;
+
+      if (dx.abs() > dy.abs()) {
+        targetCol += dx > 0 ? 1 : -1;
+        _log.info(dx > 0 ? 'Swiped RIGHT' : 'Swiped LEFT');
+      } else {
+        targetRow += dy > 0 ? 1 : -1;
+        _log.info(dy > 0 ? 'Swiped DOWN' : 'Swiped UP');
+      }
+
+      if (targetRow >= 0 &&
+          targetRow < gameController.getRowCount() &&
+          targetCol >= 0 &&
+          targetCol < gameController.getColCount()) {
+          
+        _log.info('Target valid. Initiating the swap...');
+        gameController.swapTiles(
+          _draggedTile!.coordinate,
+          TileCoordinate(row: targetRow, col: targetCol),
+        );
+        levelState.onBoardUpdated();
+      } else {
+        _log.info('Swipe hit the boarder! Ignored.');
+      }
+
+      _draggedTile = null;
+      _dragStartPosition = null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
-
     final levelstate = context.watch<LevelState>();
     final gameController = levelstate.gameController;
 
@@ -83,7 +149,6 @@ class _GameBoardState extends State<GameBoard> {
               ),
               child: LayoutBuilder(
                 builder: (context, gridAreaConstraints) {
-
                   int horizontalGapsCount = gridColumns - 1;
                   int verticalGapsCount = gridRows - 1;
 
@@ -99,40 +164,22 @@ class _GameBoardState extends State<GameBoard> {
                   final double dynamicTileAspectRatio =
                       calculatedSingleTileWidth / calculatedSingleTileHeight;
 
-                  return Stack(
-                    key: _boardKey,
-                    children: [
-                      GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: gridColumns,
-                          crossAxisSpacing: tileSpacingGap,
-                          mainAxisSpacing: tileSpacingGap,
-                          childAspectRatio: dynamicTileAspectRatio,
+                  return GestureDetector(
+                    onPanStart: (details) => onPanStart(details, context),
+                    onPanUpdate: (details) => onPanUpdate(details, levelstate),
+                    child: Stack(
+                      key: _boardKey,
+                      children: [
+                        BoardGrid(
+                          gridColumns: gridColumns,
+                          totalTiles: totalTiles,
+                          aspectRatio: dynamicTileAspectRatio,
+                          firstTileKey: _tileKey,
+                          palette: palette,
                         ),
-                        itemCount: totalTiles,
-                        itemBuilder: (context, tileIndex) {
-                          return Container(
-                            key: tileIndex == 0 ? _tileKey : null,
-                            decoration: BoxDecoration(
-                              color: palette.twilight.withValues(alpha: 0.38),
-                              border: Border.all(color: palette.dusk, width: 1),
-                              borderRadius: BorderRadius.circular(4),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: palette.voidBlack.withValues(
-                                    alpha: 0.4,
-                                  ),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const TileGrid(),
-                    ],
+                        const TileGrid(),
+                      ],
+                    ),
                   );
                 },
               ),
