@@ -7,15 +7,14 @@ import 'package:grimoji/config/emojis.dart';
 const gameLevels = [
   GameLevel(
     number: 1,
-    difficulty: 5,
-    timeLimit: 500,
+    timeLimit: 300,
     targetEmoji: Emojis.cloud,
+    targetAmount: 3,
     availableEmojis: [
       Emojis.droplet,
-      Emojis.fire,
-      Emojis.bomb,
+      // Emojis.fish,
       Emojis.exhale,
-      Emojis.salt,
+      // Emojis.salt,
     ],
     // TODO: When ready, change these achievement IDs.
     // You configure this in App Store Connect.
@@ -25,27 +24,27 @@ const gameLevels = [
   ),
   GameLevel(
     number: 2,
-    difficulty: 42,
-    timeLimit: 200,
+    timeLimit: 30,
     targetEmoji: Emojis.fire,
+    targetAmount: 6,
     availableEmojis: [
       Emojis.droplet,
       Emojis.fire,
-      Emojis.bomb,
-      Emojis.exhale,
+      // Emojis.bomb,
+      // Emojis.exhale,
       Emojis.salt,
     ],
   ),
   GameLevel(
     number: 3,
-    difficulty: 100,
-    timeLimit: 100,
+    timeLimit: 20,
     targetEmoji: Emojis.droplet,
+    targetAmount: 10,
     availableEmojis: [
       Emojis.droplet,
       Emojis.fire,
       Emojis.bomb,
-      Emojis.exhale,
+      // Emojis.exhale,
       Emojis.salt,
     ],
     achievementIdIOS: 'finished',
@@ -56,7 +55,7 @@ const gameLevels = [
 class GameLevel {
   final int number;
 
-  final int difficulty;
+  final int targetAmount;
 
   final int timeLimit;
 
@@ -73,7 +72,7 @@ class GameLevel {
 
   const GameLevel({
     required this.number,
-    required this.difficulty,
+    required this.targetAmount,
     required this.timeLimit,
     required this.targetEmoji,
     required this.availableEmojis,

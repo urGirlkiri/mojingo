@@ -40,6 +40,9 @@ flutter analyze
 
 ## How To Run
 
+### Install Flutter
+
+> Clone repo And run `flutter pub get`
 
 ### Web
 

@@ -58,13 +58,14 @@ class Header extends StatelessWidget {
         const SizedBox(height: 24),
         _buildProgressbar(
           context.watch<LevelState>().level.number.toString(),
-          65,
+          context.watch<LevelState>().progress,
+          context.watch<LevelState>().hasTargetCombo,
         ),
       ],
     );
   }
 
-  Widget _buildProgressbar(String level, double progress) {
+  Widget _buildProgressbar(String level, double progress, bool hasTargetCombo) {
     return Row(
       children: [
         Text(
@@ -95,8 +96,8 @@ class Header extends StatelessWidget {
                 child: Container(
                   height: 12,
                   decoration: ShapeDecoration(
-                    color: palette.mist,
-                    // TODO: change color if active(when actively triggering combos n updating progress) to moonlight
+                    color: hasTargetCombo ?
+                     palette.moonlight : palette.mist,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(60),
                     ),
@@ -106,9 +107,9 @@ class Header extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildStar(isActive: progress >= 0.25),
-                  _buildStar(isActive: progress >= 0.50),
-                  _buildStar(isActive: progress >= 0.75),
+                  _buildStar(isActive: progress >= 0.33), 
+                  _buildStar(isActive: progress >= 0.66),
+                  _buildStar(isActive: progress >= 1.00),
                 ],
               ),
             ],
