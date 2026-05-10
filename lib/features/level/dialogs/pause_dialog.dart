@@ -93,7 +93,7 @@ class PauseDialog extends StatelessWidget {
                   onTap: () {
                     context.read<AudioController>().playSfx(SfxType.buttonTap);
                     Navigator.of(context).pop();
-                    GoRouter.of(context).go('/play/fail/$level');
+                    GoRouter.of(context).go('/play/lose/$level');
                   },
                 ),
                 const SizedBox(width: 16),

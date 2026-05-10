@@ -1,8 +1,10 @@
 import 'dart:math';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/features/level/game/model/alchemy/book.dart';
 import 'package:grimoji/features/level/game/model/coordinate.dart';
 import 'package:grimoji/features/level/game/model/tile.dart';
+import 'package:grimoji/features/level/state.dart';
 import 'package:logging/logging.dart';
 
 class GameController {
@@ -50,13 +52,9 @@ class GameController {
   }
 
   void triggerInitialFall() {
-    _log.info('Dropping emojis');
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
         Tile tile = grid[r][c];
-        _log.info(
-          "Emoji: ${tile.emoji.visual}, Dropped From, ${tile.coordinate.row} to $r",
-        );
         tile.coordinate.row = r;
       }
     }
@@ -93,13 +91,68 @@ class GameController {
     );
   }
 
-  void spawnTiles(Set<TileCoordinate> matches) {
+  void spawnTiles(Set<TileCoordinate> matches, LevelState state, {TileCoordinate? mergePoint}) {
+    Map<GameEmoji, Set<TileCoordinate>> groupedMatches = {};
+    for (var match in matches) {
+      GameEmoji emoji = grid[match.row][match.col].emoji;
+      groupedMatches.putIfAbsent(emoji, () => {}).add(match);
+    }
+
+    Set<TileCoordinate> tilesToDestroy = {};
+    Set<TileCoordinate> transmutedTiles = {}; 
+
+    groupedMatches.forEach((emoji, coords) {
+      state.resolveEmoji(emoji, coords.length);
+      Recipe? recipe = RecipeBook.getRecipeFor(emoji);
+
+      if (recipe != null && recipe.type == RecipeType.merge && recipe.yields != null) {
+        TileCoordinate spawnPoint = coords.contains(mergePoint) ? mergePoint! : coords.first;
+        grid[spawnPoint.row][spawnPoint.col].emoji = recipe.yields!;
+        if (recipe.yields == state.level.targetEmoji) {
+          state.resolveEmoji(recipe.yields!, 1); 
+        }
+        tilesToDestroy.addAll(coords.where((c) => c != spawnPoint));
+      } 
+      
+      else if (recipe != null && recipe.type == RecipeType.volatile) {
+        _log.info('💥 SPELL DETONATED! Calculating AOE Transmutations...');
+        
+        tilesToDestroy.addAll(coords);
+
+        for (var bombCoord in coords) {
+          for (int r = bombCoord.row - 1; r <= bombCoord.row + 1; r++) {
+            for (int c = bombCoord.col - 1; c <= bombCoord.col + 1; c++) {
+              
+              if (r >= 0 && r < rows && c >= 0 && c < cols) {
+                Tile targetTile = grid[r][c];
+                TileCoordinate targetCoord = TileCoordinate(row: r, col: c);
+
+                if (RecipeBook.transmutations.containsKey(targetTile.emoji)) {
+                  _log.info('Alchemy Success: Transmuted ${targetTile.emoji.visual} into ${RecipeBook.transmutations[targetTile.emoji]!.visual}!');
+                  targetTile.emoji = RecipeBook.transmutations[targetTile.emoji]!;
+                  transmutedTiles.add(targetCoord);
+                } else if (!coords.contains(targetCoord)) {
+                  tilesToDestroy.add(targetCoord);
+                }
+              }
+            }
+          }
+        }
+      } 
+      
+      else {
+        tilesToDestroy.addAll(coords);
+      }
+    });
+
+    tilesToDestroy.removeWhere((coord) => transmutedTiles.contains(coord));
+
     for (int c = 0; c < cols; c++) {
       List<Tile> remainingTiles = [];
       int destroyedCount = 0;
 
       for (int r = 0; r < rows; r++) {
-        if (matches.any((m) => m.row == r && m.col == c)) {
+        if (tilesToDestroy.any((m) => m.row == r && m.col == c)) {
           destroyedCount++;
         } else {
           remainingTiles.add(grid[r][c]);

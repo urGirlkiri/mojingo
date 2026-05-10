@@ -57,6 +57,7 @@ class _LevelScreenState extends State<LevelScreen> {
   }
 
   Future<void> _playerWon(int starsEarned) async {
+    if (!mounted) return;
     _log.info('Level ${widget.level.number} won with $starsEarned stars!');
 
     final levelDataController = context.read<LevelDataController>();
@@ -86,13 +87,14 @@ class _LevelScreenState extends State<LevelScreen> {
   }
 
   Future<void> _playerFailed() async {
+    if (!mounted) return;
     _log.info('Level ${widget.level.number} failed');
 
     context.read<AudioController>().playSfx(SfxType.fail);
 
     if (!mounted) return;
 
-    GoRouter.of(context).go('/play/fail/${widget.level.number}');
+    GoRouter.of(context).go('/play/lose/${widget.level.number}');
   }
 
   @override
@@ -104,7 +106,7 @@ class _LevelScreenState extends State<LevelScreen> {
         ChangeNotifierProvider(
           create: (_) => LevelState(
             onWin: _playerWon,
-            onFail: _playerFailed,
+            onLose: _playerFailed,
             level: widget.level,
           ),
         ),

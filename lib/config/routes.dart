@@ -23,6 +23,6 @@ class Routes{
   static const levelHint = '/play/hint/:level';
   static const levelPlay = '/play/level/:level';
   static const levelWon = '/play/won';
-  static const levelFail = '/play/fail/:level';
+  static const levelFail = '/play/lose/:level';
 
 }
