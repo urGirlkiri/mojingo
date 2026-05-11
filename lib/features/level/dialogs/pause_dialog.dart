@@ -50,70 +50,77 @@ class PauseDialog extends StatelessWidget {
             height: 80,
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            EmojiWidget.lottie(
-              path: Emojis.alienMonster.lottie,
-              useDropShadow: true,
-              size: 80,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "The Game is Paused",
-              style: GoogleFonts.eagleLake(
-                color: palette.midnight,
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: SingleChildScrollView(
+            child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              EmojiWidget.lottie(
+                path: Emojis.alienMonster.lottie,
+                useDropShadow: true,
+                size: 70,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "Take a break, then get back to it!",
-              style: GoogleFonts.eagleLake(
-                color: palette.twilight,
-                fontSize: 18,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                PillButton(
-                  text: "Quit",
-                  color: palette.crimson,
-                  textColor: palette.trueWhite,
-                  fullWidth: false,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  borderRadius: 20,
-                  borderColor: palette.voidBlack,
-                  borderWidth: 3,
-                  onTap: () {
-                    context.read<AudioController>().playSfx(SfxType.buttonTap);
-                    Navigator.of(context).pop();
-                    GoRouter.of(context).go('/play/lose/$level');
-                  },
+              const SizedBox(height: 16),
+              Text(
+                "The Game is Paused",
+                style: GoogleFonts.eagleLake(
+                  color: palette.midnight,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: 16),
-                PillButton(
-                  text: "Resume",
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Take a break, then get back to it!",
+                style: GoogleFonts.eagleLake(
                   color: palette.twilight,
-                  textColor: palette.mist,
-                  fullWidth: false,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  borderRadius: 20,
-                  borderColor: palette.voidBlack,
-                  borderWidth: 3,
-                  onTap: () {
-                    context.read<AudioController>().playSfx(SfxType.buttonTap);
-                    Navigator.of(context).pop();
-                  },
+                  fontSize: 16,
                 ),
-              ],
-            ),
-          ],
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  PillButton(
+                    text: "Quit",
+                    color: palette.crimson,
+                    textColor: palette.trueWhite,
+                    fullWidth: false,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    borderRadius: 20,
+                    borderColor: palette.voidBlack,
+                    borderWidth: 3,
+                    onTap: () {
+                      context.read<AudioController>().playSfx(SfxType.buttonTap);
+                      Navigator.of(context).pop();
+                      GoRouter.of(context).go('/play/lose/$level');
+                    },
+                  ),
+                  PillButton(
+                    text: "Resume",
+                    color: palette.twilight,
+                    textColor: palette.mist,
+                    fullWidth: false,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    borderRadius: 20,
+                    borderColor: palette.voidBlack,
+                    borderWidth: 3,
+                    onTap: () {
+                      context.read<AudioController>().playSfx(SfxType.buttonTap);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ),
         ),
       ),
     );
