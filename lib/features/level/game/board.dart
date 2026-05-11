@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:grimoji/config/board.dart';
+import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/level/game/widgets/board_grid.dart';
 import 'package:grimoji/features/level/game/metrics.dart';
@@ -176,7 +176,7 @@ void onPanUpdate(DragUpdateDetails details, LevelState levelState) {
                           firstTileKey: _tileKey,
                           palette: palette,
                         ),
-                        const TileGrid(),
+                        TileGrid(),
                       ],
                     ),
                   );

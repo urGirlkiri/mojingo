@@ -4,6 +4,7 @@ import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/level/game/model/alchemy/book.dart';
 import 'package:grimoji/features/level/game/model/coordinate.dart';
 import 'package:grimoji/features/level/game/model/game_state.dart';
+import 'package:grimoji/features/level/game/model/match_detector.dart';
 import 'package:grimoji/features/level/game/model/tile.dart';
 import 'package:logging/logging.dart';
 
@@ -25,10 +26,6 @@ class GameController {
   void initialize() {
     _log.info('Initializing GameController');
 
-    _log.info(
-      'Available Emojis: ${level.availableEmojis.length}, Emojis: ${level.availableEmojis.map((e) => e.visual).join(', ')}',
-    );
-
     grid = List.generate(
       rows,
       (r) => List.generate(
@@ -46,110 +43,162 @@ class GameController {
       }
     }
     _log.info('Game Grid Initialized');
-    for (var row in grid) {
-      _log.info(row.map((tile) => tile.emoji.visual).join(' '));
+  }
+
+  bool hasPossibleMoves() {
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        if (c < cols - 1) {
+          _simulateSwap(r, c, r, c + 1);
+          bool hasMatch = MatchDetector.findMatchGroups(grid).isNotEmpty;
+          _simulateSwap(r, c, r, c + 1);
+          if (hasMatch) return true;
+        }
+
+        if (r < rows - 1) {
+          _simulateSwap(r, c, r + 1, c);
+          bool hasMatch = MatchDetector.findMatchGroups(grid).isNotEmpty;
+          _simulateSwap(r, c, r + 1, c);
+          if (hasMatch) return true;
+        }
+      }
     }
+    return false;
   }
 
   void triggerInitialFall() {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        Tile tile = grid[r][c];
-        tile.coordinate.row = r;
+        grid[r][c].coordinate.row = r;
       }
     }
   }
 
   void swapTiles(TileCoordinate A, TileCoordinate B) {
-    _log.info(
-      ' Swapping ${grid[A.row][A.col]}, ${A.col}) with  ${grid[B.row][B.col]}',
-    );
-
     Tile tileA = grid[A.row][A.col];
     Tile tileB = grid[B.row][B.col];
 
-    int originalARow = A.row;
-    int originalACol = A.col;
+    grid[A.row][A.col] = tileB;
+    grid[B.row][B.col] = tileA;
 
-    int originalBRow = B.row;
-    int originalBCol = B.col;
+    tileA.coordinate.row = B.row;
+    tileA.coordinate.col = B.col;
 
-    grid[originalARow][originalACol] = tileB;
-    grid[originalBRow][originalBCol] = tileA;
-
-    tileA.coordinate.row = originalBRow;
-    tileA.coordinate.col = originalBCol;
-
-    tileB.coordinate.row = originalARow;
-    tileB.coordinate.col = originalACol;
-
-    _log.info(
-      '${grid[tileA.coordinate.row][tileA.coordinate.col]} is now at (${tileA.coordinate.row}, ${tileA.coordinate.col})',
-    );
-    _log.info(
-      '${grid[tileB.coordinate.row][tileB.coordinate.col]} is now at (${tileB.coordinate.row}, ${tileB.coordinate.col})',
-    );
+    tileB.coordinate.row = A.row;
+    tileB.coordinate.col = A.col;
   }
 
-void spawnTiles(Set<TileCoordinate> matches, GameState state, {TileCoordinate? mergePoint}) {
+
+  void spawnTiles(
+    Set<TileCoordinate> matches,
+    GameState state, {
+    TileCoordinate? mergePoint,
+  }) {
+    Set<TileCoordinate> tilesToDestroy = {};
+    Set<TileCoordinate> transmutedTiles = {};
+
+    _processMatches(matches, state, tilesToDestroy, transmutedTiles, mergePoint);
+
+    tilesToDestroy.removeWhere((coord) => transmutedTiles.contains(coord));
+
+    _applyGravity(tilesToDestroy);
+  }
+
+
+  void _processMatches(
+    Set<TileCoordinate> matches,
+    GameState state,
+    Set<TileCoordinate> tilesToDestroy,
+    Set<TileCoordinate> transmutedTiles,
+    TileCoordinate? mergePoint,
+  ) {
     Map<GameEmoji, Set<TileCoordinate>> groupedMatches = {};
     for (var match in matches) {
       GameEmoji emoji = grid[match.row][match.col].emoji;
       groupedMatches.putIfAbsent(emoji, () => {}).add(match);
     }
 
-    Set<TileCoordinate> tilesToDestroy = {};
-    Set<TileCoordinate> transmutedTiles = {}; 
-
     groupedMatches.forEach((emoji, coords) {
       state.resolveEmoji(emoji, coords.length);
       Recipe? recipe = RecipeBook.getRecipeFor(emoji);
 
       if (recipe != null && recipe.type == RecipeType.merge && recipe.yields != null) {
-        TileCoordinate spawnPoint = coords.contains(mergePoint) ? mergePoint! : coords.first;
-        
-        grid[spawnPoint.row][spawnPoint.col].emoji = recipe.yields!;
-        
-        grid[spawnPoint.row][spawnPoint.col].reset(); 
-
-        if (recipe.yields == state.level.targetEmoji) {
-          state.resolveEmoji(recipe.yields!, 1); 
-        }
-        tilesToDestroy.addAll(coords.where((c) => c != spawnPoint));
-      } 
-      
-      else if (recipe != null && recipe.type == RecipeType.volatile) {
-        _log.info('💥 SPELL DETONATED!');
-        tilesToDestroy.addAll(coords);
-
-        for (var bombCoord in coords) {
-          for (int r = bombCoord.row - 1; r <= bombCoord.row + 1; r++) {
-            for (int c = bombCoord.col - 1; c <= bombCoord.col + 1; c++) {
-              if (r >= 0 && r < rows && c >= 0 && c < cols) {
-                Tile targetTile = grid[r][c];
-                TileCoordinate targetCoord = TileCoordinate(row: r, col: c);
-
-                if (RecipeBook.transmutations.containsKey(targetTile.emoji)) {
-                  targetTile.emoji = RecipeBook.transmutations[targetTile.emoji]!;
-                  
-                  targetTile.reset(); 
-                  
-                  transmutedTiles.add(targetCoord);
-                } else if (!coords.contains(targetCoord)) {
-                  tilesToDestroy.add(targetCoord);
-                }
-              }
-            }
-          }
-        }
-      } 
-      else {
+        _executeMerge(recipe, coords, state, tilesToDestroy, mergePoint);
+      } else if (recipe != null && recipe.type == RecipeType.volatile) {
+        _executClear(coords, tilesToDestroy, transmutedTiles);
+      } else {
         tilesToDestroy.addAll(coords);
       }
     });
+  }
 
-    tilesToDestroy.removeWhere((coord) => transmutedTiles.contains(coord));
+  void _executeMerge(
+    Recipe recipe,
+    Set<TileCoordinate> coords,
+    GameState state,
+    Set<TileCoordinate> tilesToDestroy,
+    TileCoordinate? mergePoint,
+  ) {
+    TileCoordinate spawnPoint = coords.contains(mergePoint) ? mergePoint! : coords.first;
+    Tile targetTile = grid[spawnPoint.row][spawnPoint.col];
 
+    targetTile.emoji = recipe.yields!;
+    targetTile.reset();
+
+    if (recipe.yields == state.level.targetEmoji) {
+      state.resolveEmoji(recipe.yields!, 1);
+      targetTile.isFlying = true; 
+    }
+
+    tilesToDestroy.addAll(coords.where((c) => c != spawnPoint));
+  }
+
+  void _executClear(
+    Set<TileCoordinate> coords,
+    Set<TileCoordinate> tilesToDestroy,
+    Set<TileCoordinate> transmutedTiles,
+  ) {
+    _log.info('DETONATED!');
+    tilesToDestroy.addAll(coords);
+
+    for (var bombCoord in coords) {
+      for (int r = bombCoord.row - 1; r <= bombCoord.row + 1; r++) {
+        for (int c = bombCoord.col - 1; c <= bombCoord.col + 1; c++) {
+          if (r >= 0 && r < rows && c >= 0 && c < cols) {
+            Tile targetTile = grid[r][c];
+            TileCoordinate targetCoord = TileCoordinate(row: r, col: c);
+
+            if (RecipeBook.transmutations.containsKey(targetTile.emoji)) {
+              targetTile.emoji = RecipeBook.transmutations[targetTile.emoji]!;
+              targetTile.reset();
+              transmutedTiles.add(targetCoord);
+            } else if (!coords.contains(targetCoord)) {
+              tilesToDestroy.add(targetCoord);
+            }
+          }
+        }
+      }
+    }
+  }
+
+bool collectFlyingTiles() {
+    Set<TileCoordinate> collected = {};
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        if (grid[r][c].isFlying) {
+          collected.add(TileCoordinate(row: r, col: c));
+          grid[r][c].isFlying = false; 
+        }
+      }
+    }
+    
+    if (collected.isEmpty) return false;
+
+    _applyGravity(collected);
+    return true;
+  }
+
+  void _applyGravity(Set<TileCoordinate> tilesToDestroy) {
     for (int c = 0; c < cols; c++) {
       List<Tile> remainingTiles = [];
       int destroyedCount = 0;
@@ -164,13 +213,12 @@ void spawnTiles(Set<TileCoordinate> matches, GameState state, {TileCoordinate? m
 
       if (destroyedCount == 0) continue;
 
-      List<Tile> skyTiles = [];
-      for (int i = 0; i < destroyedCount; i++) {
-        skyTiles.add(Tile(
+      List<Tile> skyTiles = List.generate(destroyedCount, (i) {
+        return Tile(
           coordinate: TileCoordinate(row: -destroyedCount + i, col: c),
           emoji: level.availableEmojis[_random.nextInt(level.availableEmojis.length)],
-        ));
-      }
+        );
+      });
 
       List<Tile> newColumn = [...skyTiles, ...remainingTiles];
 
@@ -179,36 +227,26 @@ void spawnTiles(Set<TileCoordinate> matches, GameState state, {TileCoordinate? m
       }
     }
   }
-  
+
+  void _simulateSwap(int r1, int c1, int r2, int c2) {
+    Tile temp = grid[r1][c1];
+    grid[r1][c1] = grid[r2][c2];
+    grid[r2][c2] = temp;
+  }
+
   GameEmoji _getRandomSafeEmoji(int row, int col) {
     GameEmoji candidate = level.availableEmojis[0];
     bool isSafe = false;
 
     while (!isSafe) {
-      candidate =
-          level.availableEmojis[_random.nextInt(level.availableEmojis.length)];
+      candidate = level.availableEmojis[_random.nextInt(level.availableEmojis.length)];
       isSafe = true;
 
-      if (col <= 1) {
-        _log.info(
-          'At The Col $col, No Two Emojis To The Left, skipping horizontal check',
-        );
-      } else {
-        if (grid[row][col - 1].emoji == candidate &&
-            grid[row][col - 2].emoji == candidate) {
-          isSafe = false;
-        }
+      if (col > 1 && grid[row][col - 1].emoji == candidate && grid[row][col - 2].emoji == candidate) {
+        isSafe = false;
       }
-
-      if (row <= 1) {
-        _log.info(
-          'At The Row $row, No Two Emojis Above, skipping vertical check',
-        );
-      } else {
-        if (grid[row - 1][col].emoji == candidate &&
-            grid[row - 2][col].emoji == candidate) {
-          isSafe = false;
-        }
+      if (row > 1 && grid[row - 1][col].emoji == candidate && grid[row - 2][col].emoji == candidate) {
+        isSafe = false;
       }
     }
     return candidate;

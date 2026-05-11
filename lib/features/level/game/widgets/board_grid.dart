@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:grimoji/config/board.dart';
+import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/palette.dart';
 
 class BoardGrid extends StatelessWidget {

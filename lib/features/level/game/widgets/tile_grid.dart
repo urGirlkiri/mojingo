@@ -1,7 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:grimoji/config/board.dart';
+import 'package:grimoji/config/constants.dart';
+import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/level/game/metrics.dart';
 import 'package:grimoji/features/level/game/widgets/flight_animation.dart';
 import 'package:grimoji/features/level/state.dart';
@@ -11,7 +12,8 @@ import 'package:provider/provider.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';
 
 class TileGrid extends StatelessWidget {
-  const TileGrid({super.key});
+  final Palette palette = Palette();
+  TileGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +31,11 @@ class TileGrid extends StatelessWidget {
     final grid = levelState.gameState.gameController.grid;
 
     List<Widget> tileWidgets = [];
+    int nRol = grid.length;
+    int nCol =  grid[0].length;
 
-    for (int r = 0; r < grid.length; r++) {
-      for (int c = 0; c < grid[r].length; c++) {
+    for (int r = 0; r < nRol; r++) {
+      for (int c = 0; c < nCol; c++) {
         final tile = grid[r][c];
 
         final double leftPixel =
@@ -48,8 +52,64 @@ class TileGrid extends StatelessWidget {
         );
       }
     }
+    final double boardWidth = (nCol * tWidth) + ((nCol - 1) * tileSpacingGap);
+    
+    final double targetWidth = levelState.gameState.shuffleProgress;
 
-    return Stack(children: tileWidgets);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 1.0, end: targetWidth),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOutCubic, 
+      builder: (context, widthFactor, child) {
+        
+        final double edgeX = boardWidth * widthFactor;
+
+        return Stack(
+          children: [
+            ClipRect(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                widthFactor: widthFactor,
+                child: SizedBox(
+                  width: boardWidth, 
+                  child: Stack(children: tileWidgets),
+                ),
+              ),
+            ),
+
+            if (widthFactor > 0.0 && widthFactor < 1.0)
+              Positioned(
+                left: edgeX - 25,
+                top: 0,
+                bottom: 0,
+                width: 30, 
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: palette.trueWhite,
+                    gradient:  LinearGradient(
+                      colors: [
+                        palette.voidBlack, 
+                        palette.trueWhite,
+                        palette.midnight, 
+                      ],
+                      stops: [0.0, 0.5, 1.0],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: palette.voidBlack.withValues(alpha: .5),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                        offset: const Offset(-8, 0), 
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+      
   }
 
   void _initialFall(LevelState levelState) {
@@ -61,7 +121,7 @@ class TileGrid extends StatelessWidget {
     }
   }
 
-void _launchTargetEmo(
+  void _launchTargetEmo(
     BuildContext context,
     Tile tile,
     LevelState levelState,
@@ -70,10 +130,10 @@ void _launchTargetEmo(
   ) {
     bool isTargetMatch = (tile.emoji == levelState.level.targetEmoji);
 
-    bool shouldFly = tile.isFlying&& !tile.hasFlown && isTargetMatch;
+    bool shouldFly = tile.isFlying && !tile.hasFlown && isTargetMatch;
 
     if (shouldFly) {
-      tile.hasFlown = true; 
+      tile.hasFlown = true;
 
       Future.microtask(() {
         if (!context.mounted) return;
@@ -81,12 +141,14 @@ void _launchTargetEmo(
         final RenderBox? boardBox = context.findRenderObject() as RenderBox?;
         if (boardBox == null) return;
 
-        final Offset globalStart = boardBox.localToGlobal(Offset(leftPixel, topPixel));
-        
+        final Offset globalStart = boardBox.localToGlobal(
+          Offset(leftPixel, topPixel),
+        );
+
         final int randomDelay = Random().nextInt(200);
 
         Future.delayed(Duration(milliseconds: randomDelay), () {
-          if(!context.mounted) return;
+          if (!context.mounted) return;
           TargetFlightAnimator.launch(
             context: context,
             startOffset: globalStart,
@@ -102,7 +164,7 @@ void _launchTargetEmo(
     if (tile.hasFlown) {
       return const SizedBox.shrink();
     }
- 
+
     if (tile.isExploding) {
       return Lottie.asset(
         "assets/lottie/stars.json",
@@ -111,6 +173,14 @@ void _launchTargetEmo(
         fit: BoxFit.cover,
         animate: true,
         frameRate: const FrameRate(60),
+        delegates: LottieDelegates(
+          values: [
+            ValueDelegate.colorFilter(
+              ['**'], 
+              value: ColorFilter.mode(palette.trueWhite, BlendMode.srcATop),
+            ),
+          ],
+        ),
       );
     } else if (tile.isMerging) {
       return Lottie.asset(
@@ -120,6 +190,14 @@ void _launchTargetEmo(
         fit: BoxFit.cover,
         animate: true,
         frameRate: const FrameRate(60),
+         delegates: LottieDelegates(
+          values: [
+            ValueDelegate.colorFilter(
+              ['**'], 
+              value: ColorFilter.mode(palette.trueWhite, BlendMode.srcATop),
+            ),
+          ],
+        ),
       );
     } else {
       return EmojiWidget.svg(path: tile.emoji.svg, size: tWidth * 0.8);

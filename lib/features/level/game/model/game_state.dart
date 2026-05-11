@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:grimoji/config/board.dart';
+import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/level/game/controller.dart';
@@ -20,6 +20,7 @@ class GameState extends ChangeNotifier {
   bool isProcessing = false;
   bool hasTargetCombo = false;
   bool _isDisposed = false;
+  bool isShuffling = false; 
 
   GameState({
     required this.level,
@@ -93,9 +94,17 @@ class GameState extends ChangeNotifier {
     if (!_isDisposed) notifyListeners();
   }
 
-  void shuffleBoard() {
-    bool validBoard = false;
+  double shuffleProgress = 1.0; 
+
+  Future<void> shuffleBoard() async {
+    _log.info('Shuffling Board...');
+
+    shuffleProgress = 0.0;
+    notifyListeners();
     
+    await Future.delayed(const Duration(milliseconds: 600)); 
+
+    bool validBoard = false;
     while (!validBoard) {
       List<GameEmoji> allEmojis = gameController.grid
           .expand((row) => row.map((tile) => tile.emoji))
@@ -111,14 +120,16 @@ class GameState extends ChangeNotifier {
       }
 
       validBoard = gameController.hasPossibleMoves();
-      
       if (MatchDetector.findMatchGroups(gameController.grid).isNotEmpty) {
         validBoard = false; 
       }
     }
-    notifyListeners(); 
-  }
 
+    shuffleProgress = 1.0;
+    notifyListeners();
+
+    await Future.delayed(const Duration(milliseconds: 600)); 
+  }
   Future<List<MatchGroup>> _attemptSwap(TileCoordinate dCoord, TileCoordinate tCoord) async {
     final originalD = TileCoordinate(row: dCoord.row, col: dCoord.col);
     final originalT = TileCoordinate(row: tCoord.row, col: tCoord.col);
