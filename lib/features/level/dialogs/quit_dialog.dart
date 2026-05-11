@@ -34,68 +34,77 @@ class QuitDialog extends StatelessWidget {
               height: 80,
             ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            EmojiWidget.lottie(
-              path: Emojis.cryingCatFace.lottie,
-              useDropShadow: true,
-              size: 80,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "Quit Level?",
-              style: GoogleFonts.eagleLake(
-                color: palette.midnight,
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: SingleChildScrollView(
+            child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              EmojiWidget.lottie(
+                path: Emojis.cryingCatFace.lottie,
+                useDropShadow: true,
+                size: 70,
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "Progress will be lost!",
-              style: GoogleFonts.eagleLake(
-                color: palette.twilight,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                PillButton(
-                  text: "Quit",
-                  color: palette.crimson,
-                  textColor: palette.trueWhite,
-                  fullWidth: false,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  borderRadius: 20,
-                  borderColor: palette.voidBlack,
-                  borderWidth: 3,
-                  onTap: () {
-                    context.read<AudioController>().playSfx(SfxType.buttonTap);
-                    Navigator.of(context).pop();
-                    GoRouter.of(context).go('/play/lose/$level');
-                  },
+              const SizedBox(height: 16),
+              Text(
+                "Quit Level?",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.eagleLake(
+                  color: palette.midnight,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: 16),
-                PillButton(
-                  text: "Stay",
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Progress will be lost!",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.eagleLake(
                   color: palette.twilight,
-                  textColor: palette.mist,
-                  fullWidth: false,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  borderRadius: 20,
-                  borderColor: palette.voidBlack,
-                  borderWidth: 3,
-                  onTap: () {
-                    context.read<AudioController>().playSfx(SfxType.buttonTap);
-                    Navigator.of(context).pop();
-                  },
+                  fontSize: 16,
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 32),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  PillButton(
+                    text: "Quit",
+                    color: palette.crimson,
+                    textColor: palette.trueWhite,
+                    fullWidth: false,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    borderRadius: 20,
+                    borderColor: palette.voidBlack,
+                    borderWidth: 3,
+                    onTap: () {
+                      context.read<AudioController>().playSfx(SfxType.buttonTap);
+                      Navigator.of(context).pop();
+                      GoRouter.of(context).go('/play/lose/$level');
+                    },
+                  ),
+                  PillButton(
+                    text: "Stay",
+                    color: palette.twilight,
+                    textColor: palette.mist,
+                    fullWidth: false,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    borderRadius: 20,
+                    borderColor: palette.voidBlack,
+                    borderWidth: 3,
+                    onTap: () {
+                      context.read<AudioController>().playSfx(SfxType.buttonTap);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ),
         ),
       ),
     );
