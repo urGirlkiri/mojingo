@@ -23,75 +23,106 @@ class MainMenuScreen extends StatelessWidget {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/emo.png',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/images/emo.png', fit: BoxFit.cover),
           ),
           ResponsiveScreen(
-            squarishMainArea: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/icons/splash.png',
-                  fit: BoxFit.cover,
-                  width: 512,
-                  height: 512,
+            squarishMainArea: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxSize = constraints.maxWidth < constraints.maxHeight
+                    ? constraints.maxWidth * 0.7
+                    : constraints.maxHeight * 0.6;
+                final imageSize = maxSize.clamp(150.0, 300.0);
+
+                return SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: constraints.maxHeight,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(height: imageSize * 0.1),
+                            Image.asset(
+                              'assets/icons/splash.png',
+                              fit: BoxFit.contain,
+                              width: imageSize,
+                              height: imageSize * 1.1,
+                            ),
+                            const SizedBox(height: 24),
+                            Transform.rotate(
+                              angle: -0.1,
+                              child: Text(
+                                'Grimoji',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                                  fontSize: (imageSize * 0.22).clamp(28.0, 56.0),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                Transform.rotate(
-                  angle: -0.1,
-                  child: Text(
-                    'Grimoji!',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.displayLarge
-                  ),
-                ),
-              ],
+                );
+              },
             ),
-            rectangularMenuArea: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                PillButton(
-                  text: 'Play',
-                  color: palette.twilight,
-                  textColor: palette.mist,
-                  fullWidth: false,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  borderRadius: 20,
-                  borderColor: palette.voidBlack,
-                  borderWidth: 3,
-                  onTap: () {
-                    audioController.playSfx(SfxType.buttonTap);
-                    GoRouter.of(context).go('/play');
-                  },
-                ),
-                _gap,
-                PillButton(
-                  text: 'Settings',
-                  color: palette.twilight,
-                  textColor: palette.mist,
-                  fullWidth: false,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  borderRadius: 20,
-                  borderColor: palette.voidBlack,
-                  borderWidth: 3,
-                  onTap: () => GoRouter.of(context).push('/settings'),
-                ),
-                _gap,
-                Padding(
-                  padding: const EdgeInsets.only(top: 32),
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: settingsController.audioOn,
-                    builder: (context, audioOn, child) {
-                      return IconButton(
-                        onPressed: settingsController.toggleAudioOn,
-                        icon: Icon(audioOn ? Icons.volume_up : Icons.volume_off),
-                      );
+            rectangularMenuArea: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  PillButton(
+                    text: 'Play',
+                    color: palette.twilight,
+                    textColor: palette.mist,
+                    fullWidth: false,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    borderRadius: 20,
+                    borderColor: palette.voidBlack,
+                    borderWidth: 3,
+                    onTap: () {
+                      audioController.playSfx(SfxType.buttonTap);
+                      GoRouter.of(context).go('/play');
                     },
                   ),
-                ),
-                _gap,
-              ],
+                  _gap,
+                  PillButton(
+                    text: 'Settings',
+                    color: palette.twilight,
+                    textColor: palette.mist,
+                    fullWidth: false,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
+                    borderRadius: 20,
+                    borderColor: palette.voidBlack,
+                    borderWidth: 3,
+                    onTap: () => GoRouter.of(context).push('/settings'),
+                  ),
+                  _gap,
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: settingsController.audioOn,
+                      builder: (context, audioOn, child) {
+                        return IconButton(
+                          onPressed: settingsController.toggleAudioOn,
+                          icon: Icon(
+                            audioOn ? Icons.volume_up : Icons.volume_off,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  _gap,
+                ],
+              ),
             ),
           ),
         ],
