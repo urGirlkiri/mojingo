@@ -34,41 +34,46 @@ class LevelStartDialog extends StatelessWidget {
             height: 80,
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Level ${level.number}",
-              style: GoogleFonts.eagleLake(
-                color: palette.midnight,
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: SingleChildScrollView(
+            child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Level ${level.number}",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.eagleLake(
+                  color: palette.midnight,
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-
-            EmojiWidget.lottie(
-              path: level.targetEmoji.lottie,
-              useDropShadow: true,
-              size: 120,
-            ),
-
-            PillButton(
-              text: "MIX IT",
-              color: palette.twilight,
-              textColor: palette.mist,
-              fullWidth: false,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              borderRadius: 20,
-              borderColor: palette.voidBlack,
-              borderWidth: 3,
-              onTap: () {
-                context.read<AudioController>().playSfx(SfxType.buttonTap);
-                Navigator.of(context).pop();
-                GoRouter.of(context).replace('/play/hint/${level.number}');
-              },
-            ),
-          ],
+              const SizedBox(height: 16),
+              EmojiWidget.lottie(
+                path: level.targetEmoji.lottie,
+                useDropShadow: true,
+                size: 100,
+              ),
+              const SizedBox(height: 24),
+              PillButton(
+                text: "MIX IT",
+                color: palette.twilight,
+                textColor: palette.mist,
+                fullWidth: false,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                borderRadius: 20,
+                borderColor: palette.voidBlack,
+                borderWidth: 3,
+                onTap: () {
+                  context.read<AudioController>().playSfx(SfxType.buttonTap);
+                  Navigator.of(context).pop();
+                  GoRouter.of(context).replace('/play/hint/${level.number}');
+                },
+              ),
+            ],
+          ),
+          ),
         ),
       ),
     );
