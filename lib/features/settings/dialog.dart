@@ -39,105 +39,114 @@ class SettingsDialog extends StatelessWidget {
         ),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Settings",
-                  style: GoogleFonts.eagleLake(
-                    color: palette.midnight,
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Settings",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.eagleLake(
+                      color: palette.midnight,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  const SizedBox(height: 24),
+                  ListenableBuilder(
+                  listenable: Listenable.merge([
+                    settings.audioOn,
+                    settings.soundsOn,
+                    settings.musicOn,
+                    settings.sfxVolume,
+                    settings.musicVolume,
+                  ]),
+                  builder: (context, child) {
+                    return Column(
+                      children: [
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 16,
+                          runSpacing: 12,
+                          children: [
+                            IconToggle(
+                              imagePath: settings.soundsOn.value
+                                  ? 'assets/icons/app/vibration_on.png'
+                                  : 'assets/icons/app/vibration_off.png',
+                              isActive: settings.soundsOn.value && settings.audioOn.value,
+                              onTap: () {
+                                context.read<AudioController>().playSfx(
+                                  SfxType.buttonTap,
+                                );
+                                settings.toggleSoundsOn();
+                              },
+                            ),
+                            IconToggle(
+                              imagePath: settings.musicOn.value
+                                  ? 'assets/icons/app/sfx_on.png'
+                                  : 'assets/icons/app/sfx_off.png',
+                              isActive: settings.musicOn.value && settings.audioOn.value,
+                              onTap: () {
+                                context.read<AudioController>().playSfx(
+                                  SfxType.buttonTap,
+                                );
+                                settings.toggleMusicOn();
+                              },
+                            ),
+                            IconToggle(
+                              imagePath: settings.audioOn.value
+                                  ? 'assets/icons/app/music_on.png'
+                                  : 'assets/icons/app/music_off.png',
+                              isActive: settings.audioOn.value,
+                              onTap: () {
+                                context.read<AudioController>().playSfx(
+                                  SfxType.buttonTap,
+                                );
+                                settings.toggleAudioOn();
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        VolumeSlider(
+                          label: "SFX Volume",
+                          value: settings.sfxVolume.value,
+                          palette: palette,
+                          onChanged: (settings.soundsOn.value && settings.audioOn.value) ? (val) {
+                            settings.setSfxVolume(val);
+                          } : null,
+                        ),
+                        const SizedBox(height: 16),
+                        VolumeSlider(
+                          label: "Music Volume",
+                          value: settings.musicVolume.value,
+                          palette: palette,
+                          onChanged: (settings.musicOn.value && settings.audioOn.value) ? (val) {
+                            settings.setMusicVolume(val);
+                          } : null,
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 32),
-                ListenableBuilder(
-                listenable: Listenable.merge([
-                  settings.audioOn,
-                  settings.soundsOn,
-                  settings.musicOn,
-                  settings.sfxVolume,
-                  settings.musicVolume,
-                ]),
-                builder: (context, child) {
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          IconToggle(
-                            imagePath: settings.soundsOn.value
-                                ? 'assets/icons/app/vibration_on.png'
-                                : 'assets/icons/app/vibration_off.png',
-                            isActive: settings.soundsOn.value && settings.audioOn.value,
-                            onTap: () {
-                              context.read<AudioController>().playSfx(
-                                SfxType.buttonTap,
-                              );
-                              settings.toggleSoundsOn();
-                            },
-                          ),
-                          IconToggle(
-                            imagePath: settings.musicOn.value
-                                ? 'assets/icons/app/sfx_on.png'
-                                : 'assets/icons/app/sfx_off.png',
-                            isActive: settings.musicOn.value && settings.audioOn.value,
-                            onTap: () {
-                              context.read<AudioController>().playSfx(
-                                SfxType.buttonTap,
-                              );
-                              settings.toggleMusicOn();
-                            },
-                          ),
-                          IconToggle(
-                            imagePath: settings.audioOn.value
-                                ? 'assets/icons/app/music_on.png'
-                                : 'assets/icons/app/music_off.png',
-                            isActive: settings.audioOn.value,
-                            onTap: () {
-                              context.read<AudioController>().playSfx(
-                                SfxType.buttonTap,
-                              );
-                              settings.toggleAudioOn();
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      VolumeSlider(
-                        label: "SFX Volume",
-                        value: settings.sfxVolume.value,
-                        palette: palette,
-                        onChanged: (settings.soundsOn.value && settings.audioOn.value) ? (val) {
-                          settings.setSfxVolume(val);
-                        } : null,
-                      ),
-                      const SizedBox(height: 16),
-                      VolumeSlider(
-                        label: "Music Volume",
-                        value: settings.musicVolume.value,
-                        palette: palette,
-                        onChanged: (settings.musicOn.value && settings.audioOn.value) ? (val) {
-                          settings.setMusicVolume(val);
-                        } : null,
-                      ),
-                    ],
-                  );
-                },
+                PillButton(
+                  text: "Quit level",
+                  color: palette.crimson,
+                  onTap: () {
+                    context.read<AudioController>().playSfx(SfxType.buttonTap);
+                    Navigator.of(context).pop();
+                    GoRouter.of(context).go('/play/lose/$level');
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
               ),
-              const SizedBox(height: 32),
-              PillButton(
-                text: "Quit level",
-                color: palette.crimson,
-                onTap: () {
-                  context.read<AudioController>().playSfx(SfxType.buttonTap);
-                  Navigator.of(context).pop();
-                  GoRouter.of(context).go('/play/lose/$level');
-                },
-              ),
-              const SizedBox(height: 8),
-            ],
-        ),
+            ),
+            ),
       ),
     ),
   );
