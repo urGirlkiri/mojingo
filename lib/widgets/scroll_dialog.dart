@@ -18,40 +18,53 @@ class ScrollDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLarge = context.isLargeScreen;
+    final screenSize = MediaQuery.sizeOf(context);
+    final maxDialogWidth = screenSize.width * 0.9;
+    final maxDialogHeight = screenSize.height * 0.8;
+    final dialogWidth = isLarge ? 677.0 : maxDialogWidth.clamp(280.0, 677.0);
+    final dialogHeight = isLarge ? 1000.0 : maxDialogHeight.clamp(400.0, 818.0);
 
-    return SizedBox(
-      width: 677,
-      height: isLarge ? 1000 : 818,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: dialogWidth,
+        maxHeight: dialogHeight,
+      ),
       child: Stack(
         clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
           Image.asset(
             'assets/images/scroll.png',
-            fit: BoxFit.fitWidth,
-            width: 677,
-            height: 1000,
+            fit: BoxFit.fill,
+            width: dialogWidth,
+            height: dialogHeight,
           ),
-
           Padding(
-            padding: padding ?? const EdgeInsets.symmetric(
-              horizontal: 50.0,
-              vertical: 40.0,
+            padding: padding ?? EdgeInsets.symmetric(
+              horizontal: isLarge ? 50.0 : 24.0,
+              vertical: isLarge ? 40.0 : 32.0,
             ),
-            child: child, 
+            child: SizedBox.expand(child: child),
           ),
-
           if (rightButton != null)
             Positioned(
-              top: isLarge ? -15 : -1,
-              right: isLarge ? -1 : -1,
-              child: rightButton!,
+              top: isLarge ? -15 : -8,
+              right: isLarge ? -1 : -8,
+              child: SizedBox(
+                width: isLarge ? 80 : 60,
+                height: isLarge ? 80 : 60,
+                child: rightButton!,
+              ),
             ),
           if (leftButton != null)
             Positioned(
-              top: isLarge ? -15 : -1,
-              left: isLarge ? -1 : -1,
-              child: leftButton!,
+              top: isLarge ? -15 : -8,
+              left: isLarge ? -1 : -8,
+              child: SizedBox(
+                width: isLarge ? 80 : 60,
+                height: isLarge ? 80 : 60,
+                child: leftButton!,
+              ),
             ),
         ],
       ),
