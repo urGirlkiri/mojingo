@@ -1,51 +1,84 @@
-// Copyright 2022, the Flutter project authors. Please see the AUTHORS file
-// for details. All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-
 import 'package:grimoji/config/emojis.dart';
 
 const gameLevels = [
   GameLevel(
     number: 1,
-    timeLimit: 300,
-    targetEmoji: Emojis.cloud,
+    timeLimit: 120,
+    targetEmoji: Emojis.ocean,
     targetAmount: 3,
     availableEmojis: [
       Emojis.droplet,
-      // Emojis.fish,
-      Emojis.exhale,
-      // Emojis.salt,
+      Emojis.leafyGreen,
+      Emojis.sunWithFace,
+      Emojis.mushroom,
+      Emojis.bug,
     ],
-    // TODO: When ready, change these achievement IDs.
-    // You configure this in App Store Connect.
-    achievementIdIOS: 'first_win',
-    // You get this string when you configure an achievement in Play Console.
-    achievementIdAndroid: 'NhkIwB69ejkMAOOLDb',
+    achievementIdIOS: 'lvl_1_ios',
+    achievementIdAndroid: 'lvl_1_android',
   ),
+
   GameLevel(
     number: 2,
-    timeLimit: 30,
-    targetEmoji: Emojis.fire,
-    targetAmount: 6,
+    timeLimit: 200,
+    targetEmoji: Emojis.cloud,
+    targetAmount: 2,
     availableEmojis: [
       Emojis.droplet,
-      Emojis.fire,
-      // Emojis.bomb,
-      // Emojis.exhale,
-      Emojis.salt,
+      Emojis.leafyGreen,
+      Emojis.sunWithFace,
+      Emojis.herb,
     ],
   ),
+
   GameLevel(
     number: 3,
-    timeLimit: 20,
-    targetEmoji: Emojis.droplet,
-    targetAmount: 10,
+    timeLimit: 200,
+    targetEmoji: Emojis.bomb,
+    targetAmount: 3,
+    availableEmojis: [
+      Emojis.fire,
+      Emojis.evergreenTree,
+      Emojis.rock,
+      Emojis.droplet,
+      Emojis.leafyGreen,
+    ],
+  ),
+
+  GameLevel(
+    number: 4,
+    timeLimit: 200,
+    targetEmoji: Emojis.gemStone,
+    targetAmount: 5,
+    availableEmojis: [
+      Emojis.fire,
+      Emojis.rock,
+      Emojis.bomb,
+      Emojis.evergreenTree,
+      Emojis.droplet,
+    ],
+  ),
+
+  GameLevel(
+    number: 5,
+    timeLimit: 1200,
+    targetEmoji: Emojis.rainbow,
+    targetAmount: 1,
     availableEmojis: [
       Emojis.droplet,
-      Emojis.fire,
-      Emojis.bomb,
-      // Emojis.exhale,
-      Emojis.salt,
+      Emojis.ocean,
+      Emojis.cloud,
+      Emojis.alien,
+      Emojis.robot,
+      Emojis.ghost,
+      Emojis.skull,
+      Emojis.clown,
+      Emojis.tRex,
+      Emojis.foxFace,
+      Emojis.cowFace,
+      Emojis.pig,
+      Emojis.frog,
+      Emojis.octopus,
+      Emojis.crab,
     ],
     achievementIdIOS: 'finished',
     achievementIdAndroid: 'CdfIhE96aspNWLGSQg',
@@ -54,18 +87,12 @@ const gameLevels = [
 
 class GameLevel {
   final int number;
-
   final int targetAmount;
-
   final int timeLimit;
-
   final GameEmoji targetEmoji;
-
   final List<GameEmoji> availableEmojis;
 
-  /// The achievement to unlock when the level is finished, if any.
   final String? achievementIdIOS;
-
   final String? achievementIdAndroid;
 
   bool get awardsAchievement => achievementIdAndroid != null;

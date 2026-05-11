@@ -1,9 +1,6 @@
 import 'package:grimoji/config/emojis.dart';
 
-enum RecipeType {
-  merge,    
-  volatile, 
-}
+enum RecipeType { merge, volatile }
 
 class Recipe {
   final GameEmoji ingredient;
@@ -28,45 +25,51 @@ class RecipeBook {
       type: RecipeType.merge,
     ),
     Recipe(
-      ingredient: Emojis.salt,
-      requiredAmount: 3,
-      yields: Emojis.fishingPole,
-      type: RecipeType.merge,
-    ),
-
-    Recipe(
       ingredient: Emojis.ocean,
       requiredAmount: 3,
       yields: Emojis.cloud,
       type: RecipeType.merge,
     ),
-    
+    Recipe(
+      ingredient: Emojis.cloud,
+      requiredAmount: 3,
+      yields: Emojis.rainbow,
+      type: RecipeType.merge,
+    ),
+
+    Recipe(
+      ingredient: Emojis.leafyGreen,
+      requiredAmount: 3,
+      yields: Emojis.herb,
+      type: RecipeType.merge,
+    ),
+
     Recipe(
       ingredient: Emojis.fire,
       requiredAmount: 3,
       yields: null,
       type: RecipeType.volatile,
     ),
-
     Recipe(
       ingredient: Emojis.fire,
       requiredAmount: 4,
       yields: Emojis.bomb,
-      type: RecipeType.volatile,
+      type: RecipeType.merge,
     ),
-
     Recipe(
       ingredient: Emojis.bomb,
       requiredAmount: 3,
-      yields: null, 
-      type: RecipeType.volatile, 
+      yields: null,
+      type: RecipeType.volatile,
     ),
   ];
 
   static const Map<GameEmoji, GameEmoji> transmutations = {
-    Emojis.wave: Emojis.droplet,
-    Emojis.rock: Emojis.volcano, 
-    Emojis.ocean: Emojis.salt
+    Emojis.rock: Emojis.gemStone,
+    Emojis.evergreenTree: Emojis.fire,
+    Emojis.ocean: Emojis.salt,
+    Emojis.volcano: Emojis.rock,
+    Emojis.gemStone: Emojis.sparkles,
   };
 
   static Recipe? getRecipeFor(GameEmoji emoji) {

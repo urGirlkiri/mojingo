@@ -88,7 +88,6 @@ class GameController {
     tileB.coordinate.col = A.col;
   }
 
-
   void spawnTiles(
     Set<TileCoordinate> matches,
     GameState state, {
@@ -97,13 +96,18 @@ class GameController {
     Set<TileCoordinate> tilesToDestroy = {};
     Set<TileCoordinate> transmutedTiles = {};
 
-    _processMatches(matches, state, tilesToDestroy, transmutedTiles, mergePoint);
+    _processMatches(
+      matches,
+      state,
+      tilesToDestroy,
+      transmutedTiles,
+      mergePoint,
+    );
 
     tilesToDestroy.removeWhere((coord) => transmutedTiles.contains(coord));
 
     _applyGravity(tilesToDestroy);
   }
-
 
   void _processMatches(
     Set<TileCoordinate> matches,
@@ -122,7 +126,9 @@ class GameController {
       state.resolveEmoji(emoji, coords.length);
       Recipe? recipe = RecipeBook.getRecipeFor(emoji);
 
-      if (recipe != null && recipe.type == RecipeType.merge && recipe.yields != null) {
+      if (recipe != null &&
+          recipe.type == RecipeType.merge &&
+          recipe.yields != null) {
         _executeMerge(recipe, coords, state, tilesToDestroy, mergePoint);
       } else if (recipe != null && recipe.type == RecipeType.volatile) {
         _executClear(coords, tilesToDestroy, transmutedTiles);
@@ -139,7 +145,9 @@ class GameController {
     Set<TileCoordinate> tilesToDestroy,
     TileCoordinate? mergePoint,
   ) {
-    TileCoordinate spawnPoint = coords.contains(mergePoint) ? mergePoint! : coords.first;
+    TileCoordinate spawnPoint = coords.contains(mergePoint)
+        ? mergePoint!
+        : coords.first;
     Tile targetTile = grid[spawnPoint.row][spawnPoint.col];
 
     targetTile.emoji = recipe.yields!;
@@ -147,7 +155,7 @@ class GameController {
 
     if (recipe.yields == state.level.targetEmoji) {
       state.resolveEmoji(recipe.yields!, 1);
-      targetTile.isFlying = true; 
+      targetTile.isFlying = true;
     }
 
     tilesToDestroy.addAll(coords.where((c) => c != spawnPoint));
@@ -181,21 +189,52 @@ class GameController {
     }
   }
 
-bool collectFlyingTiles() {
+  bool collectFlyingTiles() {
     Set<TileCoordinate> collected = {};
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
         if (grid[r][c].isFlying) {
           collected.add(TileCoordinate(row: r, col: c));
-          grid[r][c].isFlying = false; 
+          grid[r][c].isFlying = false;
         }
       }
     }
-    
+
     if (collected.isEmpty) return false;
 
     _applyGravity(collected);
     return true;
+  }
+
+  List<TileCoordinate>? getHintMove() {
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        if (c < cols - 1) {
+          _simulateSwap(r, c, r, c + 1);
+          bool hasMatch = MatchDetector.findMatchGroups(grid).isNotEmpty;
+          _simulateSwap(r, c, r, c + 1);
+          if (hasMatch) {
+            return [
+              TileCoordinate(row: r, col: c),
+              TileCoordinate(row: r, col: c + 1),
+            ];
+          }
+        }
+
+        if (r < rows - 1) {
+          _simulateSwap(r, c, r + 1, c);
+          bool hasMatch = MatchDetector.findMatchGroups(grid).isNotEmpty;
+          _simulateSwap(r, c, r + 1, c);
+          if (hasMatch) {
+            return [
+              TileCoordinate(row: r, col: c),
+              TileCoordinate(row: r + 1, col: c),
+            ];
+          }
+        }
+      }
+    }
+    return null;
   }
 
   void _applyGravity(Set<TileCoordinate> tilesToDestroy) {
@@ -216,7 +255,8 @@ bool collectFlyingTiles() {
       List<Tile> skyTiles = List.generate(destroyedCount, (i) {
         return Tile(
           coordinate: TileCoordinate(row: -destroyedCount + i, col: c),
-          emoji: level.availableEmojis[_random.nextInt(level.availableEmojis.length)],
+          emoji: level
+              .availableEmojis[_random.nextInt(level.availableEmojis.length)],
         );
       });
 
@@ -239,13 +279,18 @@ bool collectFlyingTiles() {
     bool isSafe = false;
 
     while (!isSafe) {
-      candidate = level.availableEmojis[_random.nextInt(level.availableEmojis.length)];
+      candidate =
+          level.availableEmojis[_random.nextInt(level.availableEmojis.length)];
       isSafe = true;
 
-      if (col > 1 && grid[row][col - 1].emoji == candidate && grid[row][col - 2].emoji == candidate) {
+      if (col > 1 &&
+          grid[row][col - 1].emoji == candidate &&
+          grid[row][col - 2].emoji == candidate) {
         isSafe = false;
       }
-      if (row > 1 && grid[row - 1][col].emoji == candidate && grid[row - 2][col].emoji == candidate) {
+      if (row > 1 &&
+          grid[row - 1][col].emoji == candidate &&
+          grid[row - 2][col].emoji == candidate) {
         isSafe = false;
       }
     }

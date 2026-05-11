@@ -2,9 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/constants.dart';
+import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/level/game/metrics.dart';
 import 'package:grimoji/features/level/game/widgets/flight_animation.dart';
+import 'package:grimoji/features/level/game/widgets/hit_nudge.dart';
 import 'package:grimoji/features/level/state.dart';
 import 'package:grimoji/features/level/game/model/tile.dart';
 import 'package:lottie/lottie.dart';
@@ -32,7 +34,7 @@ class TileGrid extends StatelessWidget {
 
     List<Widget> tileWidgets = [];
     int nRol = grid.length;
-    int nCol =  grid[0].length;
+    int nCol = grid[0].length;
 
     for (int r = 0; r < nRol; r++) {
       for (int c = 0; c < nCol; c++) {
@@ -48,20 +50,26 @@ class TileGrid extends StatelessWidget {
         _launchTargetEmo(context, tile, levelState, leftPixel, topPixel);
 
         tileWidgets.add(
-          _buildAnimatedTile(tile, leftPixel, topPixel, tWidth, tHeight),
+          _buildAnimatedTile(
+            tile,
+            leftPixel,
+            topPixel,
+            tWidth,
+            tHeight,
+            tile.emoji,
+          ),
         );
       }
     }
     final double boardWidth = (nCol * tWidth) + ((nCol - 1) * tileSpacingGap);
-    
+
     final double targetWidth = levelState.gameState.shuffleProgress;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 1.0, end: targetWidth),
       duration: const Duration(milliseconds: 600),
-      curve: Curves.easeInOutCubic, 
+      curve: Curves.easeInOutCubic,
       builder: (context, widthFactor, child) {
-        
         final double edgeX = boardWidth * widthFactor;
 
         return Stack(
@@ -71,7 +79,7 @@ class TileGrid extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 widthFactor: widthFactor,
                 child: SizedBox(
-                  width: boardWidth, 
+                  width: boardWidth,
                   child: Stack(children: tileWidgets),
                 ),
               ),
@@ -82,15 +90,15 @@ class TileGrid extends StatelessWidget {
                 left: edgeX - 25,
                 top: 0,
                 bottom: 0,
-                width: 30, 
+                width: 30,
                 child: Container(
                   decoration: BoxDecoration(
                     color: palette.trueWhite,
-                    gradient:  LinearGradient(
+                    gradient: LinearGradient(
                       colors: [
-                        palette.voidBlack, 
+                        palette.voidBlack,
                         palette.trueWhite,
-                        palette.midnight, 
+                        palette.midnight,
                       ],
                       stops: [0.0, 0.5, 1.0],
                     ),
@@ -99,7 +107,7 @@ class TileGrid extends StatelessWidget {
                         color: palette.voidBlack.withValues(alpha: .5),
                         blurRadius: 12,
                         spreadRadius: 2,
-                        offset: const Offset(-8, 0), 
+                        offset: const Offset(-8, 0),
                       ),
                     ],
                   ),
@@ -109,7 +117,6 @@ class TileGrid extends StatelessWidget {
         );
       },
     );
-      
   }
 
   void _initialFall(LevelState levelState) {
@@ -160,29 +167,17 @@ class TileGrid extends StatelessWidget {
     }
   }
 
-  Widget _buildTileContent(Tile tile, double tWidth, double tHeight) {
+  Widget _buildTileContent(
+    Tile tile,
+    double tWidth,
+    double tHeight,
+    GameEmoji? emoji,
+  ) {
     if (tile.hasFlown) {
       return const SizedBox.shrink();
     }
 
     if (tile.isExploding) {
-      return Lottie.asset(
-        "assets/lottie/stars.json",
-        width: tWidth * 500,
-        height: tHeight * 500,
-        fit: BoxFit.cover,
-        animate: true,
-        frameRate: const FrameRate(60),
-        delegates: LottieDelegates(
-          values: [
-            ValueDelegate.colorFilter(
-              ['**'], 
-              value: ColorFilter.mode(palette.trueWhite, BlendMode.srcATop),
-            ),
-          ],
-        ),
-      );
-    } else if (tile.isMerging) {
       return Lottie.asset(
         "assets/lottie/puff.json",
         width: tWidth * 500,
@@ -190,26 +185,48 @@ class TileGrid extends StatelessWidget {
         fit: BoxFit.cover,
         animate: true,
         frameRate: const FrameRate(60),
-         delegates: LottieDelegates(
+        delegates: LottieDelegates(
           values: [
-            ValueDelegate.colorFilter(
-              ['**'], 
-              value: ColorFilter.mode(palette.trueWhite, BlendMode.srcATop),
-            ),
+            ValueDelegate.colorFilter([
+              '**',
+            ], value: ColorFilter.mode(palette.trueWhite, BlendMode.srcATop)),
           ],
         ),
       );
+    } else if (tile.isMerging && emoji != null) {
+      return Lottie.asset(
+        emoji.lottie,
+        width: tWidth,
+        height: tHeight,
+        fit: BoxFit.fill,
+        animate: true,
+        frameRate: const FrameRate(60),
+      );
     } else {
-      return EmojiWidget.svg(path: tile.emoji.svg, size: tWidth * 0.8);
+      Widget emojiUI = EmojiWidget.svg(
+        path: tile.emoji.svg,
+        size: tWidth * 0.8,
+      );
+
+      return HintNudge(
+        isHinting: tile.isHinting,
+        current: tile.coordinate,
+        partner: tile.hintPartner,
+        tileWidth: tWidth,
+        tileHeight: tHeight,
+        child: emojiUI,
+      );
     }
   }
 
+  // 👇 Moved this INSIDE the class boundary!
   Widget _buildAnimatedTile(
     Tile tile,
     double leftPixel,
     double topPixel,
     double tWidth,
     double tHeight,
+    GameEmoji? emoji,
   ) {
     return AnimatedPositioned(
       key: ValueKey(tile.id),
@@ -221,8 +238,8 @@ class TileGrid extends StatelessWidget {
       height: tHeight,
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Center(child: _buildTileContent(tile, tWidth, tHeight)),
+        child: Center(child: _buildTileContent(tile, tWidth, tHeight, emoji)),
       ),
     );
   }
-}
+} // 👈 The TileGrid class now correctly ends HERE.

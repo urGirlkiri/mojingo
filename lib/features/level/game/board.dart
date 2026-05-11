@@ -52,10 +52,10 @@ class _GameBoardState extends State<GameBoard> {
     }
   }
 
-  void onPanStart(DragStartDetails details, BuildContext context) {
+  void onPanStart(DragStartDetails details, BuildContext contex,) {
     _log.info('Touch Detected');
     final metrics = context.read<BoardMetrics>();
-    final gameController = context.read<LevelState>().gameState.gameController;
+    final levelstate = context.read<LevelState>();
 
     if (!metrics.isReady) return;
 
@@ -65,10 +65,11 @@ class _GameBoardState extends State<GameBoard> {
     _log.info('Touch Coordinates -> row: $row, col: $col');
 
     if (row >= 0 &&
-        row < gameController.getRowCount() &&
+        row < levelstate.gameState.gameController.getRowCount() &&
         col >= 0 &&
-        col < gameController.getColCount()) {
-      _draggedTile = gameController.grid[row][col];
+        col < levelstate.gameState.gameController.getColCount()) {
+          levelstate.gameState.resetIdleTimer();
+      _draggedTile = levelstate.gameState.gameController.grid[row][col];
       _dragStartPosition = details.localPosition;
     }
   }
