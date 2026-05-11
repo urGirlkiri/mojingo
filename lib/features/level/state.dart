@@ -99,6 +99,7 @@ class LevelState extends ChangeNotifier {
     _isDisposed = true;
     _ticker?.cancel();
     _stopwatch.stop();
+    gameState.removeListener(notifyListeners);
     gameState.dispose();
     super.dispose();
   }

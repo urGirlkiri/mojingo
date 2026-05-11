@@ -14,8 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';
 
 class TileGrid extends StatelessWidget {
-  final Palette palette = Palette();
-  TileGrid({super.key});
+  const TileGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +25,7 @@ class TileGrid extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    _initialFall(levelState);
+    _initialFall(context, levelState);
 
     final double tWidth = metrics.tileWidth!;
     final double tHeight = metrics.tileHeight!;
@@ -51,6 +50,7 @@ class TileGrid extends StatelessWidget {
 
         tileWidgets.add(
           _buildAnimatedTile(
+            context,
             tile,
             leftPixel,
             topPixel,
@@ -86,42 +86,48 @@ class TileGrid extends StatelessWidget {
             ),
 
             if (widthFactor > 0.0 && widthFactor < 1.0)
-              Positioned(
-                left: edgeX - 25,
-                top: 0,
-                bottom: 0,
-                width: 30,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: palette.trueWhite,
-                    gradient: LinearGradient(
-                      colors: [
-                        palette.voidBlack,
-                        palette.trueWhite,
-                        palette.midnight,
-                      ],
-                      stops: [0.0, 0.5, 1.0],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: palette.voidBlack.withValues(alpha: .5),
-                        blurRadius: 12,
-                        spreadRadius: 2,
-                        offset: const Offset(-8, 0),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildShuffleIndicator(edgeX, context),
           ],
         );
       },
     );
   }
 
-  void _initialFall(LevelState levelState) {
+  Widget _buildShuffleIndicator(double edgeX, BuildContext context) {
+    final palette = context.read<Palette>();
+    return Positioned(
+      left: edgeX - 25,
+      top: 0,
+      bottom: 0,
+      width: 30,
+      child: Container(
+        decoration: BoxDecoration(
+          color: palette.trueWhite,
+          gradient: LinearGradient(
+            colors: [
+              palette.voidBlack,
+              palette.trueWhite,
+              palette.midnight,
+            ],
+            stops: [0.0, 0.5, 1.0],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: palette.voidBlack.withValues(alpha: .5),
+              blurRadius: 12,
+              spreadRadius: 2,
+              offset: const Offset(-8, 0),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _initialFall(BuildContext context, LevelState levelState) {
     if (levelState.gameState.gameController.grid[0][0].coordinate.row < 0) {
       Future.microtask(() {
+        if (!context.mounted) return;
         levelState.gameState.startInitialDrop();
         levelState.startLevel();
       });
@@ -142,6 +148,8 @@ class TileGrid extends StatelessWidget {
     if (shouldFly) {
       tile.hasFlown = true;
 
+      final targetKey = levelState.targetIconKey;
+
       Future.microtask(() {
         if (!context.mounted) return;
 
@@ -156,10 +164,11 @@ class TileGrid extends StatelessWidget {
 
         Future.delayed(Duration(milliseconds: randomDelay), () {
           if (!context.mounted) return;
+          if (targetKey.currentContext == null) return;
           TargetFlightAnimator.launch(
             context: context,
             startOffset: globalStart,
-            targetKey: levelState.targetIconKey,
+            targetKey: targetKey,
             emoji: tile.emoji,
           );
         });
@@ -168,6 +177,7 @@ class TileGrid extends StatelessWidget {
   }
 
   Widget _buildTileContent(
+    BuildContext context,
     Tile tile,
     double tWidth,
     double tHeight,
@@ -176,6 +186,8 @@ class TileGrid extends StatelessWidget {
     if (tile.hasFlown) {
       return const SizedBox.shrink();
     }
+
+    final palette = context.read<Palette>();
 
     if (tile.isExploding) {
       return Lottie.asset(
@@ -219,8 +231,8 @@ class TileGrid extends StatelessWidget {
     }
   }
 
-  // 👇 Moved this INSIDE the class boundary!
   Widget _buildAnimatedTile(
+    BuildContext context,
     Tile tile,
     double leftPixel,
     double topPixel,
@@ -238,8 +250,8 @@ class TileGrid extends StatelessWidget {
       height: tHeight,
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Center(child: _buildTileContent(tile, tWidth, tHeight, emoji)),
+        child: Center(child: _buildTileContent(context, tile, tWidth, tHeight, emoji)),
       ),
     );
   }
-} // 👈 The TileGrid class now correctly ends HERE.
+} 

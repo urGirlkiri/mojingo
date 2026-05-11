@@ -258,6 +258,8 @@ class GameState extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed = true;
+    _idleTimer?.cancel();
+    isProcessing = false;
     super.dispose();
   }
 }
