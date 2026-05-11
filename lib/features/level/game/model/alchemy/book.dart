@@ -73,10 +73,11 @@ class RecipeBook {
   };
 
   static Recipe? getRecipeFor(GameEmoji emoji) {
-    try {
-      return recipes.firstWhere((r) => r.ingredient == emoji);
-    } catch (e) {
-      return null;
+    for (final recipe in recipes) {
+      if (recipe.ingredient == emoji) {
+        return recipe;
+      }
     }
+    return null; 
   }
 }

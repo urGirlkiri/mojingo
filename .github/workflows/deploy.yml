@@ -1,19 +1,24 @@
-name: Deploy to GitHub Pages
+name: Deploy Web & Release Files
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*' # Triggers on version tags (e.g., v1.0.0)
 
 permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
+  build-and-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Install Linux Build Requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -23,6 +28,9 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Enable Linux Desktop
+        run: flutter config --enable-linux-desktop
+
       - name: Build Web App
         run: flutter build web --base-href "/mojingo/"
 
@@ -31,3 +39,46 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Build Linux Desktop
+        run: flutter build linux --release
+
+      - name: Package Linux into .deb
+        run: |
+          # Create Debian file structure
+          mkdir -p debian_build/usr/share/mojingo
+          cp -r build/linux/x64/release/bundle/* debian_build/usr/share/mojingo/
+
+          # Create a symlink so users can type "mojingo" in their terminal to launch it
+          mkdir -p debian_build/usr/bin
+          ln -s /usr/share/mojingo/mojingo debian_build/usr/bin/mojingo
+
+          # Strip the "v" from the GitHub tag (e.g., "v1.0.0" becomes "1.0.0")
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
+
+          # Write the Debian control file on the fly
+          mkdir -p debian_build/DEBIAN
+          cat <<EOF > debian_build/DEBIAN/control
+          Package: Grimoji
+          Version: $VERSION
+          Architecture: amd64
+          Maintainer: Kiri <games@kiri.com>
+          Description: An Emoji Match And Merge Game
+          EOF
+
+          # Compile the .deb package
+          dpkg-deb --build debian_build grimoji-linux-amd64.deb
+
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            grimoji-linux-amd64.deb
+          name: Release ${{ github.ref_name }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
