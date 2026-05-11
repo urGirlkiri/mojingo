@@ -85,8 +85,8 @@ class ConfettiPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(covariant ConfettiPainter oldDelegate) {
+    return oldDelegate.colors != colors;
   }
 }
 
@@ -95,10 +95,23 @@ class _ConfettiState extends State<Confetti>
   late AnimationController _controller;
 
   @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
+
+    if (!widget.isStopped) {
+      _controller.repeat();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: ConfettiPainter(colors: widget.colors, animation: _controller),
-      willChange: true,
+      willChange: !widget.isStopped,
       child: const SizedBox.expand(),
     );
   }
@@ -106,6 +119,7 @@ class _ConfettiState extends State<Confetti>
   @override
   void didUpdateWidget(covariant Confetti oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!mounted) return;
     if (oldWidget.isStopped && !widget.isStopped) {
       _controller.repeat();
     } else if (!oldWidget.isStopped && widget.isStopped) {
@@ -117,21 +131,6 @@ class _ConfettiState extends State<Confetti>
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      // We don't really care about the duration, since we're going to
-      // use the controller on loop anyway.
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    );
-
-    if (!widget.isStopped) {
-      _controller.repeat();
-    }
   }
 }
 
