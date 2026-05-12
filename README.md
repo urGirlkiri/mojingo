@@ -9,6 +9,18 @@
   style="max-width: 800px; max-height: 800px; object-fit: contain; border-radius: 12px;"
 />
 
+<div align="center">
+ Available on
+</div>
+
+<div align="center">
+
+[![Google Play](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=io.grimoji.game)
+[![Flathub](https://img.shields.io/badge/Flathub-4A86CF?style=for-the-badge&logo=flathub&logoColor=white)](https://flathub.org/apps/io.grimoji.game)
+[![Snap Store](https://img.shields.io/badge/Snap_Store-E95420?style=for-the-badge&logo=snapcraft&logoColor=white)](https://snapcraft.io/grimoji)
+</div>
+
+
 ## Setup
 
 ### Env Var
@@ -36,6 +48,29 @@ flutter pub get
 ```bash
 flutter analyze
 ```
+
+
+## Logging
+
+
+```dart
+import 'package:logging/logging.dart';
+
+final _log = Logger('Foo');
+
+void foo() {
+  _log.info('Hello, world!');
+}
+```
+
+This will show up in the console as:
+
+```text
+[Foo] Hello, world!
+```
+
+When using Flutter DevTools, all the metadata of the log message is preserved, 
+so you can filter by logger name, log level, and so on.
 
 ## How To Run Locally
 
@@ -115,13 +150,29 @@ chmod +x ./tools/build_deb.sh
 ```bash
 sudo dpkg -i grimoji-local.deb
 ```
-
-
 ### macOS
 
 ```bash
 flutter build macos
 ```
+
+### Flatpak
+
+Build a Flatpak package locally:
+
+```bash
+flatpak install -y flathub org.flatpak.Builder
+flatpak run --command=flatpak-builder org.flatpak.Builder --install . io.grimoji.game.yml
+```
+
+Or build without installing:
+
+```bash
+flatpak-builder --force-clean build-dir io.grimoji.game.yml
+flatpak-builder --export=repo build-dir io.grimoji.game.yml
+flatpak build-bundle repo grimoji.flatpak io.grimoji.game
+```
+
 
 ## How to Deploy
 
@@ -149,7 +200,6 @@ chmod +X ./tool/deploy.sh
 ./tool/deploy.sh v0.0.1 --replace
 ```
 
-
 ## Credits
 
 - [Animated Emoji 💖](https://googlefonts.github.io/noto-emoji-animation/) for the emoji animations and SVG icons
@@ -159,26 +209,3 @@ chmod +X ./tool/deploy.sh
 - [Gemini](https://gemini.google.com/) for the music
 
 - [Vecteezy](https://vecteezy.com/) for the background and pattern images
-
-## Logging
-
-
-
-```dart
-import 'package:logging/logging.dart';
-
-final _log = Logger('Foo');
-
-void foo() {
-  _log.info('Hello, world!');
-}
-```
-
-This will show up in the console as:
-
-```text
-[Foo] Hello, world!
-```
-
-When using Flutter DevTools, all the metadata of the log message is preserved, 
-so you can filter by logger name, log level, and so on.

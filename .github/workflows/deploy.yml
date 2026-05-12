@@ -2,7 +2,6 @@ name: Release Pipeline
 
 on:
   push:
-    branches: [main]
     tags:
       - 'v*' 
 
@@ -64,7 +63,7 @@ jobs:
           Package: grimoji
           Version: $VERSION
           Architecture: amd64
-          Maintainer: Kiri <studio@ghettocoders.com>
+          Maintainer: Kiri <support@grimoji.io>
           Description: Grimoji: Mix & Match Emojis
            Welcome to Grimoji, the ultimate gothic alchemy puzzle game!
            Step into the shoes of a magical apprentice and learn to brew, mix,
@@ -80,6 +79,7 @@ jobs:
           chmod +x appimagetool
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
           cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          
           cat <<EOF > AppDir/grimoji.desktop
           [Desktop Entry]
           Name=Grimoji
@@ -87,15 +87,18 @@ jobs:
           Exec=grimoji
           Icon=grimoji
           Type=Application
-          Categories=Game;Puzzle;
+          Categories=Game;LogicGame;
           EOF
+          
           cat <<EOF > AppDir/AppRun
           #!/bin/sh
           cd "\$(dirname "\$0")"
           exec ./usr/bin/grimoji "\$@"
           EOF
           chmod +x AppDir/AppRun
-          touch AppDir/grimoji.png 
+          
+          cp assets/icons/512x512.png AppDir/grimoji.png 
+          
           ./appimagetool --appimage-extract-and-run AppDir linux-x86_64.AppImage
 
       - name: Upload Core Files to GitHub Release
@@ -143,15 +146,68 @@ jobs:
       options: --privileged
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Run Flatpak Linter
+        run: flatpak-builder-lint manifest io.grimoji.game.yml
+        
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: linux.flatpak
-          manifest-path: io.grimoji.game.yml 
+          manifest-path: io.grimoji.game.yml
           cache-key: flatpak-builder-${{ github.sha }}
+          
       - name: Upload Flatpak to Release
         uses: softprops/action-gh-release@v2
         with:
           files: linux.flatpak
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  submit-flatpak:
+    name: Submit to Flathub
+    needs: [build-and-release, build-flatpak]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout original repo
+        uses: actions/checkout@v4
+      
+      - name: Checkout Flathub fork
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.repository.owner.login }}/flathub
+          ref: new-pr
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Copy manifest to Flathub
+        run: |
+          mkdir -p apps
+          cp io.grimoji.game.yml apps/
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: new-pr
+          branch: ${{ github.event.repository.name }}-submission-${{ github.sha }}
+          title: 'Add io.grimoji.game'
+          body: |
+            ## Flathub Submission
+            
+            This is an automated submission for Grimoji.
+            
+            ### App Info
+            - **Name**: Grimoji
+            - **ID**: io.grimoji.game
+            - **Description**: Gothic alchemy puzzle game mixing emojis
+            
+            ### Build
+            - Built from commit: ${{ github.sha }}
+            - Source: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}
+            
+            Please review and merge if suitable for Flathub.
+          commit-message: |
+            Add io.grimoji.game
+            
+            Flathub submission for Grimoji game.
+          labels: submission

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Grimoji
+Comment=Grimoji: Mix & Match Emojis - Gothic alchemy puzzle game
+GenericName=Gothic Alchemy Puzzle Game
+Exec=grimoji
+Icon=io.grimoji.game
+Type=Application
+Categories=Game;Puzzle;
+Keywords=game;puzzle;emoji;match;
+Terminal=false
+StartupNotify=true

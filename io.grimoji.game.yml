@@ -1,0 +1,41 @@
+app-id: io.grimoji.game
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: grimoji
+finish-args:
+  - --share=network
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --share=ipc
+modules:
+  - name: grimoji
+    buildsystem: flutter
+    sources:
+      - type: dir
+        path: .
+        exclude:
+          - .git
+          - build
+          - linux
+          - macos
+          - windows
+          - test
+          - .dart_tool
+          - '*.md'
+          - 'README*'
+          - 'LICENSE'
+          - 'pubspec.lock'
+          - 'debian_build'
+          - 'AppDir'
+          - '*.deb'
+          - '*.AppImage'
+          - 'snap'
+          - '.github'
+      - type: file
+        path: io.grimoji.game.desktop
+        dest: %{INSTALL_PREFIX}/share/applications/io.grimoji.game.desktop
+      - type: file
+        path: assets/icons/512x512.png
+        dest: %{INSTALL_PREFIX}/share/icons/hicolor/512x512/apps/io.grimoji.game.png
