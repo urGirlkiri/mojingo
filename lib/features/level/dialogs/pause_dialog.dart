@@ -19,6 +19,9 @@ class PauseDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
+    final screenSize = MediaQuery.sizeOf(context);
+    final isLarge = screenSize.width > 400;
+
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -50,77 +53,74 @@ class PauseDialog extends StatelessWidget {
             height: 80,
           ),
         ),
-        child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-          child: SingleChildScrollView(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              EmojiWidget.lottie(
-                path: Emojis.alienMonster.lottie,
-                useDropShadow: true,
-                size: 70,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            EmojiWidget.lottie(
+              path: Emojis.alienMonster.lottie,
+              useDropShadow: true,
+              size: isLarge?  100 : 70,
+            ),
+            Text(
+              "The Game is Paused",
+              style: GoogleFonts.eagleLake(
+                color: palette.midnight,
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 16),
-              Text(
-                "The Game is Paused",
-                style: GoogleFonts.eagleLake(
-                  color: palette.midnight,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
+              textAlign: TextAlign.center,
+            ),
               const SizedBox(height: 12),
-              Text(
-                "Take a break, then get back to it!",
-                style: GoogleFonts.eagleLake(
-                  color: palette.twilight,
-                  fontSize: 16,
+            Text(
+              "Take a break, then get back to it!",
+              style: GoogleFonts.eagleLake(
+                color: palette.twilight,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: isLarge ? 32 : 12),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                PillButton(
+                  text: "Quit",
+                  color: palette.crimson,
+                  textColor: palette.trueWhite,
+                  fullWidth: false,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  borderRadius: 20,
+                  borderColor: palette.voidBlack,
+                  borderWidth: 3,
+                  onTap: () {
+                    context.read<AudioController>().playSfx(SfxType.buttonTap);
+                    Navigator.of(context).pop();
+                    GoRouter.of(context).go('/play/lose/$level');
+                  },
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  PillButton(
-                    text: "Quit",
-                    color: palette.crimson,
-                    textColor: palette.trueWhite,
-                    fullWidth: false,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    borderRadius: 20,
-                    borderColor: palette.voidBlack,
-                    borderWidth: 3,
-                    onTap: () {
-                      context.read<AudioController>().playSfx(SfxType.buttonTap);
-                      Navigator.of(context).pop();
-                      GoRouter.of(context).go('/play/lose/$level');
-                    },
+                PillButton(
+                  text: "Resume",
+                  color: palette.twilight,
+                  textColor: palette.mist,
+                  fullWidth: false,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  borderRadius: 20,
+                  borderColor: palette.voidBlack,
+                  borderWidth: 3,
+                  onTap: () {
+                    context.read<AudioController>().playSfx(SfxType.buttonTap);
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
                   ),
-                  PillButton(
-                    text: "Resume",
-                    color: palette.twilight,
-                    textColor: palette.mist,
-                    fullWidth: false,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    borderRadius: 20,
-                    borderColor: palette.voidBlack,
-                    borderWidth: 3,
-                    onTap: () {
-                      context.read<AudioController>().playSfx(SfxType.buttonTap);
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          ),
         ),
       ),
     );

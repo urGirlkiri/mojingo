@@ -32,7 +32,7 @@ class MainMenuScreen extends StatelessWidget {
                 final maxSize = constraints.maxWidth < constraints.maxHeight
                     ? constraints.maxWidth * 0.7
                     : constraints.maxHeight * 0.6;
-                final imageSize = maxSize.clamp(150.0, 300.0);
+                final imageSize = maxSize.clamp(50.0, 150.0);
 
                 return SingleChildScrollView(
                   physics: const NeverScrollableScrollPhysics(),

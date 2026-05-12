@@ -10,6 +10,7 @@ class NeonLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
+    final screenSize = MediaQuery.sizeOf(context);
 
     final double titleFontSize = (imageSize * 0.8).clamp(32.0, 72.0);
     final double subtitleFontSize = (titleFontSize * 0.35).clamp(16.0, 28.0);
@@ -117,7 +118,7 @@ class NeonLogo extends StatelessWidget {
                 ),
               ],
             ),
-            
+            screenSize.width >= 400 ?
             Text(
               'Alchemy of Emojis',
               maxLines: 1,
@@ -136,7 +137,7 @@ class NeonLogo extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
+            ) : const SizedBox.shrink(),
           ],
         ),
       ),

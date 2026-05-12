@@ -39,13 +39,7 @@ class ScrollDialog extends StatelessWidget {
             width: dialogWidth,
             height: dialogHeight,
           ),
-          Padding(
-            padding: padding ?? EdgeInsets.symmetric(
-              horizontal: isLarge ? 50.0 : 24.0,
-              vertical: isLarge ? 40.0 : 32.0,
-            ),
-            child: SizedBox.expand(child: child),
-          ),
+          SizedBox.expand(child: child),
           if (rightButton != null)
             Positioned(
               top: isLarge ? -15 : -8,
