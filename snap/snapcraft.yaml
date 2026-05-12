@@ -19,6 +19,8 @@ description: |
   • Gothic Vibe: A beautifully dark, magical aesthetic replacing the standard bright candy themes.
   • 100% Ad-Free: A pure, uninterrupted puzzle experience.
 
+icon: assets/icons/512x512.png
+
 confinement: strict
 base: core22
 grade: stable
@@ -35,11 +37,8 @@ apps:
     extensions: [gnome]
     plugs:
     - network
-    - pulseaudio
-    - audioplayers
-    - x11
+    - audio-playback
     - opengl
-    - gtk-3
     slots:
       - dbus-grimoji
 
