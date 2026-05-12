@@ -13,6 +13,7 @@ modules:
   - name: grimoji
     buildsystem: simple
     build-commands:
+      - mkdir -p /app/bin
       - cp -r * /app/bin/
       - chmod +x /app/bin/grimoji
     sources:
@@ -22,11 +23,11 @@ modules:
   - name: metadata
     buildsystem: simple
     build-commands:
-      - install -Dm644 flatpak/io.grimoji.game.desktop /app/share/applications/io.grimoji.game.desktop
-      - install -Dm644 assets/icons/512x512.png /app/share/icons/hicolor/512x512/apps/io.grimoji.game.png
+      - install -Dm644 io.grimoji.game.desktop /app/share/applications/io.grimoji.game.desktop
+      - install -Dm644 grimoji.png /app/share/icons/hicolor/512x512/apps/io.grimoji.game.png
     sources:
       - type: file
-        path: flatpak/io.grimoji.game.desktop
+        path: io.grimoji.game.desktop
       - type: file
         path: assets/icons/512x512.png
         dest-filename: grimoji.png

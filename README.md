@@ -16,10 +16,11 @@
 <div align="center">
 
 [![Google Play](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=io.grimoji.game)
+[![Microsoft Store](https://img.shields.io/badge/Microsoft_Store-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://apps.microsoft.com/)
 [![Flathub](https://img.shields.io/badge/Flathub-4A86CF?style=for-the-badge&logo=flathub&logoColor=white)](https://flathub.org/apps/io.grimoji.game)
 [![Snap Store](https://img.shields.io/badge/Snap_Store-E95420?style=for-the-badge&logo=snapcraft&logoColor=white)](https://snapcraft.io/grimoji)
-</div>
 
+</div>
 
 ## Setup
 
