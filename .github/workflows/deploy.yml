@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-and-release:
-    name: Android, Linux, Web
+    name: Android, Releases, Web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -74,6 +74,8 @@ jobs:
         run: |
           mkdir -p debian_build/usr/share/grimoji debian_build/usr/bin debian_build/DEBIAN
           cp -r build/linux/x64/release/bundle/* debian_build/usr/share/grimoji/
+          # FIX: Rename binary from Grimoji to grimoji if needed
+          if [ -f debian_build/usr/share/grimoji/Grimoji ]; then mv debian_build/usr/share/grimoji/Grimoji debian_build/usr/share/grimoji/grimoji; fi
           ln -s /usr/share/grimoji/grimoji debian_build/usr/bin/grimoji
           VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
           cat <<EOF > debian_build/DEBIAN/control
@@ -91,6 +93,8 @@ jobs:
           chmod +x appimagetool
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
           cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          # FIX: Rename binary from Grimoji to grimoji if needed
+          if [ -f AppDir/usr/bin/Grimoji ]; then mv AppDir/usr/bin/Grimoji AppDir/usr/bin/grimoji; fi
           cat <<EOF > AppDir/grimoji.desktop
           [Desktop Entry]
           Name=Grimoji
@@ -117,7 +121,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: io.grimoji.game
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: internal
+          track: alpha
           status: completed
 
       - name: Create GitHub Release
