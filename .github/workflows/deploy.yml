@@ -136,6 +136,26 @@ jobs:
         with:
           snap: ${{ steps.snap-build.outputs.snap }}
           release: edge 
+
+  build-windows-msix:
+    name: Build Windows MSIX
+    needs: build-and-release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      - name: Build MSIX
+        run: |
+          flutter config --enable-windows-desktop
+          flutter pub get
+          flutter build windows --release
+          dart run msix:create --store
+      - name: Upload MSIX
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build\windows\x64\runner\Release\*.msix
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
   build-flatpak:
     name: Build Flatpak
