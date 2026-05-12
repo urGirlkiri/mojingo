@@ -8,8 +8,11 @@ class Palette {
 
   Color get slate => const Color(0xff8080a4);
   Color get mist => const Color(0xffa6a6bf);
-  Color get crimson => const Color(0xFFd10841);
   Color get moonlight => const Color(0xffe6e6ec);
   Color get moonlightSoft => const Color(0xeee6e6ec);
   Color get trueWhite => const Color(0xffffffff);
+
+  Color get crimson => const Color(0xFFd10841);
+  Color get magicCyan => Color(0xFFd9f8fa);
+  Color get magicCyanDeep => Color(0xFFb3edfc);
 }

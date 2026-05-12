@@ -75,7 +75,7 @@ class MainMenuScreen extends StatelessWidget {
                       vertical: 10,
                     ),
                     borderRadius: 20,
-                    borderColor: palette.mist,
+                    borderColor: palette.magicCyan.withValues(alpha: .2),
                     borderWidth: 3,
                     onTap: () {
                       audioController.playSfx(SfxType.buttonTap);
@@ -93,7 +93,7 @@ class MainMenuScreen extends StatelessWidget {
                       vertical: 10,
                     ),
                     borderRadius: 20,
-                    borderColor: palette.mist,
+                    borderColor: palette.magicCyan.withValues(alpha: .2),
                     borderWidth: 3,
                     onTap: () => GoRouter.of(context).push('/settings'),
                   ),
