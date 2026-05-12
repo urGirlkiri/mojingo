@@ -131,6 +131,7 @@ jobs:
             build/app/outputs/flutter-apk/app-release.apk
             linux-amd64.deb
             linux-x86_64.AppImage
+            build\windows\x64\runner\Release\windows.msix
           name: "Grimoji Release ${{ github.ref_name }}"
           generate_release_notes: true
         env:
@@ -156,7 +157,7 @@ jobs:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
         with:
           snap: ${{ steps.snap-build.outputs.snap }}
-          release: stable
+          release: edge
 
   build-windows:
     needs: build-and-release
@@ -172,9 +173,10 @@ jobs:
           flutter pub get
           flutter build windows --release
           dart run msix:create --store
+          ren build\windows\x64\runner\Release\*.msix windows.msix
       - uses: softprops/action-gh-release@v2
         with:
-          files: build\windows\x64\runner\Release\*.msix
+          files: build\windows\x64\runner\Release\windows.msix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
