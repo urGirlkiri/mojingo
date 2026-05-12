@@ -123,6 +123,32 @@ sudo dpkg -i grimoji-local.deb
 flutter build macos
 ```
 
+## How to Deploy
+
+### Commit and Push To Main
+
+```bash
+git push origin main
+```
+
+### Setup Script
+
+```bash
+chmod +X ./tool/deploy.sh
+```
+
+### To Release
+
+```bash
+./tool/deploy.sh v0.0.1
+```
+
+### To Update A Release
+
+```bash
+./tool/deploy.sh v0.0.1 --replace
+```
+
 
 ## Credits
 

@@ -1,9 +1,10 @@
-name: Deploy Web & Release Files
+name: Release Pipeline
 
 on:
   push:
+    branches: [main]
     tags:
-      - 'v*' # Triggers on version tags (e.g., v1.0.0)
+      - 'v*' 
 
 permissions:
   contents: write
@@ -36,11 +37,8 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Enable Linux Desktop
-        run: flutter config --enable-linux-desktop
-
       - name: Build Web App
-        run: flutter build web --base-href "/mojingo/"
+        run: flutter build web --base-href "/grimoji/"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -51,42 +49,109 @@ jobs:
       - name: Build Android APK
         run: flutter build apk --release
 
-      - name: Build Linux Desktop
-        run: flutter build linux --release
-
-      - name: Package Linux into .deb
+      - name: Enable & Build Linux Desktop
         run: |
-          # Create Debian file structure
-          mkdir -p debian_build/usr/share/grimoji
+          flutter config --enable-linux-desktop
+          flutter build linux --release
+
+      - name: Package .Deb
+        run: |
+          mkdir -p debian_build/usr/share/grimoji debian_build/usr/bin debian_build/DEBIAN
           cp -r build/linux/x64/release/bundle/* debian_build/usr/share/grimoji/
-
-          # Create a symlink so users can type "grimoji" in their terminal to launch it
-          mkdir -p debian_build/usr/bin
           ln -s /usr/share/grimoji/grimoji debian_build/usr/bin/grimoji
-
-          # Strip the "v" from the GitHub tag (e.g., "v1.0.0" becomes "1.0.0")
           VERSION=$(echo ${{ github.ref_name }} | sed 's/^v//')
-
-          # Write the Debian control file on the fly
-          mkdir -p debian_build/DEBIAN
           cat <<EOF > debian_build/DEBIAN/control
-          Package: Grimoji
+          Package: grimoji
           Version: $VERSION
           Architecture: amd64
-          Maintainer: Kiri <games@kiri.com>
-          Description:  A gothic alchemy game for mixing and collecting emojis.
+          Maintainer: Kiri <studio@ghettocoders.com>
+          Description: Grimoji: Mix & Match Emojis
+           Welcome to Grimoji, the ultimate gothic alchemy puzzle game!
+           Step into the shoes of a magical apprentice and learn to brew, mix,
+           and transmute your favorite emojis. Grimoji takes the grid-sliding
+           mechanics of 2048 and collides them with the explosive chain reactions
+           of classic match-3 games.
           EOF
-
-          # Compile the .deb package
           dpkg-deb --build debian_build linux-amd64.deb
 
-      - name: Upload to GitHub Releases
+      - name: Package AppImage
+        run: |
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool
+          mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          cat <<EOF > AppDir/grimoji.desktop
+          [Desktop Entry]
+          Name=Grimoji
+          Comment=Grimoji: Mix & Match Emojis - Gothic alchemy puzzle game
+          Exec=grimoji
+          Icon=grimoji
+          Type=Application
+          Categories=Game;Puzzle;
+          EOF
+          cat <<EOF > AppDir/AppRun
+          #!/bin/sh
+          cd "\$(dirname "\$0")"
+          exec ./usr/bin/grimoji "\$@"
+          EOF
+          chmod +x AppDir/AppRun
+          touch AppDir/grimoji.png 
+          ./appimagetool --appimage-extract-and-run AppDir linux-x86_64.AppImage
+
+      - name: Upload Core Files to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             build/app/outputs/flutter-apk/app-release.apk
             linux-amd64.deb
-          name: Release ${{ github.ref_name }}
+            linux-x86_64.AppImage
+          name: Grimoji Release ${{ github.ref_name }}
           generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-snap:
+    name: Build Snap Package
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Build Snap
+        uses: snapcore/action-build@v1
+        id: snap-build
+
+      - name: Publish Snap
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+        with:
+          snap: ${{ steps.snap-build.outputs.snap }}
+          release: edge 
+    
+  build-flatpak:
+    name: Build Flatpak
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-23.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: linux.flatpak
+          manifest-path: io.grimoji.game.yml 
+          cache-key: flatpak-builder-${{ github.sha }}
+      - name: Upload Flatpak to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: linux.flatpak
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

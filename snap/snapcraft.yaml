@@ -1,0 +1,45 @@
+name: grimoji
+version: 0.0.1
+summary: 'Grimoji: Mix & Match Emojis'
+description: |
+  Welcome to Grimoji, the ultimate gothic alchemy puzzle game!
+  
+  Step into the shoes of a magical apprentice and learn to brew, mix, and transmute your favorite emojis. Grimoji takes the grid-sliding mechanics of 2048 and collides them with the explosive chain reactions of classic match-3 games.
+  
+  🧪 THE ALCHEMY OF EMOJIS
+  Every level gives you a specific target emoji to craft before the timer runs out. You'll need to learn the secret recipes to succeed. Swipe identical ingredients together to merge them into something entirely new!
+  
+  💥 VOLATILE REACTIONS
+  Not all emojis merge peacefully! Some combinations are highly volatile. Match fire or bomb emojis to trigger massive area-of-effect (AOE) explosions that clear the board—but be careful! Explosions can transmute nearby items, turning your hard-earned gems back into rocks.
+  
+  🎮 GAME FEATURES:
+  • Unique Core Loop: A brand new puzzle hybrid combining swipe-to-merge and match-3 mechanics.
+  • Hundreds of Discoveries: Over 800+ animated emojis to unlock, transmute, and collect.
+  • Strategic Gameplay: Manage the board carefully. Plan your swipes to avoid cascading explosions and dead ends.
+  • Gothic Vibe: A beautifully dark, magical aesthetic replacing the standard bright candy themes.
+  • 100% Ad-Free: A pure, uninterrupted puzzle experience.
+
+confinement: strict
+base: core22
+grade: stable
+
+slots:
+  dbus-grimoji:
+    interface: dbus
+    bus: session
+    name: io.grimoji.game 
+
+apps:
+  grimoji:
+    command: grimoji
+    extensions: [gnome]
+    plugs:
+    - network
+    slots:
+      - dbus-grimoji
+
+parts:
+  grimoji:
+    source: .
+    plugin: flutter
+    flutter-target: lib/main.dart
