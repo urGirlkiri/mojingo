@@ -37,6 +37,7 @@ dev_dependencies:
   flutter_native_splash: ^2.4.7
   path: ^1.9.1
   http: ^1.6.0
+  msix: ^3.16.13
 
 flutter:
   uses-material-design: true

@@ -136,6 +136,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Upload Linux Bundle for Flatpak
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-bundle
+          path: build/linux/x64/release/bundle/
+
   build-snap:
     needs: build-and-release
     runs-on: ubuntu-latest
@@ -181,6 +187,13 @@ jobs:
       options: --privileged
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Download Linux Bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-bundle
+          path: build/linux/x64/release/bundle/
+          
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
