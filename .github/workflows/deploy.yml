@@ -192,7 +192,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: linux-bundle
-          path: build/linux/x64/release/bundle/
+          path: flatpak/build/linux/x64/release/bundle/
           
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6

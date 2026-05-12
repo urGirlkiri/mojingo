@@ -57,6 +57,8 @@ parts:
       - liblzma-dev
       - libgstreamer1.0-dev
       - libgstreamer-plugins-base1.0-dev
+      - binutils
+      - lld
     stage-packages:
       - libgstreamer1.0-0
       - libgstreamer-plugins-base1.0-0
