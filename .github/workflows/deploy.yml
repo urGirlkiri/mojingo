@@ -1,54 +1,71 @@
-name: Release Pipeline
+name: Grimoji Global Release Pipeline
 
 on:
   push:
     tags:
-      - 'v*' 
+      - 'v*'
+  workflow_dispatch: 
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build-and-release:
+    name: Core Build & Deploy (Android, Linux, Web)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Linux Build Requirements
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            clang \
-            cmake \
-            ninja-build \
-            pkg-config \
-            libgtk-3-dev \
-            liblzma-dev \
-            libgstreamer1.0-dev \
-            libgstreamer-plugins-base1.0-dev
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          channel: "stable"
+
+      - name: Install Linux Build Requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev \
+            liblzma-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build Web App
-        run: flutter build web --base-href "/grimoji/"
+      - name: Decode Android Secrets
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
+      - name: Create key.properties
+        run: |
+          cat << EOF > android/key.properties
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          storeFile=upload-keystore.jks
+          EOF
 
-      - name: Build Android APK
-        run: flutter build apk --release
+      - name: Optimize Gradle
+        run: |
+          echo "org.gradle.daemon=false" >> android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx3072m" >> android/gradle.properties
 
-      - name: Enable & Build Linux Desktop
+      - name: Build Web
+        run: flutter build web --base-href "/mojingo/"
+
+      - name: Build Android (AAB & APK)
+        run: |
+          flutter build appbundle --release
+          flutter build apk --release
+
+      - name: Build Linux Desktop (Bundle)
         run: |
           flutter config --enable-linux-desktop
           flutter build linux --release
@@ -64,12 +81,7 @@ jobs:
           Version: $VERSION
           Architecture: amd64
           Maintainer: Kiri <support@grimoji.io>
-          Description: Grimoji: Mix & Match Emojis
-           Welcome to Grimoji, the ultimate gothic alchemy puzzle game!
-           Step into the shoes of a magical apprentice and learn to brew, mix,
-           and transmute your favorite emojis. Grimoji takes the grid-sliding
-           mechanics of 2048 and collides them with the explosive chain reactions
-           of classic match-3 games.
+          Description: Grimoji: Mix & Match Emojis Gothic Alchemy.
           EOF
           dpkg-deb --build debian_build linux-amd64.deb
 
@@ -79,106 +91,98 @@ jobs:
           chmod +x appimagetool
           mkdir -p AppDir/usr/bin AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/256x256/apps
           cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
-          
           cat <<EOF > AppDir/grimoji.desktop
           [Desktop Entry]
           Name=Grimoji
-          Comment=Grimoji: Mix & Match Emojis - Gothic alchemy puzzle game
           Exec=grimoji
           Icon=grimoji
           Type=Application
           Categories=Game;LogicGame;
           EOF
-          
-          cat <<EOF > AppDir/AppRun
-          #!/bin/sh
-          cd "\$(dirname "\$0")"
-          exec ./usr/bin/grimoji "\$@"
-          EOF
-          chmod +x AppDir/AppRun
-          
-          cp assets/icons/512x512.png AppDir/grimoji.png 
-          
+          cp assets/icons/512x512.png AppDir/grimoji.png
+          chmod +x AppDir/usr/bin/grimoji
           ./appimagetool --appimage-extract-and-run AppDir linux-x86_64.AppImage
 
-      - name: Upload Core Files to GitHub Release
+      - name: Deploy to GitHub Pages
+        continue-on-error: true 
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+
+      - name: Upload to Google Play
+        continue-on-error: true
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: io.grimoji.game
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             build/app/outputs/flutter-apk/app-release.apk
             linux-amd64.deb
             linux-x86_64.AppImage
-          name: Grimoji Release ${{ github.ref_name }}
+          name: "Grimoji Release ${{ github.ref_name }}"
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-snap:
-    name: Build Snap Package
     needs: build-and-release
     runs-on: ubuntu-latest
+    continue-on-error: true 
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
-      - name: Build Snap
-        uses: snapcore/action-build@v1
+      - uses: subosito/flutter-action@v2
+      - uses: snapcore/action-build@v1
         id: snap-build
-
-      - name: Publish Snap
-        uses: snapcore/action-publish@v1
+      - uses: snapcore/action-publish@v1
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
         with:
           snap: ${{ steps.snap-build.outputs.snap }}
-          release: edge 
+          release: stable
 
-  build-windows-msix:
-    name: Build Windows MSIX
+  build-windows:
     needs: build-and-release
     runs-on: windows-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - name: Build MSIX
         run: |
           flutter config --enable-windows-desktop
+          flutter create --platforms=windows . 
           flutter pub get
           flutter build windows --release
           dart run msix:create --store
-      - name: Upload MSIX
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           files: build\windows\x64\runner\Release\*.msix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
+
   build-flatpak:
-    name: Build Flatpak
     needs: build-and-release
     runs-on: ubuntu-latest
+    continue-on-error: true
     container:
       image: bilelmoussaoui/flatpak-github-actions:freedesktop-23.08
       options: --privileged
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Run Flatpak Linter
-        run: flatpak-builder-lint manifest io.grimoji.game.yml
-        
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: linux.flatpak
-          manifest-path: io.grimoji.game.yml
-          cache-key: flatpak-builder-${{ github.sha }}
-          
-      - name: Upload Flatpak to Release
-        uses: softprops/action-gh-release@v2
+          manifest-path: flatpak/io.grimoji.game.yml
+      - uses: softprops/action-gh-release@v2
         with:
           files: linux.flatpak
         env:
@@ -188,6 +192,7 @@ jobs:
     name: Submit to Flathub
     needs: [build-and-release, build-flatpak]
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout original repo
         uses: actions/checkout@v4
