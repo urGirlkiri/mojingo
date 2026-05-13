@@ -14,7 +14,56 @@ import 'package:provider/provider.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';
 
 class TileGrid extends StatelessWidget {
+  static const movementDuration = Duration(milliseconds: 800);
+  static const shuffleDuration = Duration(milliseconds: 600);
+
   const TileGrid({super.key});
+
+  void _initialFall(BuildContext context, LevelState levelState) {
+    if (levelState.gameState.gameController.grid[0][0].coordinate.row < 0) {
+      Future.microtask(() {
+        if (!context.mounted) return;
+        levelState.gameState.startInitialDrop();
+        levelState.startLevel();
+      });
+    }
+  }
+
+  void _launchTargetEmo(
+    BuildContext context,
+    Tile tile,
+    LevelState levelState,
+    double leftPixel,
+    double topPixel,
+  ) {
+    tile.hasFlown = true;
+
+    final targetKey = levelState.targetIconKey;
+
+    Future.microtask(() {
+      if (!context.mounted) return;
+
+      final RenderBox? boardBox = context.findRenderObject() as RenderBox?;
+      if (boardBox == null) return;
+
+      final Offset globalStart = boardBox.localToGlobal(
+        Offset(leftPixel, topPixel),
+      );
+
+      final int randomDelay = Random().nextInt(200);
+
+      Future.delayed(Duration(milliseconds: randomDelay), () {
+        if (!context.mounted) return;
+        if (targetKey.currentContext == null) return;
+        TargetFlightAnimator.launch(
+          context: context,
+          startOffset: globalStart,
+          targetKey: targetKey,
+          emoji: tile.emoji,
+        );
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +95,12 @@ class TileGrid extends StatelessWidget {
             (tile.coordinate.row * tHeight) +
             (tile.coordinate.row * tileSpacingGap);
 
-        _launchTargetEmo(context, tile, levelState, leftPixel, topPixel);
+        bool isTargetMatch = (tile.emoji == levelState.level.targetEmoji);
+        bool shouldFly = tile.isFlying && !tile.hasFlown && isTargetMatch;
+
+        shouldFly
+            ? _launchTargetEmo(context, tile, levelState, leftPixel, topPixel)
+            : null;
 
         tileWidgets.add(
           _buildAnimatedTile(
@@ -67,7 +121,7 @@ class TileGrid extends StatelessWidget {
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 1.0, end: targetWidth),
-      duration: const Duration(milliseconds: 600),
+      duration: shuffleDuration,
       curve: Curves.easeInOutCubic,
       builder: (context, widthFactor, child) {
         final double edgeX = boardWidth * widthFactor;
@@ -104,11 +158,7 @@ class TileGrid extends StatelessWidget {
         decoration: BoxDecoration(
           color: palette.trueWhite,
           gradient: LinearGradient(
-            colors: [
-              palette.voidBlack,
-              palette.trueWhite,
-              palette.midnight,
-            ],
+            colors: [palette.voidBlack, palette.trueWhite, palette.midnight],
             stops: [0.0, 0.5, 1.0],
           ),
           boxShadow: [
@@ -122,58 +172,6 @@ class TileGrid extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _initialFall(BuildContext context, LevelState levelState) {
-    if (levelState.gameState.gameController.grid[0][0].coordinate.row < 0) {
-      Future.microtask(() {
-        if (!context.mounted) return;
-        levelState.gameState.startInitialDrop();
-        levelState.startLevel();
-      });
-    }
-  }
-
-  void _launchTargetEmo(
-    BuildContext context,
-    Tile tile,
-    LevelState levelState,
-    double leftPixel,
-    double topPixel,
-  ) {
-    bool isTargetMatch = (tile.emoji == levelState.level.targetEmoji);
-
-    bool shouldFly = tile.isFlying && !tile.hasFlown && isTargetMatch;
-
-    if (shouldFly) {
-      tile.hasFlown = true;
-
-      final targetKey = levelState.targetIconKey;
-
-      Future.microtask(() {
-        if (!context.mounted) return;
-
-        final RenderBox? boardBox = context.findRenderObject() as RenderBox?;
-        if (boardBox == null) return;
-
-        final Offset globalStart = boardBox.localToGlobal(
-          Offset(leftPixel, topPixel),
-        );
-
-        final int randomDelay = Random().nextInt(200);
-
-        Future.delayed(Duration(milliseconds: randomDelay), () {
-          if (!context.mounted) return;
-          if (targetKey.currentContext == null) return;
-          TargetFlightAnimator.launch(
-            context: context,
-            startOffset: globalStart,
-            targetKey: targetKey,
-            emoji: tile.emoji,
-          );
-        });
-      });
-    }
   }
 
   Widget _buildTileContent(
@@ -220,7 +218,7 @@ class TileGrid extends StatelessWidget {
         size: tWidth * 0.8,
       );
 
-      return HintSwipeNudge(
+      return HintNudge(
         isHinting: tile.isHinting,
         current: tile.coordinate,
         partner: tile.hintPartner,
@@ -242,7 +240,7 @@ class TileGrid extends StatelessWidget {
   ) {
     return AnimatedPositioned(
       key: ValueKey(tile.id),
-      duration: const Duration(milliseconds: 800),
+      duration: movementDuration,
       curve: Curves.easeOutCubic,
       left: leftPixel + (tile.isExploding || tile.isMerging ? -20 : 0),
       top: topPixel,
@@ -250,8 +248,10 @@ class TileGrid extends StatelessWidget {
       height: tHeight,
       child: Padding(
         padding: const EdgeInsets.all(4.0),
-        child: Center(child: _buildTileContent(context, tile, tWidth, tHeight, emoji)),
+        child: Center(
+          child: _buildTileContent(context, tile, tWidth, tHeight, emoji),
+        ),
       ),
     );
   }
-} 
+}
