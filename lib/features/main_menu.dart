@@ -30,33 +30,26 @@ class MainMenuScreen extends StatelessWidget {
             squarishMainArea: LayoutBuilder(
               builder: (context, constraints) {
                 final maxSize = constraints.maxWidth < constraints.maxHeight
-                    ? constraints.maxWidth * 0.7
-                    : constraints.maxHeight * 0.6;
-                final imageSize = maxSize.clamp(50.0, 150.0);
+                    ? constraints.maxWidth * 0.65
+                    : constraints.maxHeight * 0.5;
+                final imageSize = maxSize.clamp(100.0, 512.0);
 
-                return SingleChildScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: SizedBox(
-                    height: constraints.maxHeight,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(height: imageSize * 0.1),
-                            Image.asset(
-                              'assets/icons/512x512.png',
-                              fit: BoxFit.contain,
-                              width: imageSize,
-                              height: imageSize * 1.1,
-                            ),
-                            const SizedBox(height: 16),
-                            NeonLogo(imageSize: imageSize),
-                          ],
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min, 
+                    children: [
+                      Flexible(
+                        child: Image.asset(
+                          'assets/icons/512x512.png',
+                          fit: BoxFit.contain,
+                          width: imageSize,
+                          height: imageSize,
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 16),
+                      NeonLogo(imageSize: imageSize),
+                    ],
                   ),
                 );
               },

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:grimoji/config/audio/audio_controller.dart';
 import 'package:grimoji/config/audio/sounds.dart';
 import 'package:grimoji/config/emojis.dart';
@@ -40,8 +39,8 @@ class LevelFailDialog extends StatelessWidget {
                 height: 80,
               ),
             ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -55,12 +54,13 @@ class LevelFailDialog extends StatelessWidget {
                   Text(
                     'The mixture exploded!',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.eagleLake(
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: palette.twilight,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 30),
-
+              
                   PillButton(
                     text: 'Retry Level $level',
                     color: palette.crimson,
