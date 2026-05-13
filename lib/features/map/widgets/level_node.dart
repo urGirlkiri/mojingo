@@ -40,21 +40,17 @@ class LevelNode extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(100),
       onTap: () => _showLevelDialog(context),
-      child: SizedBox(
-        width: 100,
-        height: 100,
+      child: SizedBox.square(
+        dimension: nodeSize,
         child: Stack(
           alignment: Alignment.center,
           children: [
             Image.asset(
               imagePath,
               fit: BoxFit.contain,
-              width: nodeSize,
-              height: nodeSize,
             ),
-            Positioned(
-              top: stars > 0 ? (isLarge ? 18 : 30) : null,
-
+            Transform.translate(
+              offset: Offset(0, stars > 0 ? -2 : 0),
               child: Text(
                 level.number.toString(),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(

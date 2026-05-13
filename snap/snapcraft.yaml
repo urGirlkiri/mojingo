@@ -19,14 +19,7 @@ description: |
   • Gothic Vibe: A beautifully dark, magical aesthetic replacing the standard bright candy themes.
   • 100% Ad-Free: A pure, uninterrupted puzzle experience.
 
-icon: snap/gui/grimoji.png 
-
-screenshots:
-  - snap/gui/screenshots/screen1.png
-  - snap/gui/screenshots/screen2.png
-  - snap/gui/screenshots/screen3.png
-  - snap/gui/screenshots/screen4.png
-  - snap/gui/screenshots/screen5.png
+icon: snap/gui/grimoji.png
 
 confinement: strict
 base: core22
@@ -35,7 +28,7 @@ grade: stable
 apps:
   grimoji:
     command: grimoji
-    desktop: snap/gui/grimoji.desktop 
+    desktop: snap/gui/grimoji.desktop
     extensions: [gnome]
     plugs:
     - network
@@ -62,3 +55,5 @@ parts:
     stage-packages:
       - libgstreamer1.0-0
       - libgstreamer-plugins-base1.0-0
+    organize:
+      snap/gui/grimoji.metainfo.xml: meta/gui/grimoji.metainfo.xml

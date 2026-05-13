@@ -2,8 +2,6 @@ app-id: io.grimoji.game
 runtime: org.freedesktop.Platform
 runtime-version: '24.08' 
 sdk: org.freedesktop.Sdk
-sdk-extensions:
-  - org.freedesktop.Sdk.Extension.flutter
 command: grimoji
 finish-args:
   - --share=network
@@ -16,11 +14,11 @@ modules:
     buildsystem: simple
     build-commands:
       - mkdir -p /app/bin
-      - cp -r * /app/bin/
+      - cp -r ./* /app/bin/
       - chmod +x /app/bin/grimoji
     sources:
       - type: dir
-        path: flatpak/build/linux/x64/release/bundle/
+        path: app-dir
   
   - name: metadata
     buildsystem: simple

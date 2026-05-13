@@ -166,6 +166,28 @@ jobs:
           Type=Application
           Categories=Game;Puzzle;
           EOF
+
+          # Create the Metainfo file
+          cat <<EOF > snap/gui/grimoji.metainfo.xml
+          <?xml version="1.0" encoding="UTF-8"?>
+          <component type="desktop-application">
+            <id>io.grimoji.game</id>
+            <name>Grimoji</name>
+            <summary>Mix &amp; Match Emojis</summary>
+            <description>
+              <p>The ultimate gothic alchemy puzzle game.</p>
+            </description>
+            <screenshots>
+              <screenshot type="default">
+                <image>https://raw.githubusercontent.com/urGirlkiri/mojingo/main/assets/screenshots/screen1.png</image>
+                <image>https://raw.githubusercontent.com/urGirlkiri/mojingo/main/assets/screenshots/screen2.png</image>
+                <image>https://raw.githubusercontent.com/urGirlkiri/mojingo/main/assets/screenshots/screen3.png</image>
+                <image>https://raw.githubusercontent.com/urGirlkiri/mojingo/main/assets/screenshots/screen4.png</image>
+                <image>https://raw.githubusercontent.com/urGirlkiri/mojingo/main/assets/screenshots/screen5.png</image>
+              </screenshot>
+            </screenshots>
+          </component>
+          EOF
       - uses: subosito/flutter-action@v2
       - uses: snapcore/action-build@v1
         id: snap-build
@@ -211,7 +233,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: linux-bundle
-          path: flatpak/build/linux/x64/release/bundle/
+          path: flatpak/app-dir/
       
       - name: Copy Icon File
         run: cp assets/icons/512x512.png flatpak/grimoji.png
