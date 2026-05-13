@@ -149,6 +149,23 @@ jobs:
     continue-on-error: true 
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare Snap Metadata
+        run: |
+          mkdir -p snap/gui
+          # Copy your existing icon to the place Snapcraft expects it
+          cp assets/icons/512x512.png snap/gui/grimoji.png
+          
+          # Create the .desktop file on the fly
+          cat <<EOF > snap/gui/grimoji.desktop
+          [Desktop Entry]
+          Name=Grimoji
+          Comment=Gothic alchemy puzzle game
+          Exec=grimoji
+          Icon=\${SNAP}/meta/gui/grimoji.png
+          Terminal=false
+          Type=Application
+          Categories=Game;Puzzle;
+          EOF
       - uses: subosito/flutter-action@v2
       - uses: snapcore/action-build@v1
         id: snap-build
