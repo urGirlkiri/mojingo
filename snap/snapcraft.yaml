@@ -19,17 +19,11 @@ description: |
   • Gothic Vibe: A beautifully dark, magical aesthetic replacing the standard bright candy themes.
   • 100% Ad-Free: A pure, uninterrupted puzzle experience.
 
-icon: assets/icons/512x512.png
+icon: ../assets/icons/512x512.png
 
 confinement: strict
 base: core22
 grade: stable
-
-slots:
-  dbus-grimoji:
-    interface: dbus
-    bus: session
-    name: io.grimoji.game 
 
 apps:
   grimoji:
@@ -39,8 +33,6 @@ apps:
     - network
     - audio-playback
     - opengl
-    slots:
-      - dbus-grimoji
 
 parts:
   grimoji:
