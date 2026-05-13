@@ -1,16 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2026 Ghetto Coders / Kiri -->
 <component type="desktop-application">
   <id>io.grimoji.game</id>
   <name>Grimoji</name>
-  <summary>Gothic alchemy puzzle game</summary>
+  <summary>Mix &amp; Match Emojis</summary>
+  <metadata_license>FSFAP</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="io.grimoji">
+    <name>Ghetto Coders / Kiri</name>
+  </developer>
   <description>
     <p>Step into the shoes of a magical apprentice and learn to brew, mix, and transmute emojis.</p>
+    <p>The ultimate gothic alchemy puzzle game combining swipe-to-merge and match-3 mechanics.</p>
+    <ul>
+      <li>Unique core loop: A brand new puzzle hybrid</li>
+      <li>Over 800+ animated emojis to unlock, transmute, and collect</li>
+      <li>Strategic gameplay: Manage the board carefully</li>
+      <li>100% Ad-Free: A pure, uninterrupted puzzle experience</li>
+    </ul>
   </description>
   <launchable type="desktop-id">io.grimoji.game.desktop</launchable>
+  <url type="homepage">https://grimoji.io</url>
+  <url type="vcs-browser">https://github.com/urGirlkiri/mojingo</url>
   <screenshots>
     <screenshot type="default">
-      <caption>Gameplay combining merge and match-3 mechanics.</caption>
       <image>https://raw.githubusercontent.com/urGirlkiri/mojingo/main/assets/screenshots/screen1.png</image>
+      <caption>Gameplay combining merge and match-3 mechanics.</caption>
     </screenshot>
   </screenshots>
+  <releases>
+    <release version="0.0.2" date="2026-05-13">
+      <description>
+        <p>Initial release with core gameplay mechanics.</p>
+      </description>
+    </release>
+  </releases>
 </component>
