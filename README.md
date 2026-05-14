@@ -50,6 +50,12 @@ flutter pub get
 flutter analyze
 ```
 
+### Run Tests
+
+```bash
+flutter test
+```
+
 
 ## Logging
 
