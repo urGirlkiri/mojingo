@@ -110,15 +110,22 @@ void main() {
 
     group('Hints', () {
       test('getHintMove should find a valid swap that creates a match', () {
+        final safeEmojis = [Emojis.rock, Emojis.droplet, Emojis.alien, Emojis.bug];
+        for (int r = 0; r < GridManager.rows; r++) {
+          for (int c = 0; c < GridManager.cols; c++) {
+            int colorIndex = (r + c + (r % 2)) % safeEmojis.length;
+            gridManager.gridTiles[r][c].emoji = safeEmojis[colorIndex];
+          }
+        }
+
         gridManager.gridTiles[0][0].emoji = Emojis.fire;
         gridManager.gridTiles[0][1].emoji = Emojis.fire;
         gridManager.gridTiles[0][2].emoji = Emojis.rock;
         gridManager.gridTiles[0][3].emoji = Emojis.fire;
         gridManager.gridTiles[0][4].emoji = Emojis.droplet;
         
-        gridManager.gridTiles[1][0].emoji = Emojis.droplet;
-        gridManager.gridTiles[1][1].emoji = Emojis.droplet;
-        gridManager.gridTiles[1][3].emoji = Emojis.droplet;
+        gridManager.gridTiles[1][2].emoji = Emojis.droplet;
+        gridManager.gridTiles[2][2].emoji = Emojis.alien;
 
         final hint = gridManager.getHintMove();
 
