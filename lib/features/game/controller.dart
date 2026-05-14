@@ -1,8 +1,11 @@
 import 'dart:math';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
-import 'package:grimoji/features/alchemy/book.dart';
-import 'package:grimoji/features/alchemy/recipe_type.dart';
+import 'package:grimoji/features/alchemy/behaviors/behavior.dart';
+import 'package:grimoji/features/alchemy/behavior_register.dart';
+import 'package:grimoji/features/alchemy/reactions/reaction.dart';
+import 'package:grimoji/features/alchemy/recipe_book.dart';
+import 'package:grimoji/features/alchemy/recipes/recipe.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/state.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';
@@ -41,9 +44,17 @@ class GameController {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
         grid[r][c].emoji = _getRandomSafeEmoji(r, c);
+        _initializeBehavior(grid[r][c]);
       }
     }
     _log.info('Game Grid Initialized');
+  }
+
+  void _initializeBehavior(Tile tile) {
+    final behavior = BehaviorRegister.getBehaviorFor(tile.emoji);
+    if (behavior != null) {
+      tile.behavior = behavior;
+    }
   }
 
   bool hasPossibleMoves() {
@@ -51,7 +62,8 @@ class GameController {
       for (int c = 0; c < cols; c++) {
         if (c < cols - 1) {
           _simulateSwap(r, c, r, c + 1);
-          bool hasMatch = MatchDetector.hasMatchAt(grid, r, c) ||
+          bool hasMatch =
+              MatchDetector.hasMatchAt(grid, r, c) ||
               MatchDetector.hasMatchAt(grid, r, c + 1);
           _simulateSwap(r, c, r, c + 1);
           if (hasMatch) return true;
@@ -59,7 +71,8 @@ class GameController {
 
         if (r < rows - 1) {
           _simulateSwap(r, c, r + 1, c);
-          bool hasMatch = MatchDetector.hasMatchAt(grid, r, c) ||
+          bool hasMatch =
+              MatchDetector.hasMatchAt(grid, r, c) ||
               MatchDetector.hasMatchAt(grid, r + 1, c);
           _simulateSwap(r, c, r + 1, c);
           if (hasMatch) return true;
@@ -126,6 +139,10 @@ class GameController {
     }
 
     groupedMatches.forEach((emoji, coords) {
+      for (var coord in coords) {
+        processMatchedBehavior(grid[coord.row][coord.col], coord.row, coord.col);
+      }
+      
       state.resolveEmoji(emoji, coords.length);
       Recipe? recipe = RecipeBook.getRecipeFor(emoji);
 
@@ -134,7 +151,7 @@ class GameController {
           recipe.yields != null) {
         _executeMerge(recipe, coords, state, tilesToDestroy, mergePoint);
       } else if (recipe != null && recipe.type == RecipeType.volatile) {
-        _executClear(coords, tilesToDestroy, transmutedTiles);
+        _executClear(coords, tilesToDestroy, transmutedTiles, recipe.blastType);
       } else {
         tilesToDestroy.addAll(coords);
       }
@@ -168,19 +185,27 @@ class GameController {
     Set<TileCoordinate> coords,
     Set<TileCoordinate> tilesToDestroy,
     Set<TileCoordinate> transmutedTiles,
+    ReactionType? blastType,
   ) {
-    _log.info('DETONATED!');
+    final reactionType = blastType ?? ReactionType.explosive;
+    _log.info('$reactionType DETONATED!');
     tilesToDestroy.addAll(coords);
 
-    for (var bombCoord in coords) {
-      for (int r = bombCoord.row - 1; r <= bombCoord.row + 1; r++) {
-        for (int c = bombCoord.col - 1; c <= bombCoord.col + 1; c++) {
+    final reactions = RecipeBook.getReactionsForType(reactionType);
+
+    for (var centerCoord in coords) {
+      for (int r = centerCoord.row - 1; r <= centerCoord.row + 1; r++) {
+        for (int c = centerCoord.col - 1; c <= centerCoord.col + 1; c++) {
           if (r >= 0 && r < rows && c >= 0 && c < cols) {
             Tile targetTile = grid[r][c];
             TileCoordinate targetCoord = TileCoordinate(row: r, col: c);
 
-            if (RecipeBook.transmutations.containsKey(targetTile.emoji)) {
-              targetTile.emoji = RecipeBook.transmutations[targetTile.emoji]!;
+            processBlastBehavior(targetTile, r, c, reactionType);
+
+            GameEmoji? resultingEmoji = reactions[targetTile.emoji];
+
+            if (resultingEmoji != null) {
+              targetTile.emoji = resultingEmoji;
               targetTile.reset();
               transmutedTiles.add(targetCoord);
             } else if (!coords.contains(targetCoord)) {
@@ -258,11 +283,13 @@ class GameController {
       if (destroyedCount == 0) continue;
 
       List<Tile> skyTiles = List.generate(destroyedCount, (i) {
-        return Tile(
+        final tile = Tile(
           coordinate: TileCoordinate(row: -destroyedCount + i, col: c),
           emoji: level
               .availableEmojis[_random.nextInt(level.availableEmojis.length)],
         );
+        _initializeBehavior(tile);
+        return tile;
       });
 
       List<Tile> newColumn = [...skyTiles, ...remainingTiles];
@@ -300,5 +327,104 @@ class GameController {
       }
     }
     return candidate;
+  }
+
+  ({int x, int y})? _findAdjacentEmptyTile(int centerX, int centerY) {
+    final List<({int x, int y})> candidates = [];
+    
+    for (final (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)]) {
+      final nx = centerX + dx;
+      final ny = centerY + dy;
+      
+      if (nx >= 0 && nx < rows && ny >= 0 && ny < cols) {
+        if (grid[nx][ny].emoji.visual.isEmpty) {
+          candidates.add((x: nx, y: ny));
+        }
+      }
+    }
+    
+    if (candidates.isEmpty) return null;
+    return candidates[_random.nextInt(candidates.length)];
+  }
+
+  ({int x, int y})? _findAdjacentFilledTile(int centerX, int centerY) {
+    final List<({int x, int y})> candidates = [];
+    
+    for (final (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)]) {
+      final nx = centerX + dx;
+      final ny = centerY + dy;
+      
+      if (nx >= 0 && nx < rows && ny >= 0 && ny < cols) {
+        if (grid[nx][ny].emoji.visual.isNotEmpty) {
+          candidates.add((x: nx, y: ny));
+        }
+      }
+    }
+    
+    if (candidates.isEmpty) return null;
+    return candidates[_random.nextInt(candidates.length)];
+  }
+
+  void processTurnEndBehaviors() {
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < cols; c++) {
+        final tile = grid[r][c];
+        if (tile.behavior != null) {
+          final actions = tile.behavior!.onTurnEnd(r, c);
+          _executeBehaviorActions(actions, r, c);
+        }
+      }
+    }
+  }
+
+  void _executeBehaviorActions(List<BehaviorAction> actions, int centerX, int centerY) {
+    for (final action in actions) {
+      switch (action.type) {
+        case ActionType.placeEmoji:
+          final target = _findAdjacentEmptyTile(centerX, centerY);
+          if (target != null && action.emoji != null) {
+            grid[target.x][target.y].emoji = action.emoji!;
+            _initializeBehavior(grid[target.x][target.y]);
+          }
+          break;
+        case ActionType.transmuteEmoji:
+          final target = _findAdjacentFilledTile(centerX, centerY);
+          if (target != null && action.emoji != null) {
+            grid[target.x][target.y].emoji = action.emoji!;
+            grid[target.x][target.y].clearBehavior();
+          }
+          break;
+        case ActionType.doNothing:
+          break;
+      }
+    }
+  }
+
+  void executeBehaviorActions(List<BehaviorAction> actions, int centerX, int centerY) {
+    _executeBehaviorActions(actions, centerX, centerY);
+  }
+
+  void processMatchedBehavior(Tile tile, int x, int y) {
+    if (tile.behavior != null) {
+      tile.behavior!.onMatched(x, y);
+    }
+  }
+
+  void processBlastBehavior(Tile tile, int x, int y, ReactionType blastType) {
+    if (tile.behavior != null) {
+      tile.behavior!.onBlastNearby(x, y, blastType);
+    }
+  }
+
+  List<BehaviorAction> processSwipedWithBehavior(
+    Tile tile,
+    int x,
+    int y,
+    GameEmoji targetEmoji,
+  ) {
+    if (tile.behavior != null) {
+      return tile.behavior!.onSwipedWith(x, y, targetEmoji);
+    }
+    return [];
   }
 }

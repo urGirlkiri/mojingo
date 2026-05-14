@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
-import 'package:grimoji/features/alchemy/recipe_type.dart';
+import 'package:grimoji/features/alchemy/recipes/recipe.dart';
 import 'package:grimoji/features/game/controller.dart';
-import 'package:grimoji/features/alchemy/book.dart';
+import 'package:grimoji/features/alchemy/recipe_book.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';
 import 'package:grimoji/features/game/model/tile.dart';
@@ -117,6 +117,13 @@ class GameState extends ChangeNotifier {
       shuffleBoard();
     }
 
+    _log.info('Processing After Turn Emoji Behaviors...');
+    gameController.processTurnEndBehaviors();
+    notifyListeners(); 
+
+    await Future.delayed(const Duration(milliseconds: 300)); 
+    if (_isDisposed) return;
+
     bool isGameOver = onComboFinished();
     if (!isGameOver) hasTargetCombo = false;
 
@@ -201,10 +208,33 @@ class GameState extends ChangeNotifier {
     final originalD = TileCoordinate(row: dCoord.row, col: dCoord.col);
     final originalT = TileCoordinate(row: tCoord.row, col: tCoord.col);
 
+    final tileD = gameController.grid[originalD.row][originalD.col];
+    final tileT = gameController.grid[originalT.row][originalT.col];
+
     gameController.swapTiles(originalD, originalT);
     notifyListeners();
     await Future.delayed(swapAnimationTime);
     if (_isDisposed) return [];
+
+    final actionsD = gameController.processSwipedWithBehavior(
+      tileT,
+      originalD.row,
+      originalD.col,
+      tileD.emoji,
+    );
+    final actionsT = gameController.processSwipedWithBehavior(
+      tileD,
+      originalT.row,
+      originalT.col,
+      tileT.emoji,
+    );
+
+    if (actionsD.isNotEmpty || actionsT.isNotEmpty) {
+      _log.info('Special swipe behavior triggered!');
+      final allActions = [...actionsD, ...actionsT];
+      gameController.executeBehaviorActions(allActions, originalD.row, originalD.col);
+      return [];
+    }
 
     List<MatchGroup> matchGroups = MatchDetector.findMatchGroups(
       gameController.grid,
