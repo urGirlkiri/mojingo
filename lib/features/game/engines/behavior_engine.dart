@@ -1,17 +1,21 @@
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/features/alchemy/behaviors/behavior.dart';
-import 'package:grimoji/features/alchemy/behavior_register.dart';
 import 'package:grimoji/features/alchemy/reactions/reaction.dart';
 import 'package:grimoji/features/game/model/tile.dart';
 import '../board/manager.dart';
 
 class BehaviorEngine {
   final GridManager gridManager;
+  
+  final EmojiBehavior? Function(GameEmoji) getBehavior;
 
-  BehaviorEngine({required this.gridManager});
+  BehaviorEngine({
+    required this.gridManager,
+    required this.getBehavior, 
+  });
 
   void initializeBehavior(Tile tile) {
-    final behavior = BehaviorRegister.getBehaviorFor(tile.emoji);
+    final behavior = getBehavior(tile.emoji); 
     if (behavior != null) {
       tile.behavior = behavior;
     }

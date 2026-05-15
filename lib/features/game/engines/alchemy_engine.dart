@@ -2,7 +2,6 @@ import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/features/game/state.dart';
 import 'package:grimoji/features/game/model/tile.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
-import 'package:grimoji/features/alchemy/recipe_book.dart';
 import 'package:grimoji/features/alchemy/recipes/recipe.dart';
 import 'package:grimoji/features/alchemy/reactions/reaction.dart';
 import 'package:logging/logging.dart';
@@ -10,9 +9,17 @@ import '../board/manager.dart';
 
 class AlchemyEngine {
   final GridManager gridManager;
+  
+  final Recipe? Function(GameEmoji) getRecipe;
+  final Map<GameEmoji, GameEmoji> Function(ReactionType) getReactions;
+  
   final Logger _log = Logger('AlchemyEngine');
 
-  AlchemyEngine({required this.gridManager});
+  AlchemyEngine({
+    required this.gridManager,
+    required this.getRecipe,     
+    required this.getReactions,
+  });
 
   void processMatches(
     Set<TileCoordinate> matches,
@@ -50,7 +57,7 @@ class AlchemyEngine {
 
     groupedMatches.forEach((emoji, coords) {
       state.resolveEmoji(emoji, coords.length);
-      Recipe? recipe = RecipeBook.getRecipeFor(emoji);
+      Recipe? recipe = getRecipe(emoji);
 
       if (recipe != null &&
           recipe.type == RecipeType.merge &&
@@ -97,7 +104,7 @@ class AlchemyEngine {
     _log.info('$reactionType DETONATED!');
     tilesToDestroy.addAll(coords);
 
-    final reactions = RecipeBook.getReactionsForType(reactionType);
+    final reactions = getReactions(reactionType);
 
     for (var centerCoord in coords) {
       for (int r = centerCoord.row - 1; r <= centerCoord.row + 1; r++) {

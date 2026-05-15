@@ -2,6 +2,8 @@ import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/features/alchemy/behaviors/behavior.dart';
 import 'package:grimoji/features/alchemy/reactions/reaction.dart';
+import 'package:grimoji/features/alchemy/recipe_book.dart';
+import 'package:grimoji/features/alchemy/behavior_register.dart';
 import 'package:grimoji/features/game/state.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/tile.dart';
@@ -18,8 +20,17 @@ class GameController {
 
   GameController(this.level) {
     _gridManager = GridManager(level);
-    alchemy = AlchemyEngine(gridManager: _gridManager);
-    behaviors = BehaviorEngine(gridManager: _gridManager);
+    
+    alchemy = AlchemyEngine(
+      gridManager: _gridManager,
+      getRecipe: RecipeBook.getRecipeFor,
+      getReactions: RecipeBook.getReactionsForType,
+    );
+    
+    behaviors = BehaviorEngine(
+      gridManager: _gridManager,
+      getBehavior: BehaviorRegister.getBehaviorFor,
+    );
   }
 
   List<List<Tile>> get grid => _gridManager.gridTiles;
