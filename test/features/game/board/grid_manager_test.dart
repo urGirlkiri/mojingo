@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
-import 'package:grimoji/features/game/board/manager.dart'; // Adjust path if needed
+import 'package:grimoji/features/game/board/manager.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';
 
@@ -72,11 +72,9 @@ void main() {
 
     group('Adjacency Finders', () {
       test('findAdjacentFilledTile should find a neighbor', () {
-        // Since the board just initialized, every tile is filled!
         final neighbor = gridManager.findAdjacentFilledTile(4, 2);
         
         expect(neighbor, isNotNull);
-        // Ensure the neighbor is actually adjacent (math check)
         final dx = (neighbor!.x - 4).abs();
         final dy = (neighbor.y - 2).abs();
         expect(dx + dy, 1, reason: 'Neighbor must be exactly 1 step away (no diagonals)');
@@ -86,6 +84,18 @@ void main() {
         final emptySpace = gridManager.findAdjacentEmptyTile(4, 2);
         
         expect(emptySpace, isNull);
+      });
+
+      test('findAdjacentEmptyTile should return a coordinate when an empty tile exists', () {
+        const emptyEmoji = GameEmoji('svg/empty.svg', 'lottie/empty.json', '');
+        
+        gridManager.gridTiles[4][3].emoji = emptyEmoji;
+
+        final emptySpace = gridManager.findAdjacentEmptyTile(4, 2);
+        
+        expect(emptySpace, isNotNull, reason: 'Should find the empty tile we just placed');
+        expect(emptySpace!.x, equals(4));
+        expect(emptySpace.y, equals(3));
       });
     });
 
@@ -108,52 +118,81 @@ void main() {
       });
     });
 
-    group('Hints', () {
-      test('getHintMove should find a valid swap that creates a match', () {
-        final safeEmojis = [Emojis.rock, Emojis.droplet, Emojis.alien, Emojis.bug];
+    group('Hints & Moves Coverage', () {
+      void genDeadLockedBoard() {
+        final a = Emojis.rock;
+        final b = Emojis.droplet;
+        final c = Emojis.fire;
+        final d = Emojis.alien;
+
         for (int r = 0; r < GridManager.rows; r++) {
-          for (int c = 0; c < GridManager.cols; c++) {
-            int colorIndex = (r + c + (r % 2)) % safeEmojis.length;
-            gridManager.gridTiles[r][c].emoji = safeEmojis[colorIndex];
+          for (int col = 0; col < GridManager.cols; col++) {
+            if (r % 2 == 0) {
+              gridManager.gridTiles[r][col].emoji = (col % 2 == 0) ? a : b;
+            } else {
+              gridManager.gridTiles[r][col].emoji = (col % 2 == 0) ? c : d;
+            }
           }
         }
+      }
+
+      test('getHintMove should find a valid HORIZONTAL swap', () {
+        genDeadLockedBoard();
 
         gridManager.gridTiles[0][0].emoji = Emojis.fire;
         gridManager.gridTiles[0][1].emoji = Emojis.fire;
         gridManager.gridTiles[0][2].emoji = Emojis.rock;
         gridManager.gridTiles[0][3].emoji = Emojis.fire;
-        gridManager.gridTiles[0][4].emoji = Emojis.droplet;
         
         gridManager.gridTiles[1][2].emoji = Emojis.droplet;
         gridManager.gridTiles[2][2].emoji = Emojis.alien;
 
         final hint = gridManager.getHintMove();
 
-        expect(hint, isNotNull, reason: 'Should find the seeded hint');
-        expect(hint!.length, 2, reason: 'A hint must contain exactly 2 coordinates to swap');
-        
-        final containsRock = hint.any((coord) => coord.row == 0 && coord.col == 2);
-        final containsThirdFire = hint.any((coord) => coord.row == 0 && coord.col == 3);
-        
-        expect(containsRock, isTrue, reason: 'Hint should tell us to move the Rock blocking the match');
-        expect(containsThirdFire, isTrue, reason: 'Hint should tell us to move the Fire into place');
+        expect(hint, isNotNull);
+        expect(hint!.length, 2);
+        expect(hint.any((c) => c.row == 0 && c.col == 2), isTrue);
+        expect(hint.any((c) => c.row == 0 && c.col == 3), isTrue);
       });
 
-      test('hasPossibleMoves should return false on a completely deadlocked board', () {
-        final safeEmojis = [Emojis.rock, Emojis.droplet, Emojis.alien, Emojis.bug];
+      test('getHintMove should find a valid VERTICAL swap', () {
+        genDeadLockedBoard();
+
+        gridManager.gridTiles[0][0].emoji = Emojis.fire;
+        gridManager.gridTiles[1][0].emoji = Emojis.droplet;
+        gridManager.gridTiles[2][0].emoji = Emojis.fire;
+        gridManager.gridTiles[3][0].emoji = Emojis.fire;
+
+        final hint = gridManager.getHintMove();
+
+        expect(hint, isNotNull);
+        expect(hint!.length, 2);
         
-        for (int r = 0; r < GridManager.rows; r++) {
-          for (int c = 0; c < GridManager.cols; c++) {
-            int colorIndex = (r + c + (r % 2)) % safeEmojis.length;
-            gridManager.gridTiles[r][c].emoji = safeEmojis[colorIndex];
-          }
-        }
+        expect(hint.any((c) => c.row == 0 && c.col == 0), isTrue, reason: 'Should suggest swapping row 0 col 0');
+        expect(hint.any((c) => c.row == 1 && c.col == 0), isTrue, reason: 'Should suggest swapping row 1 col 0');
+      });
+
+      test('hasPossibleMoves and getHintMove should return false/null on a deadlocked board', () {
+        genDeadLockedBoard();
 
         final canMove = gridManager.hasPossibleMoves();
         final hint = gridManager.getHintMove();
 
         expect(canMove, isFalse, reason: 'You can\'t make any moves on a deadlocked board');
         expect(hint, isNull, reason: 'Should not be able to provide a hint when there are no possible moves');
+      });
+
+      test('hasPossibleMoves should return true when only a VERTICAL move exists', () {
+        genDeadLockedBoard();
+
+        gridManager.gridTiles[0][0].emoji = Emojis.fire;
+        gridManager.gridTiles[1][0].emoji = Emojis.droplet;
+        gridManager.gridTiles[2][0].emoji = Emojis.fire;
+        gridManager.gridTiles[3][0].emoji = Emojis.fire;
+
+        final canMove = gridManager.hasPossibleMoves();
+        
+        expect(canMove, isTrue, reason: 'Should execute the vertical scan and find the move');
       });
     });
   });
