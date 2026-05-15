@@ -3,11 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/features/alchemy/recipe_book.dart';
 import 'package:grimoji/features/alchemy/recipes/recipe.dart';
 import 'package:grimoji/features/game/controller.dart';
-import 'package:grimoji/features/alchemy/recipe_book.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';
+import 'package:grimoji/features/game/model/swipe_detector.dart';
 import 'package:grimoji/features/game/model/tile.dart';
 import 'package:logging/logging.dart';
 
@@ -141,26 +142,7 @@ class GameState extends ChangeNotifier {
 
     await Future.delayed(const Duration(milliseconds: 600));
 
-    bool validBoard = false;
-    while (!validBoard) {
-      List<GameEmoji> allEmojis = gameController.grid
-          .expand((row) => row.map((tile) => tile.emoji))
-          .toList();
-      allEmojis.shuffle();
-
-      int index = 0;
-      for (int r = 0; r < gameController.getRowCount(); r++) {
-        for (int c = 0; c < gameController.getColCount(); c++) {
-          gameController.grid[r][c].emoji = allEmojis[index++];
-          gameController.grid[r][c].reset();
-        }
-      }
-
-      validBoard = gameController.hasPossibleMoves();
-      if (MatchDetector.findMatchGroups(gameController.grid).isNotEmpty) {
-        validBoard = false;
-      }
-    }
+    gameController.shuffleGrid();
 
     shuffleProgress = 1.0;
     notifyListeners();
@@ -205,50 +187,28 @@ class GameState extends ChangeNotifier {
     TileCoordinate dCoord,
     TileCoordinate tCoord,
   ) async {
-    final originalD = TileCoordinate(row: dCoord.row, col: dCoord.col);
-    final originalT = TileCoordinate(row: tCoord.row, col: tCoord.col);
-
-    final tileD = gameController.grid[originalD.row][originalD.col];
-    final tileT = gameController.grid[originalT.row][originalT.col];
-
-    gameController.swapTiles(originalD, originalT);
     notifyListeners();
     await Future.delayed(swapAnimationTime);
     if (_isDisposed) return [];
 
-    final actionsD = gameController.processSwipedWithBehavior(
-      tileT,
-      originalD.row,
-      originalD.col,
-      tileD.emoji,
-    );
-    final actionsT = gameController.processSwipedWithBehavior(
-      tileD,
-      originalT.row,
-      originalT.col,
-      tileT.emoji,
-    );
+    final decision = gameController.evaluateSwipe(dCoord, tCoord);
 
-    if (actionsD.isNotEmpty || actionsT.isNotEmpty) {
-      _log.info('Special swipe behavior triggered!');
-      final allActions = [...actionsD, ...actionsT];
-      gameController.executeBehaviorActions(allActions, originalD.row, originalD.col);
-      return [];
+    switch (decision.type) {
+      case SwipeResultType.specialBehavior:
+        _log.info('Special swipe behavior triggered!');
+        gameController.executeBehaviorActions(decision.actions, dCoord.row, dCoord.col);
+        return [];
+
+      case SwipeResultType.match:
+        return decision.matches;
+
+      case SwipeResultType.invalid:
+        _log.info('Invalid Move! Reverting swap.');
+        gameController.swapTiles(tCoord, dCoord);
+        notifyListeners();
+        await Future.delayed(swapAnimationTime);
+        return [];
     }
-
-    List<MatchGroup> matchGroups = MatchDetector.findMatchGroups(
-      gameController.grid,
-    );
-
-    if (matchGroups.isEmpty) {
-      _log.info('Invalid Move! Reverting swap.');
-      gameController.swapTiles(originalT, originalD);
-      notifyListeners();
-      await Future.delayed(swapAnimationTime);
-      return [];
-    }
-
-    return matchGroups;
   }
 
   void _categorizeAnimations(

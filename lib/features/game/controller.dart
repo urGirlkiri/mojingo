@@ -4,6 +4,8 @@ import 'package:grimoji/features/alchemy/behaviors/behavior.dart';
 import 'package:grimoji/features/alchemy/reactions/reaction.dart';
 import 'package:grimoji/features/alchemy/recipe_book.dart';
 import 'package:grimoji/features/alchemy/behavior_register.dart';
+import 'package:grimoji/features/game/model/match_detector.dart';
+import 'package:grimoji/features/game/model/swipe_detector.dart';
 import 'package:grimoji/features/game/state.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/tile.dart';
@@ -40,6 +42,38 @@ class GameController {
 
   void initialize() {
     _gridManager.initialize();
+  }
+
+  void shuffleGrid() {
+    bool validBoard = false;
+    
+    while (!validBoard) {
+      List<GameEmoji> allEmojis = grid
+          .expand((row) => row.map((tile) => tile.emoji))
+          .toList();
+      allEmojis.shuffle();
+
+      int index = 0;
+      for (int r = 0; r < getRowCount(); r++) {
+        for (int c = 0; c < getColCount(); c++) {
+          final tile = grid[r][c];
+          tile.emoji = allEmojis[index++];
+          tile.reset(); 
+          tile.clearBehavior(); 
+        }
+      }
+
+      validBoard = hasPossibleMoves();
+      if (MatchDetector.findMatchGroups(grid).isNotEmpty) {
+        validBoard = false;
+      }
+    }
+
+    for (int r = 0; r < getRowCount(); r++) {
+      for (int c = 0; c < getColCount(); c++) {
+        behaviors.initializeBehavior(grid[r][c]);
+      }
+    }
   }
 
   void swapTiles(TileCoordinate A, TileCoordinate B) {
@@ -84,5 +118,20 @@ class GameController {
 
   void executeBehaviorActions(List<BehaviorAction> actions, int centerX, int centerY) {
     behaviors.executeBehaviorActions(actions, centerX, centerY);
+  }
+
+  SwipeDecision evaluateSwipe(TileCoordinate dCoord, TileCoordinate tCoord) {
+    final decision = SwipeDetector.evaluate(
+      grid: grid,
+      dCoord: dCoord,
+      tCoord: tCoord,
+      getSwipeBehaviors: behaviors.processSwipedWithBehavior,
+    );
+
+    if (decision.type != SwipeResultType.invalid) {
+      _gridManager.swapTiles(dCoord, tCoord);
+    }
+
+    return decision;
   }
 }
