@@ -68,7 +68,7 @@ class _GameBoardState extends State<GameBoard> {
         row < levelstate.gameState.gameController.getRowCount() &&
         col >= 0 &&
         col < levelstate.gameState.gameController.getColCount()) {
-          levelstate.gameState.resetIdleTimer();
+          levelstate.gameState.resetTimer();
       _draggedTile = levelstate.gameState.gameController.grid[row][col];
       _dragStartPosition = details.localPosition;
     }

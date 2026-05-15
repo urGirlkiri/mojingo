@@ -33,9 +33,8 @@ class GameState extends ChangeNotifier {
     _idleTimer = Timer(const Duration(seconds: 5), _triggerHint);
   }
 
-  void resetIdleTimer() {
-    _log.info('Screen touched.. Resetting idle timer.');
-
+  void resetTimer() {
+    if (_isDisposed) return;
     _clearHint();
     if (!isProcessing && !isShuffling) {
       _startIdleTimer();
@@ -55,15 +54,15 @@ class GameState extends ChangeNotifier {
     _log.info('Starting to drop emojis');
     gameController.triggerInitialFall();
     notifyListeners();
-    _startIdleTimer();
+    resetTimer();
   }
 
   Future<void> resolveSwipe(
     TileCoordinate draggedCoordinate,
     TileCoordinate targetCoordinate,
   ) async {
+    resetTimer();
     isProcessing = true;
-    resetIdleTimer();
     notifyListeners();
 
     List<MatchGroup> matchGroups = await _attemptSwap(
@@ -152,6 +151,8 @@ class GameState extends ChangeNotifier {
 
   void _triggerHint() {
     if (isProcessing || isShuffling || _isDisposed) return;
+    
+    if (onComboFinished()) return;
 
     _currentHints = gameController.getHintMove();
     if (_currentHints != null) {
@@ -187,27 +188,34 @@ class GameState extends ChangeNotifier {
     TileCoordinate dCoord,
     TileCoordinate tCoord,
   ) async {
-    notifyListeners();
-    await Future.delayed(swapAnimationTime);
-    if (_isDisposed) return [];
-
     final decision = gameController.evaluateSwipe(dCoord, tCoord);
 
-    switch (decision.type) {
-      case SwipeResultType.specialBehavior:
+    if (decision.type == SwipeResultType.invalid) {
+      _log.info('Invalid Move! Playing negative swap.');
+      
+      gameController.swapTiles(dCoord, tCoord);
+      notifyListeners();
+      await Future.delayed(swapAnimationTime);
+      if (_isDisposed) return [];
+
+      gameController.swapTiles(tCoord, dCoord);
+      notifyListeners();
+      await Future.delayed(swapAnimationTime);
+      
+      return [];
+    } 
+    else {
+      notifyListeners();
+      await Future.delayed(swapAnimationTime);
+      if (_isDisposed) return [];
+
+      if (decision.type == SwipeResultType.specialBehavior) {
         _log.info('Special swipe behavior triggered!');
         gameController.executeBehaviorActions(decision.actions, dCoord.row, dCoord.col);
         return [];
+      }
 
-      case SwipeResultType.match:
-        return decision.matches;
-
-      case SwipeResultType.invalid:
-        _log.info('Invalid Move! Reverting swap.');
-        gameController.swapTiles(tCoord, dCoord);
-        notifyListeners();
-        await Future.delayed(swapAnimationTime);
-        return [];
+      return decision.matches;
     }
   }
 
