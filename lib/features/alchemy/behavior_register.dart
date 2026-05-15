@@ -19,4 +19,8 @@ class BehaviorRegister {
   static bool hasBehavior(GameEmoji emoji) {
     return _behaviors.containsKey(emoji);
   }
+
+  static List<GameEmoji> getAllEmojisWithBehaviors() {
+    return _behaviors.keys.toList();
+  }
 }
