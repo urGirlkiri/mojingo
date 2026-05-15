@@ -3,7 +3,6 @@ import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/features/game/model/tile.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
-import 'package:grimoji/features/game/model/match_detector.dart';
 
 class GridManager {
   static const int rows = 8;
@@ -71,38 +70,6 @@ class GridManager {
     tileB.coordinate.col = A.col;
   }
 
-  void _simulateSwap(int r1, int c1, int r2, int c2) {
-    Tile temp = gridTiles[r1][c1];
-    gridTiles[r1][c1] = gridTiles[r2][c2];
-    gridTiles[r2][c2] = temp;
-  }
-
-  bool hasPossibleMoves() {
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < cols; c++) {
-        if (c < cols - 1) {
-          _simulateSwap(r, c, r, c + 1);
-          bool hasMatch =
-               MatchDetector.hasMatchAt(gridTiles, r, c) ||
-              MatchDetector.hasMatchAt(gridTiles, r, c + 1);
-          _simulateSwap(r, c, r, c + 1);
-          if (hasMatch) return true;
-        }
-
-        if (r < rows - 1) {
-          _simulateSwap(r, c, r + 1, c);
-          bool hasMatch =
-               MatchDetector.hasMatchAt(gridTiles, r, c) ||
-               MatchDetector.hasMatchAt(gridTiles, r + 1, c);
-          _simulateSwap(r, c, r + 1, c);
-          if (hasMatch) return true;
-        }
-      }
-    }
-    return false;
-  }
-
-
   void triggerInitialFall() {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
@@ -126,39 +93,6 @@ class GridManager {
 
     applyGravity(collected);
     return true;
-  }
-
-  List<TileCoordinate>? getHintMove() {
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < cols; c++) {
-        if (c < cols - 1) {
-          _simulateSwap(r, c, r, c + 1);
-          bool hasMatch =  MatchDetector.hasMatchAt(gridTiles, r, c) ||
-               MatchDetector.hasMatchAt(gridTiles, r, c + 1);
-          _simulateSwap(r, c, r, c + 1);
-          if (hasMatch) {
-            return [
-              TileCoordinate(row: r, col: c),
-              TileCoordinate(row: r, col: c + 1),
-            ];
-          }
-        }
-
-        if (r < rows - 1) {
-          _simulateSwap(r, c, r + 1, c);
-          bool hasMatch =  MatchDetector.hasMatchAt(gridTiles, r, c) ||
-               MatchDetector.hasMatchAt(gridTiles, r + 1, c);
-          _simulateSwap(r, c, r + 1, c);
-          if (hasMatch) {
-            return [
-              TileCoordinate(row: r, col: c),
-              TileCoordinate(row: r + 1, col: c),
-            ];
-          }
-        }
-      }
-    }
-    return null;
   }
 
   void applyGravity(Set<TileCoordinate> tilesToDestroy) {

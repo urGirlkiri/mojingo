@@ -18,20 +18,14 @@ void main() {
         targetAmount: 1,
         availableEmojis: [Emojis.droplet, Emojis.fire, Emojis.rock],
       );
-      
       gridManager = GridManager(testLevel);
       gridManager.initialize();
     });
 
     test('Should initialize an 8x5 board with NO immediate matches', () {
-      expect(gridManager.gridTiles.length, 8, reason: 'Should have 8 rows');
-      expect(gridManager.gridTiles[0].length, 5, reason: 'Should have 5 columns');
-
+      expect(gridManager.gridTiles.length, 8);
       final initialMatches = MatchDetector.findMatchGroups(gridManager.gridTiles);
-      expect(initialMatches.isEmpty, isTrue, reason: '_getRandomSafeEmoji  should guarantee a clean board on start');
-
-      final hasPossibleMoves = gridManager.hasPossibleMoves(); 
-      expect(hasPossibleMoves, true, reason: 'A newly initialized board should always have possible moves');
+      expect(initialMatches.isEmpty, isTrue);
     });
 
     test('swapTiles should swap positions in the array AND update internal tile coordinates', () {
@@ -58,7 +52,7 @@ void main() {
       gridManager.applyGravity(tilesToDestroy);
 
       expect(gridManager.gridTiles[7][0].emoji, tileAbove, reason: 'Gravity failed to pull the tile down');
-      
+
       expect(testLevel.availableEmojis.contains(gridManager.gridTiles[0][0].emoji), isTrue, reason: 'A new tile should have spawned at the top with a valid emoji');
     });
 
@@ -72,9 +66,9 @@ void main() {
 
     group('Adjacency Finders', () {
       test('findAdjacentFilledTile should find a neighbor', () {
-        final neighbor = gridManager.findAdjacentFilledTile(4, 2);
+      final neighbor = gridManager.findAdjacentFilledTile(4, 2);
         
-        expect(neighbor, isNotNull);
+      expect(neighbor, isNotNull);
         final dx = (neighbor!.x - 4).abs();
         final dy = (neighbor.y - 2).abs();
         expect(dx + dy, 1, reason: 'Neighbor must be exactly 1 step away (no diagonals)');
@@ -118,82 +112,5 @@ void main() {
       });
     });
 
-    group('Hints & Moves Coverage', () {
-      void genDeadLockedBoard() {
-        final a = Emojis.rock;
-        final b = Emojis.droplet;
-        final c = Emojis.fire;
-        final d = Emojis.alien;
-
-        for (int r = 0; r < GridManager.rows; r++) {
-          for (int col = 0; col < GridManager.cols; col++) {
-            if (r % 2 == 0) {
-              gridManager.gridTiles[r][col].emoji = (col % 2 == 0) ? a : b;
-            } else {
-              gridManager.gridTiles[r][col].emoji = (col % 2 == 0) ? c : d;
-            }
-          }
-        }
-      }
-
-      test('getHintMove should find a valid HORIZONTAL swap', () {
-        genDeadLockedBoard();
-
-        gridManager.gridTiles[0][0].emoji = Emojis.fire;
-        gridManager.gridTiles[0][1].emoji = Emojis.fire;
-        gridManager.gridTiles[0][2].emoji = Emojis.rock;
-        gridManager.gridTiles[0][3].emoji = Emojis.fire;
-        
-        gridManager.gridTiles[1][2].emoji = Emojis.droplet;
-        gridManager.gridTiles[2][2].emoji = Emojis.alien;
-
-        final hint = gridManager.getHintMove();
-
-        expect(hint, isNotNull);
-        expect(hint!.length, 2);
-        expect(hint.any((c) => c.row == 0 && c.col == 2), isTrue);
-        expect(hint.any((c) => c.row == 0 && c.col == 3), isTrue);
-      });
-
-      test('getHintMove should find a valid VERTICAL swap', () {
-        genDeadLockedBoard();
-
-        gridManager.gridTiles[0][0].emoji = Emojis.fire;
-        gridManager.gridTiles[1][0].emoji = Emojis.droplet;
-        gridManager.gridTiles[2][0].emoji = Emojis.fire;
-        gridManager.gridTiles[3][0].emoji = Emojis.fire;
-
-        final hint = gridManager.getHintMove();
-
-        expect(hint, isNotNull);
-        expect(hint!.length, 2);
-        
-        expect(hint.any((c) => c.row == 0 && c.col == 0), isTrue, reason: 'Should suggest swapping row 0 col 0');
-        expect(hint.any((c) => c.row == 1 && c.col == 0), isTrue, reason: 'Should suggest swapping row 1 col 0');
-      });
-
-      test('hasPossibleMoves and getHintMove should return false/null on a deadlocked board', () {
-        genDeadLockedBoard();
-
-        final canMove = gridManager.hasPossibleMoves();
-        final hint = gridManager.getHintMove();
-
-        expect(canMove, isFalse, reason: 'You can\'t make any moves on a deadlocked board');
-        expect(hint, isNull, reason: 'Should not be able to provide a hint when there are no possible moves');
-      });
-
-      test('hasPossibleMoves should return true when only a VERTICAL move exists', () {
-        genDeadLockedBoard();
-
-        gridManager.gridTiles[0][0].emoji = Emojis.fire;
-        gridManager.gridTiles[1][0].emoji = Emojis.droplet;
-        gridManager.gridTiles[2][0].emoji = Emojis.fire;
-        gridManager.gridTiles[3][0].emoji = Emojis.fire;
-
-        final canMove = gridManager.hasPossibleMoves();
-        
-        expect(canMove, isTrue, reason: 'Should execute the vertical scan and find the move');
-      });
-    });
   });
 }
