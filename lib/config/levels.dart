@@ -12,7 +12,6 @@ const gameLevels = [
       Emojis.droplet,
       Emojis.leafyGreen,
       Emojis.sunWithFace,
-      Emojis.mushroom,
       Emojis.bug,
     ],
     type: LevelType.puzzle,
@@ -30,6 +29,7 @@ const gameLevels = [
       Emojis.leafyGreen,
       Emojis.sunWithFace,
       Emojis.herb,
+      Emojis.mushroom,
     ],
     type: LevelType.puzzle,
   ),
@@ -59,6 +59,9 @@ const gameLevels = [
       Emojis.rock,
       Emojis.evergreenTree,
       Emojis.droplet,
+      Emojis.frog,
+      Emojis.octopus,
+      Emojis.crab,
     ],
     type: LevelType.puzzle,
   ),
@@ -72,20 +75,13 @@ const gameLevels = [
       Emojis.droplet,
       Emojis.ocean,
       Emojis.cloud,
-      Emojis.alien,
-      Emojis.robot,
-      Emojis.ghost,
-      Emojis.skull,
-      Emojis.clown,
-      Emojis.tRex,
-      Emojis.foxFace,
-      Emojis.cowFace,
-      Emojis.pig,
+      Emojis.fire,
       Emojis.frog,
       Emojis.octopus,
       Emojis.crab,
     ],
     type: LevelType.puzzle,
+    skipAutoPlayer: true,
     achievementIdIOS: 'finished',
     achievementIdAndroid: 'CdfIhE96aspNWLGSQg',
   ),
@@ -98,6 +94,7 @@ class GameLevel {
   final GameEmoji targetEmoji;
   final List<GameEmoji> availableEmojis;
   final LevelType type;
+  final bool skipAutoPlayer;
 
   final String? achievementIdIOS;
   final String? achievementIdAndroid;
@@ -111,6 +108,7 @@ class GameLevel {
     required this.targetEmoji,
     required this.availableEmojis,
     required this.type,
+    this.skipAutoPlayer = false,
     this.achievementIdIOS,
     this.achievementIdAndroid,
   }) : assert(

@@ -137,5 +137,47 @@ void main() {
         expect(MatchDetector.hasMatchAt(directionalGrid, 2, 4), isFalse); 
       });
     });
+
+    group('Testing large match detection', () {
+      test('Should correctly group a 4-in-a-row match', () {
+        final grid = [
+          buildRow(0, [Emojis.droplet, Emojis.droplet, Emojis.droplet, Emojis.droplet]),
+        ];
+        final matches = MatchDetector.findMatchGroups(grid);
+        expect(matches.length, 1);
+        expect(matches.first.coordinates.length, 4);
+      });
+
+      test('Should correctly group a 5-in-a-column match', () {
+        final grid = [
+          buildRow(0, [Emojis.droplet]),
+          buildRow(1, [Emojis.droplet]),
+          buildRow(2, [Emojis.droplet]),
+          buildRow(3, [Emojis.droplet]),
+          buildRow(4, [Emojis.droplet]),
+        ];
+        final matches = MatchDetector.findMatchGroups(grid);
+        expect(matches.length, 1);
+        expect(matches.first.coordinates.length, 5);
+      });
+
+      test('Should correctly group a 6-in-a-row match', () {
+        final grid = [
+          buildRow(0, [Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen]),
+        ];
+        final matches = MatchDetector.findMatchGroups(grid);
+        expect(matches.length, 1);
+        expect(matches.first.coordinates.length, 6);
+      });
+
+      test('Should correctly group a 7-in-a-row match', () {
+        final grid = [
+          buildRow(0, [Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen, Emojis.leafyGreen]),
+        ];
+        final matches = MatchDetector.findMatchGroups(grid);
+        expect(matches.length, 1);
+        expect(matches.first.coordinates.length, 7);
+      });
+    });
   });
 }

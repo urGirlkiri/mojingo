@@ -118,6 +118,7 @@ void main() {
             );
           });
         },
+        skip: level.skipAutoPlayer ? 'Too complex skip' : false,
       );
     }
   });
