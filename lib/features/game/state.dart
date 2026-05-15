@@ -4,7 +4,6 @@ import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/alchemy/recipe_book.dart';
-import 'package:grimoji/features/alchemy/recipes/recipe.dart';
 import 'package:grimoji/features/game/controller.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';
@@ -276,7 +275,7 @@ class GameState extends ChangeNotifier {
     for (var group in matchGroups) {
       final recipe = RecipeBook.getRecipeFor(group.emoji);
 
-      if (recipe != null && recipe.type == RecipeType.merge) {
+      if (recipe != null) {
         TileCoordinate catalyst =
             (isFirstMatch && group.coordinates.contains(targetCoord))
             ? targetCoord

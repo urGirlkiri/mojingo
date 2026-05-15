@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/features/alchemy/reactions/reaction.dart';
 import 'package:grimoji/features/alchemy/recipe_book.dart';
-import 'package:grimoji/features/alchemy/recipes/recipe.dart';
 
 void main() {
   group('RecipeBook Tests', () {
@@ -17,8 +16,7 @@ void main() {
     test('getRecipeFor should successfully return mapped recipes', () {
       final dropletRecipe = RecipeBook.getRecipeFor(Emojis.droplet);
       expect(dropletRecipe, isNotNull);
-      expect(dropletRecipe!.type, equals(RecipeType.merge));
-      expect(dropletRecipe.yields, equals(Emojis.ocean));
+      expect(dropletRecipe!.yields, equals(Emojis.ocean));
     });
 
     test('getRecipeFor should return null for normal emojis', () {
@@ -40,24 +38,20 @@ void main() {
       expect(() => RecipeBook.getTransformationsForType(ReactionType.freezing), throwsStateError);
     });
 
-    test('All recipes must have strictly valid data according to their RecipeType', () {
+    test('All recipes must have strictly valid data', () {
       for (final recipe in RecipeBook.allRecipes) {
-        if (recipe.type == RecipeType.merge) {
-          expect(recipe.yields, isNotNull, 
-            reason: '${recipe.ingredient.visual} is a Merge recipe but yields nothing');
-        }
+        expect(recipe.yields, isNotNull, 
+          reason: '${recipe.ingredient.visual} is a recipe but yields nothing');
       }
     });
 
     test('Recipes MUST NOT yield their own ingredient', () {
       for (final recipe in RecipeBook.allRecipes) {
-        if (recipe.type == RecipeType.merge && recipe.yields != null) {
-          expect(
-            recipe.yields, 
-            isNot(equals(recipe.ingredient)), 
-            reason: 'CRITICAL ERROR: ${recipe.ingredient.visual} yields itself! This will cause an infinite match loop.'
-          );
-        }
+        expect(
+          recipe.yields, 
+          isNot(equals(recipe.ingredient)), 
+          reason: 'CRITICAL ERROR: ${recipe.ingredient.visual} yields itself! This will cause an infinite match loop.'
+        );
       }
     });
 

@@ -61,7 +61,7 @@ class AlchemyEngine {
       state.resolveEmoji(emoji, coords.length);
 
       final recipe = getRecipe(emoji);
-      if (recipe != null && recipe.type == RecipeType.merge && recipe.yields != null) {
+      if (recipe != null) {
         _executeMerge(recipe, coords, state, tilesToDestroy, mergePoint);
         return;
       }
@@ -88,11 +88,11 @@ class AlchemyEngine {
         : coords.first;
     Tile targetTile = gridManager.gridTiles[spawnPoint.row][spawnPoint.col];
 
-    targetTile.emoji = recipe.yields!;
+    targetTile.emoji = recipe.yields;
     targetTile.reset();
 
     if (recipe.yields == gridManager.level.targetEmoji) {
-      state.resolveEmoji(recipe.yields!, 1);
+      state.resolveEmoji(recipe.yields, 1);
       targetTile.isFlying = true;
     }
 

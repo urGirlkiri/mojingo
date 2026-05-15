@@ -6,6 +6,5 @@ const List<Recipe> natureRecipes = [
     ingredient: Emojis.leafyGreen,
     requiredAmount: 3,
     yields: Emojis.herb,
-    type: RecipeType.merge,
   ),
 ];

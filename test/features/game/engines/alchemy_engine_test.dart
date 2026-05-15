@@ -36,10 +36,10 @@ void main() {
         gridManager: gridManager,
         getRecipe: (emoji) {
           if (emoji == Emojis.droplet) {
-            return const Recipe(ingredient: Emojis.droplet, requiredAmount: 3, yields: Emojis.ocean, type: RecipeType.merge);
+            return const Recipe(ingredient: Emojis.droplet, requiredAmount: 3, yields: Emojis.ocean);
           }
           if (emoji == Emojis.fire) {
-            return const Recipe(ingredient: Emojis.fire, requiredAmount: 3, yields: Emojis.bomb, type: RecipeType.merge);
+            return const Recipe(ingredient: Emojis.fire, requiredAmount: 3, yields: Emojis.bomb);
           }
           return null; 
         },
