@@ -64,6 +64,7 @@ class LevelState extends ChangeNotifier {
 
     if (progress >= 1.0 || (secondsRemaining <= 0 && !gameState.isProcessing)) {
       _isGameOver = true;
+      gameState.setGameOver();
       _ticker?.cancel();
       _stopwatch.stop();
 
@@ -74,6 +75,7 @@ class LevelState extends ChangeNotifier {
     if (progress >= 0.33) earnedStars = 1;
       
       if (earnedStars >= 1) {
+        gameState.hasTargetCombo = true;
         _log.info("GAME OVER! Earned $earnedStars stars. YOU WIN!");
         onWin.call(earnedStars);
       } else {

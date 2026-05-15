@@ -18,27 +18,37 @@ class GameState extends ChangeNotifier {
 
   late final GameController gameController;
   final Logger _log = Logger('GameState');
-  Timer? _idleTimer;
+  Timer? _hintTimer;
 
   bool isProcessing = false;
   bool hasTargetCombo = false;
   bool _isDisposed = false;
   bool isShuffling = false;
+  bool _isGameOver = false;
 
   List<TileCoordinate>? _currentHints;
 
-  void _startIdleTimer() {
-    _log.info('Idle timer started (Waiting 5 seconds)...');
-    _idleTimer?.cancel();
-    _idleTimer = Timer(const Duration(seconds: 5), _triggerHint);
+  void _startHintTimer() {
+    _log.info('Hint timer started (Waiting 5 seconds)...');
+    _hintTimer?.cancel();
+    _hintTimer = Timer(const Duration(seconds: 5), _triggerHint);
   }
 
   void resetTimer() {
     if (_isDisposed) return;
+    
+    if (_isGameOver) {
+      _log.info('Game Over - Timer disabled');
+      _hintTimer?.cancel();
+      return; 
+    }
+
+    _log.info('Timer reset - clearing hints and restarting countdown');
     _clearHint();
     if (!isProcessing && !isShuffling) {
-      _startIdleTimer();
+      _startHintTimer();
     }
+    notifyListeners();
   }
 
   GameState({
@@ -57,12 +67,25 @@ class GameState extends ChangeNotifier {
     resetTimer();
   }
 
+  void setGameOver() {
+    _log.info('Game Over - stopping timers and disabling interactions');
+    _isGameOver = true;
+    _hintTimer?.cancel();
+    isProcessing = false;
+    notifyListeners();
+  }
+
   Future<void> resolveSwipe(
     TileCoordinate draggedCoordinate,
     TileCoordinate targetCoordinate,
   ) async {
-    resetTimer();
+    if (_isGameOver) {
+      _log.info('Game Over - swipe ignored');
+      return;
+    }
+    
     isProcessing = true;
+    resetTimer();
     notifyListeners();
 
     List<MatchGroup> matchGroups = await _attemptSwap(
@@ -71,8 +94,13 @@ class GameState extends ChangeNotifier {
     );
 
     if (matchGroups.isEmpty) {
+      hasTargetCombo = false; 
+      
       isProcessing = false;
-      if (!_isDisposed) notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+        resetTimer();
+      }
       return;
     }
 
@@ -114,7 +142,7 @@ class GameState extends ChangeNotifier {
 
     if (!gameController.hasPossibleMoves()) {
       _log.info('NO MOVES LEFT!  Shuffling...');
-      shuffleBoard();
+      await shuffleBoard(); 
     }
 
     _log.info('Processing After Turn Emoji Behaviors...');
@@ -124,11 +152,13 @@ class GameState extends ChangeNotifier {
     await Future.delayed(const Duration(milliseconds: 300)); 
     if (_isDisposed) return;
 
-    bool isGameOver = onComboFinished();
-    if (!isGameOver) hasTargetCombo = false;
-
+    hasTargetCombo = false; 
+    
     isProcessing = false;
-    if (!_isDisposed) notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+      resetTimer();
+    }
   }
 
   double shuffleProgress = 1.0;
@@ -137,6 +167,7 @@ class GameState extends ChangeNotifier {
     _log.info('Shuffling Board...');
 
     shuffleProgress = 0.0;
+    isShuffling = true;
     notifyListeners();
 
     await Future.delayed(const Duration(milliseconds: 600));
@@ -147,15 +178,25 @@ class GameState extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(const Duration(milliseconds: 600));
+
+    isShuffling = false;
+    if (!_isDisposed) {
+      _log.info('Shuffle complete - restarting hint timer');
+      notifyListeners();
+      resetTimer();
+    }
   }
 
   void _triggerHint() {
-    if (isProcessing || isShuffling || _isDisposed) return;
-    
-    if (onComboFinished()) return;
+    _log.info('Hint timer fired - checking for hint move');
+    if (isProcessing || isShuffling || _isDisposed || _isGameOver) {
+      _log.info('Hint skipped - processing=$isProcessing, shuffling=$isShuffling, disposed=$_isDisposed, gameOver=$_isGameOver');
+      return;
+    }
 
     _currentHints = gameController.getHintMove();
     if (_currentHints != null) {
+      _log.info('Hint found at ${_currentHints![0]} and ${_currentHints![1]}');
       Tile tileA =
           gameController.grid[_currentHints![0].row][_currentHints![0].col];
       Tile tileB =
@@ -168,11 +209,14 @@ class GameState extends ChangeNotifier {
       tileB.hintPartner = tileA.coordinate;
 
       notifyListeners();
+    } else {
+      _log.info('No hint available - no valid moves found');
     }
   }
 
   void _clearHint() {
-    _idleTimer?.cancel();
+    _log.info('Clearing hints and canceling Hint timer');
+    _hintTimer?.cancel();
     _currentHints = null;
 
     for (int r = 0; r < gameController.getRowCount(); r++) {
@@ -191,7 +235,7 @@ class GameState extends ChangeNotifier {
     final decision = gameController.evaluateSwipe(dCoord, tCoord);
 
     if (decision.type == SwipeResultType.invalid) {
-      _log.info('Invalid Move! Playing negative swap.');
+      _log.info('Invalid Move! Playing Look-Ahead Animation.');
       
       gameController.swapTiles(dCoord, tCoord);
       notifyListeners();
@@ -202,6 +246,11 @@ class GameState extends ChangeNotifier {
       notifyListeners();
       await Future.delayed(swapAnimationTime);
       
+      if (!_isDisposed) {
+        _log.info('Invalid swap complete - restarting hint timer');
+        _clearHint();
+        _startHintTimer();
+      }
       return [];
     } 
     else {
@@ -256,7 +305,7 @@ class GameState extends ChangeNotifier {
   @override
   void dispose() {
     _isDisposed = true;
-    _idleTimer?.cancel();
+    _hintTimer?.cancel();
     isProcessing = false;
     super.dispose();
   }
