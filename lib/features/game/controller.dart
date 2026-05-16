@@ -93,7 +93,7 @@ class GameController {
             getSwipeBehaviors: behaviors.processSwipedWithBehavior,
             quickCheckOnly: true,
           );
-          if (d.type != SwipeResultType.invalid) return true;
+          if (d.type != SwipeResult.invalid) return true;
         }
 
         if (r < getRowCount() - 1) {
@@ -104,7 +104,7 @@ class GameController {
             getSwipeBehaviors: behaviors.processSwipedWithBehavior,
             quickCheckOnly: true,
           );
-          if (d.type != SwipeResultType.invalid) return true;
+          if (d.type != SwipeResult.invalid) return true;
         }
       }
     }
@@ -122,7 +122,7 @@ class GameController {
             getSwipeBehaviors: behaviors.processSwipedWithBehavior,
             quickCheckOnly: true,
           );
-          if (d.type != SwipeResultType.invalid) {
+          if (d.type != SwipeResult.invalid) {
             return [
               TileCoordinate(row: r, col: c),
               TileCoordinate(row: r, col: c + 1),
@@ -137,7 +137,7 @@ class GameController {
             getSwipeBehaviors: behaviors.processSwipedWithBehavior,
             quickCheckOnly: true,
           );
-          if (d.type != SwipeResultType.invalid) {
+          if (d.type != SwipeResult.invalid) {
             return [
               TileCoordinate(row: r, col: c),
               TileCoordinate(row: r + 1, col: c),
@@ -189,7 +189,7 @@ class GameController {
       getSwipeBehaviors: behaviors.processSwipedWithBehavior,
     );
 
-    if (decision.type != SwipeResultType.invalid) {
+    if (decision.type != SwipeResult.invalid) {
       _gridManager.swapTiles(dCoord, tCoord);
     }
 

@@ -236,10 +236,10 @@ class GameState extends ChangeNotifier {
   ) async {
     gameController.swapTiles(dCoord, tCoord);
     notifyListeners();
-    
+
     final decision = gameController.evaluateSwipe(dCoord, tCoord);
 
-    if (decision.type == SwipeResultType.invalid) {
+    if (decision.type == SwipeResult.invalid) {
       _log.info('Invalid swap - playing snap-back animation');
 
       await Future.delayed(swapAnimationTime);
@@ -257,7 +257,7 @@ class GameState extends ChangeNotifier {
     } else {
       if (_isDisposed) return [];
 
-      if (decision.type == SwipeResultType.specialBehavior) {
+      if (decision.type == SwipeResult.specialBehavior) {
         _log.info('Special swipe behavior triggered!');
         gameController.executeBehaviorActions(
           decision.actions,

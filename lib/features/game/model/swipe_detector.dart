@@ -4,10 +4,10 @@ import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';
 import 'package:grimoji/features/game/model/tile.dart';
 
-enum SwipeResultType { match, specialBehavior, invalid }
+enum SwipeResult { match, specialBehavior, invalid }
 
 class SwipeDecision {
-  final SwipeResultType type;
+  final SwipeResult type;
   final List<MatchGroup> matches;
   final List<BehaviorAction> actions;
 
@@ -30,7 +30,7 @@ class SwipeDetector {
 
     if (actionsD.isNotEmpty || actionsT.isNotEmpty) {
       return SwipeDecision(
-        type: SwipeResultType.specialBehavior,
+        type: SwipeResult.specialBehavior,
         actions: [...actionsD, ...actionsT],
       );
     }
@@ -44,13 +44,13 @@ class SwipeDetector {
                        MatchDetector.hasMatchAt(grid, tCoord.row, tCoord.col);
 
       decision = hasMatch
-          ? SwipeDecision(type: SwipeResultType.match)
-          : SwipeDecision(type: SwipeResultType.invalid);
+          ? SwipeDecision(type: SwipeResult.match)
+          : SwipeDecision(type: SwipeResult.invalid);
     } else {
       final matchGroups = MatchDetector.findMatchGroups(grid);
       decision = matchGroups.isNotEmpty
-          ? SwipeDecision(type: SwipeResultType.match, matches: matchGroups)
-          : SwipeDecision(type: SwipeResultType.invalid);
+          ? SwipeDecision(type: SwipeResult.match, matches: matchGroups)
+          : SwipeDecision(type: SwipeResult.invalid);
     }
 
     _tempSwap(grid, dCoord, tCoord);

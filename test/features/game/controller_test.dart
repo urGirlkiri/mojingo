@@ -51,14 +51,14 @@ void main() {
       final originalVisual = controller.grid[0][0].emoji.visual;
       
       final d1 = controller.evaluateSwipe(TileCoordinate(row: 0, col: 0), TileCoordinate(row: 0, col: 1));
-      expect(d1.type, SwipeResultType.invalid, reason: 'Swap should be invalid in deadlock');
+      expect(d1.type, SwipeResult.invalid, reason: 'Swap should be invalid in deadlock');
       expect(controller.grid[0][0].emoji.visual, originalVisual, reason: 'Grid should revert after invalid swap');
 
       controller.grid[0][0].emoji = Emojis.fire;
       controller.grid[0][1].emoji = Emojis.fire;
       controller.grid[1][2].emoji = Emojis.fire;
       final d2 = controller.evaluateSwipe(TileCoordinate(row: 0, col: 2), TileCoordinate(row: 1, col: 2));
-      expect(d2.type, SwipeResultType.match, reason: 'Swap should create a match');
+      expect(d2.type, SwipeResult.match, reason: 'Swap should create a match');
       expect(controller.grid[0][2].emoji.visual, Emojis.fire.visual, reason: 'Matched emoji should appear at target position');
     });
 

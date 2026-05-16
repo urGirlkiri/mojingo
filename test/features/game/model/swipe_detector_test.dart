@@ -31,7 +31,7 @@ void main() {
         getSwipeBehaviors: (_, _, _, _) => [],
       );
 
-      expect(decision.type, equals(SwipeResultType.invalid));
+      expect(decision.type, equals(SwipeResult.invalid));
     });
 
     test('Should detect a match using quickCheckOnly: true', () {
@@ -48,7 +48,7 @@ void main() {
         quickCheckOnly: true, 
       );
 
-      expect(decision.type, equals(SwipeResultType.match));
+      expect(decision.type, equals(SwipeResult.match));
       expect(decision.matches, isEmpty, reason: 'QuickCheck doesn\'t return group data');
     });
 
@@ -62,7 +62,7 @@ void main() {
         quickCheckOnly: true,
       );
 
-      expect(decision.type, equals(SwipeResultType.invalid));
+      expect(decision.type, equals(SwipeResult.invalid));
     });
 
     test('Should detect a valid HORIZONTAL match-3', () {
@@ -79,7 +79,7 @@ void main() {
         getSwipeBehaviors: (_, _, _, _) => [],
       );
 
-      expect(decision.type, equals(SwipeResultType.match));
+      expect(decision.type, equals(SwipeResult.match));
       expect(decision.matches.first.emoji, equals(Emojis.fire));
       expect(decision.matches.first.coordinates.length, equals(3));
     });
@@ -98,7 +98,7 @@ void main() {
         getSwipeBehaviors: (_, _, _, _) => [],
       );
 
-      expect(decision.type, equals(SwipeResultType.match));
+      expect(decision.type, equals(SwipeResult.match));
       expect(decision.matches.any((g) => g.emoji == Emojis.fire), isTrue);
     });
 
@@ -118,7 +118,7 @@ void main() {
         },
       );
 
-      expect(decision.type, equals(SwipeResultType.specialBehavior), 
+      expect(decision.type, equals(SwipeResult.specialBehavior), 
         reason: 'Behaviors should intercept the evaluation before matches are checked');
       expect(decision.actions, isNotEmpty);
       expect(decision.matches, isEmpty);
