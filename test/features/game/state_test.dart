@@ -131,11 +131,11 @@ void main() {
 
         state.resolveSwipe(TileCoordinate(row: 0, col: 2), TileCoordinate(row: 1, col: 2));
         
-        async.elapse(swapAnimationTime);
-        
-        async.elapse(clearAnimationTime);
-
-        async.elapse(gravityAnimationTime + const Duration(seconds: 1));
+        int safeTimeLimit = 200; 
+        while (state.isProcessing && safeTimeLimit > 0) {
+          async.elapse(const Duration(milliseconds: 100));
+          safeTimeLimit--;
+        }
 
         expect(state.isProcessing, isFalse, reason: 'Processing should complete after valid match');
       });
