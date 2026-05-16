@@ -4,6 +4,7 @@ import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/alchemy/recipe_book.dart';
+import 'package:grimoji/features/alchemy/reactions/reaction.dart';
 import 'package:grimoji/features/game/controller.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';
@@ -110,7 +111,6 @@ class GameState extends ChangeNotifier {
           break; 
         }
 
-        _log.info('Processing ${matchedGroups.length} groups...');
         _categorizeAnimations(matchedGroups, isFirstMatch, targetCoordinate);
         notifyListeners();
         await Future.delayed(clearAnimationTime);
@@ -211,7 +211,6 @@ class GameState extends ChangeNotifier {
 
     isShuffling = false;
     if (!_isDisposed) {
-      _log.info('Shuffle complete - restarting hint timer');
       notifyListeners();
       resetTimer();
     }
@@ -237,7 +236,6 @@ class GameState extends ChangeNotifier {
 
       notifyListeners();
     } else {
-      _log.info('No hint available - no valid moves found');
       shuffleBoard();
     }
   }
@@ -305,6 +303,7 @@ class GameState extends ChangeNotifier {
   ) {
     for (var groupMatch in matchedGroups) {
       final recipe = RecipeBook.getRecipeFor(groupMatch.emoji);
+      final reaction = RecipeBook.getReactionFor(groupMatch.emoji);
 
       if (recipe != null && groupMatch.coordinates.length >= recipe.requiredAmount) {
         TileCoordinate catalyst =
@@ -314,7 +313,6 @@ class GameState extends ChangeNotifier {
 
         for (var coord in groupMatch.coordinates) {
           final tile = gameController.grid[coord.row][coord.col];
-
           tile.isMergePoint = coord == catalyst;
 
           if (!tile.isMergePoint) {
@@ -325,6 +323,8 @@ class GameState extends ChangeNotifier {
             tile.morphTarget = recipe.yields; 
           }
         }
+      } else if (reaction != null && reaction.type == ReactionType.explosive) {
+        continue;
       } else {
         for (var coord in groupMatch.coordinates) {
           gameController.grid[coord.row][coord.col].isExploding = true;

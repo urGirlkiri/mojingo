@@ -60,6 +60,8 @@ class AlchemyEngine {
       groupedMatches.putIfAbsent(emoji, () => {}).add(match);
     }
 
+    bool mergeHappened = false;
+
     groupedMatches.forEach((emoji, coords) {
       state.resolveEmoji(emoji, coords.length);
 
@@ -67,6 +69,7 @@ class AlchemyEngine {
       
       if (recipe != null && coords.length >= recipe.requiredAmount) {
         _executeMerge(recipe, coords, state, tilesToDestroy, mergePoint);
+        mergeHappened = true;
         return;
       }
 
@@ -86,7 +89,9 @@ class AlchemyEngine {
       tilesToDestroy.addAll(coords);
     });
 
-    _triggerAdjacentBombs(matches);
+    if (!mergeHappened) {
+      _triggerAdjacentBombs(matches);
+    }
   }
 
   void _triggerAdjacentBombs(Set<TileCoordinate> matches) {

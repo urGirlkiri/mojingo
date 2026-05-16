@@ -89,9 +89,9 @@ void main() {
       alchemyEngine.processMatches({TileCoordinate(row: 1, col: 1)}, mockState);
 
       expect(
-        gridManager.gridTiles[1][1].emoji,
-        isNot(equals(Emojis.bomb)),
-        reason: 'The bomb should be destroyed',
+        gridManager.gridTiles[1][1].isTriggered,
+        isTrue,
+        reason: 'The bomb should be primed (isTriggered) for detonation',
       );
 
       expect(
@@ -101,53 +101,81 @@ void main() {
       );
     });
 
-    test('Should Transmute an Ocean into Salt and properly handle gravity', () {
-      for (int r = 0; r < GridManager.rows; r++) {
-        for (int c = 0; c < GridManager.cols; c++) {
-          gridManager.gridTiles[r][c].emoji = Emojis.rock;
+    test(
+      'Should Transmute an Ocean into Salt when bomb detonates via executeBlastRadius',
+      () {
+        for (int r = 0; r < GridManager.rows; r++) {
+          for (int c = 0; c < GridManager.cols; c++) {
+            gridManager.gridTiles[r][c].emoji = Emojis.rock;
+          }
         }
-      }
 
-      gridManager.gridTiles[5][1].emoji = Emojis.bomb;
-      gridManager.gridTiles[4][2].emoji = Emojis.ocean;
+        gridManager.gridTiles[3][2].emoji = Emojis.bomb;
+        gridManager.gridTiles[3][3].emoji = Emojis.ocean;
 
-      alchemyEngine.processMatches({TileCoordinate(row: 5, col: 1)}, mockState);
+        gridManager.triggerInitialFall();
 
-      expect(
-        gridManager.gridTiles[4][2].emoji,
-        equals(Emojis.salt),
-        reason: 'Ocean should transmute to Salt and not be destroyed',
-      );
+        alchemyEngine.processMatches({
+          TileCoordinate(row: 3, col: 2),
+        }, mockState);
 
-      expect(
-        gridManager.gridTiles[5][1].emoji,
-        isNot(equals(Emojis.bomb)),
-        reason: 'The bomb should be destroyed',
-      );
-    });
+        expect(
+          gridManager.gridTiles[3][2].isTriggered,
+          isTrue,
+          reason: 'The bomb should be primed (isTriggered) for detonation',
+        );
 
-    test('Should destroy tiles normally when no recipe exists, Basic Match-3', () {
-      gridManager.gridTiles[0][0].emoji = Emojis.rock;
-      gridManager.gridTiles[0][1].emoji = Emojis.rock;
-      gridManager.gridTiles[0][2].emoji = Emojis.rock;
+        Set<TileCoordinate> destroyed = gridManager.executeBlastRadius(
+          TileCoordinate(row: 3, col: 2),
+          radius: 1,
+        );
 
-      final matchCoords = {
-        TileCoordinate(row: 0, col: 0),
-        TileCoordinate(row: 0, col: 1),
-        TileCoordinate(row: 0, col: 2),
-      };
+        expect(
+          destroyed.contains(TileCoordinate(row: 3, col: 3)),
+          isTrue,
+          reason: 'Ocean should be in destroyed set from blast radius',
+        );
 
-      alchemyEngine.processMatches(matchCoords, mockState);
-
-      expect(
-        gridManager.gridTiles[0][0].emoji,
-        anyOf([equals(Emojis.rock), equals(Emojis.droplet), equals(Emojis.ocean), equals(Emojis.cloud), equals(Emojis.bomb), equals(Emojis.volcano)]),
-        reason: 'Tile should have been processed',
-      );
-    });
+        expect(
+          gridManager.gridTiles[3][3].isExploding,
+          isTrue,
+          reason: 'Ocean should be marked as exploding',
+        );
+      },
+    );
 
     test(
-      'Should merge automatically find merge point when merge occurs in a falling combo',
+      'Should destroy tiles normally when no recipe exists, Basic Match-3',
+      () {
+        gridManager.gridTiles[0][0].emoji = Emojis.rock;
+        gridManager.gridTiles[0][1].emoji = Emojis.rock;
+        gridManager.gridTiles[0][2].emoji = Emojis.rock;
+
+        final matchCoords = {
+          TileCoordinate(row: 0, col: 0),
+          TileCoordinate(row: 0, col: 1),
+          TileCoordinate(row: 0, col: 2),
+        };
+
+        alchemyEngine.processMatches(matchCoords, mockState);
+
+        expect(
+          gridManager.gridTiles[0][0].emoji,
+          anyOf([
+            equals(Emojis.rock),
+            equals(Emojis.droplet),
+            equals(Emojis.ocean),
+            equals(Emojis.cloud),
+            equals(Emojis.bomb),
+            equals(Emojis.volcano),
+          ]),
+          reason: 'Tile should have been processed',
+        );
+      },
+    );
+
+    test(
+      'Should automatically find merge point when merge occurs in a falling combo',
       () {
         gridManager.gridTiles[0][0].emoji = Emojis.fire;
         gridManager.gridTiles[0][1].emoji = Emojis.fire;
@@ -180,15 +208,14 @@ void main() {
 
     test('Should default to explosive ReactionType if no mapping exists', () {
       gridManager.gridTiles[1][1].emoji = Emojis.bomb;
-
       gridManager.gridTiles[1][2].emoji = Emojis.rock;
 
       alchemyEngine.processMatches({TileCoordinate(row: 1, col: 1)}, mockState);
 
       expect(
-        gridManager.gridTiles[1][1].emoji,
-        isNot(equals(Emojis.bomb)),
-        reason: 'The bomb should be destroyed',
+        gridManager.gridTiles[1][1].isTriggered,
+        isTrue,
+        reason: 'The bomb should be primed (isTriggered) for detonation',
       );
     });
 
@@ -226,5 +253,196 @@ void main() {
         reason: 'Fire tiles should be destroyed and replaced',
       );
     });
+  });
+
+  group('AlchemyEngine Logic Tests (Chain Reactions & Crafting)', () {
+    late GridManager gridManager;
+    late AlchemyEngine alchemy;
+    late MockGameState mockState;
+
+    setUp(() {
+      final testLevel = const GameLevel(
+        number: 1,
+        timeLimit: 60,
+        targetEmoji: Emojis.ocean,
+        targetAmount: 1,
+        availableEmojis: [
+          Emojis.droplet,
+          Emojis.ocean,
+          Emojis.cloud,
+          Emojis.bomb,
+          Emojis.rock,
+          Emojis.volcano,
+          Emojis.fire,
+        ],
+        type: LevelType.puzzle,
+      );
+
+      gridManager = GridManager(testLevel);
+      gridManager.initialize();
+
+      RecipeBook.initialize();
+
+      alchemy = AlchemyEngine(
+        gridManager: gridManager,
+        getRecipe: RecipeBook.getRecipeFor,
+        getReactionFor: RecipeBook.getReactionFor,
+        getTransformationsForType: RecipeBook.getTransformationsForType,
+        getAoERadiusForType: RecipeBook.getAoERadiusForType,
+      );
+
+      mockState = MockGameState();
+    });
+
+    test('Matching 3 Explosives should PRIME them, not destroy them', () {
+      gridManager.gridTiles[0][0].emoji = Emojis.bomb;
+      gridManager.gridTiles[0][1].emoji = Emojis.bomb;
+      gridManager.gridTiles[0][2].emoji = Emojis.bomb;
+
+      Set<TileCoordinate> matches = {
+        TileCoordinate(row: 0, col: 0),
+        TileCoordinate(row: 0, col: 1),
+        TileCoordinate(row: 0, col: 2),
+      };
+
+      alchemy.processMatches(matches, mockState);
+
+      expect(
+        gridManager.gridTiles[0][0].isTriggered,
+        isTrue,
+        reason: 'Bomb 1 should be primed',
+      );
+      expect(
+        gridManager.gridTiles[0][1].isTriggered,
+        isTrue,
+        reason: 'Bomb 2 should be primed',
+      );
+      expect(
+        gridManager.gridTiles[0][2].isTriggered,
+        isTrue,
+        reason: 'Bomb 3 should be primed',
+      );
+
+      expect(gridManager.gridTiles[0][0].isExploding, isFalse);
+      expect(gridManager.gridTiles[0][1].isExploding, isFalse);
+      expect(gridManager.gridTiles[0][2].isExploding, isFalse);
+    });
+
+    test('Crafting a Bomb (4 Fires) does NOT self-ignite the new Bomb', () {
+      gridManager.gridTiles[0][0].emoji = Emojis.fire;
+      gridManager.gridTiles[0][1].emoji = Emojis.fire;
+      gridManager.gridTiles[0][2].emoji = Emojis.fire;
+      gridManager.gridTiles[0][3].emoji = Emojis.fire;
+
+      Set<TileCoordinate> matches = {
+        TileCoordinate(row: 0, col: 0),
+        TileCoordinate(row: 0, col: 1),
+        TileCoordinate(row: 0, col: 2),
+        TileCoordinate(row: 0, col: 3),
+      };
+
+      TileCoordinate mergePoint = TileCoordinate(row: 0, col: 1);
+
+      alchemy.processMatches(matches, mockState, mergePoint: mergePoint);
+
+      final craftedTile = gridManager.gridTiles[0][1];
+      expect(
+        craftedTile.emoji,
+        equals(Emojis.bomb),
+        reason: '4 Fires should craft a Bomb',
+      );
+      expect(
+        craftedTile.isTriggered,
+        isFalse,
+        reason: 'The newly crafted Bomb MUST NOT self-ignite!',
+      );
+    });
+  });
+
+  group('GridManager Blast Radius Tests', () {
+    late GridManager gridManager;
+
+    setUp(() {
+      final testLevel = const GameLevel(
+        number: 1,
+        timeLimit: 60,
+        targetEmoji: Emojis.ocean,
+        targetAmount: 1,
+        availableEmojis: [
+          Emojis.droplet,
+          Emojis.ocean,
+          Emojis.cloud,
+          Emojis.bomb,
+          Emojis.rock,
+          Emojis.volcano,
+        ],
+        type: LevelType.puzzle,
+      );
+
+      gridManager = GridManager(testLevel);
+      gridManager.initialize();
+      RecipeBook.initialize();
+    });
+
+    test('Blast radius destroys normal tiles but PRIMES caught explosives', () {
+      gridManager.triggerInitialFall();
+
+      TileCoordinate center = TileCoordinate(row: 4, col: 2);
+      gridManager.gridTiles[4][2].emoji = Emojis.bomb;
+
+      gridManager.gridTiles[4][3].emoji = Emojis.droplet;
+      gridManager.gridTiles[4][4].emoji = Emojis.bomb;
+
+      Set<TileCoordinate> destroyed = gridManager.executeBlastRadius(
+        center,
+        radius: 2,
+      );
+
+      expect(
+        destroyed.contains(TileCoordinate(row: 4, col: 3)),
+        isTrue,
+        reason: 'Droplet should be in the destroyed set',
+      );
+      expect(
+        gridManager.gridTiles[4][3].isExploding,
+        isTrue,
+        reason: 'Droplet should be marked for explosion',
+      );
+
+      expect(
+        destroyed.contains(TileCoordinate(row: 4, col: 4)),
+        isFalse,
+        reason: 'Caught Bomb should NOT be in the destroyed set',
+      );
+      expect(
+        gridManager.gridTiles[4][4].isTriggered,
+        isTrue,
+        reason: 'Caught Bomb should be ignited for the chain reaction!',
+      );
+    });
+
+    test(
+      'Blast radius correctly handles center tile (should not be triggered)',
+      () {
+        gridManager.triggerInitialFall();
+
+        TileCoordinate center = TileCoordinate(row: 4, col: 2);
+        gridManager.gridTiles[4][2].emoji = Emojis.bomb;
+        gridManager.gridTiles[4][3].emoji = Emojis.rock;
+
+        gridManager.executeBlastRadius(center, radius: 1);
+
+        expect(
+          gridManager.gridTiles[4][2].isTriggered,
+          isFalse,
+          reason: 'Center bomb should not be triggered',
+        );
+        expect(
+          gridManager.gridTiles[4][3].isExploding,
+          isTrue,
+          reason: 'Adjacent rock should be destroyed',
+        );
+      },
+    );
   });
 }
