@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/game/board/widgets/hit_nudge.dart';
@@ -8,8 +9,6 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 class TileWidget extends StatelessWidget {
-  static const movementDuration = Duration(milliseconds: 800);
-
   const TileWidget({
     super.key,
     required this.tile,
@@ -30,10 +29,9 @@ class TileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
-      key: ValueKey(tile.id),
-      duration: movementDuration,
+      duration: swapAnimationTime,
       curve: Curves.easeOutCubic,
-      left: leftPixel + (tile.isExploding || tile.isMerging ? -20 : 0),
+      left: leftPixel,
       top: topPixel,
       width: tWidth,
       height: tHeight,
@@ -50,10 +48,22 @@ class TileWidget extends StatelessWidget {
     }
 
     final palette = context.read<Palette>();
+    
+    final displayEmoji = tile.morphTarget ?? tile.emoji;
 
-    Widget emojiUI = EmojiWidget.svg(
-      path: tile.emoji.svg,
-      size: tWidth * 0.8,
+    Widget emojiUI = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: animation, child: child),
+        );
+      },
+      child: EmojiWidget.svg(
+        key: ValueKey(displayEmoji.visual), 
+        path: displayEmoji.svg,
+        size: tWidth * 0.8,
+      ),
     );
 
     emojiUI = HintNudge(
@@ -65,31 +75,30 @@ class TileWidget extends StatelessWidget {
       child: emojiUI,
     );
 
-    double targetScale = 1;
-
-    if (tile.isExploding) {
-      targetScale = 0.0;
-    } else if (tile.isMerging) {
-      targetScale = 0.0;
+    double targetScale = 1.0;
+    if (tile.isExploding || tile.isMerging) {
+      targetScale = 0.0; 
     } else if (tile.isMergePoint) {
-      targetScale = 1.3;
+      targetScale = 1.3; 
     }
 
     Widget scaledEmoji = AnimatedScale(
       scale: targetScale,
-      duration: const Duration(milliseconds: 300),
-      curve: tile.isMerging ? Curves.elasticOut : Curves.easeInBack,
+      duration: const Duration(milliseconds: 200),
+      curve: tile.isMergePoint ? Curves.elasticOut : Curves.easeInBack,
       child: emojiUI,
     );
 
-    if (!tile.isExploding && !tile.isMerging) {
+    if (!tile.isExploding && !tile.isMergePoint) {
       return scaledEmoji;
     }
 
     return Stack(
       alignment: Alignment.center,
+      clipBehavior: Clip.none,
       children: [
-        scaledEmoji, 
+        scaledEmoji,
+        
         if (tile.isExploding)
           Lottie.asset(
             "assets/lottie/puff.json",
@@ -105,16 +114,6 @@ class TileWidget extends StatelessWidget {
                 ], value: ColorFilter.mode(palette.trueWhite, BlendMode.srcATop)),
               ],
             ),
-          ),
-
-        if (tile.isMerging && emoji != null)
-          Lottie.asset(
-            emoji!.lottie,
-            width: tWidth * 1.2,
-            height: tHeight * 1.2,
-            fit: BoxFit.contain,
-            animate: true,
-            repeat: false, 
           ),
       ],
     );

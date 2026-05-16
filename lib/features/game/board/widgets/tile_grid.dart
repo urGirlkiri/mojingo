@@ -100,6 +100,7 @@ class TileGrid extends StatelessWidget {
 
         tileWidgets.add(
           TileWidget(
+            key: ValueKey(tile.id),
             tile: tile,
             leftPixel: leftPixel,
             topPixel: topPixel,

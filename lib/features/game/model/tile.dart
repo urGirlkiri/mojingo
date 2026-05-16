@@ -18,6 +18,7 @@ class Tile {
   bool hasFlown = false;
   bool isFlying = false; 
   bool isHinting = false;
+  GameEmoji? morphTarget;
   
   Tile({required this.coordinate, required this.emoji, String? id, this.behavior})
     : id = id ?? const Uuid().v4();
@@ -41,6 +42,7 @@ class Tile {
     newTile.isHinting = isHinting;
     newTile.hintPartner = hintPartner;
     newTile.isMergePoint = isMergePoint;
+    newTile.morphTarget = morphTarget;
     
     return newTile;
   }
@@ -52,7 +54,8 @@ class Tile {
     hasFlown = false; 
     isFlying = false; 
     isHinting = false;   
-    hintPartner = null;  
+    hintPartner = null;
+    morphTarget = null;  
   }
 
   void clearBehavior() {

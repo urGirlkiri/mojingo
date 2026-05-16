@@ -116,7 +116,7 @@ class GameState extends ChangeNotifier {
         mergePoint: isFirstMatch ? targetCoordinate : null,
       );
 
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 400));
       if (_isDisposed) return;
 
       bool collected = gameController.collectFlyingTiles();
@@ -285,6 +285,8 @@ class GameState extends ChangeNotifier {
             tile.isMerging = true;
             tile.coordinate.col = catalyst.col;
             tile.coordinate.row = catalyst.row;
+          } else {
+            tile.morphTarget = recipe.yields; 
           }
         }
       } else {
