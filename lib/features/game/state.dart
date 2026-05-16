@@ -28,7 +28,6 @@ class GameState extends ChangeNotifier {
   List<TileCoordinate>? _currentHints;
 
   void _startHintTimer() {
-    _log.info('Hint timer started (Waiting 5 seconds)...');
     _hintTimer?.cancel();
     _hintTimer = Timer(const Duration(seconds: 5), _triggerHint);
   }
@@ -37,12 +36,10 @@ class GameState extends ChangeNotifier {
     if (_isDisposed) return;
 
     if (_isGameOver) {
-      _log.info('Game Over - Timer disabled');
       _hintTimer?.cancel();
       return;
     }
 
-    _log.info('Timer reset - clearing hints and restarting countdown');
     _clearHint();
     if (!isProcessing && !isShuffling) {
       _startHintTimer();
@@ -60,14 +57,12 @@ class GameState extends ChangeNotifier {
   }
 
   void startInitialDrop() {
-    _log.info('Starting to drop emojis');
     gameController.triggerInitialFall();
     notifyListeners();
     resetTimer();
   }
 
   void setGameOver() {
-    _log.info('Game Over - stopping timers and disabling interactions');
     _isGameOver = true;
     _hintTimer?.cancel();
     isProcessing = false;
@@ -79,7 +74,6 @@ class GameState extends ChangeNotifier {
     TileCoordinate targetCoordinate,
   ) async {
     if (_isGameOver) {
-      _log.info('Game Over - swipe ignored');
       return;
     }
 
@@ -188,17 +182,12 @@ class GameState extends ChangeNotifier {
   }
 
   void _triggerHint() {
-    _log.info('Hint timer fired - checking for hint move');
     if (isProcessing || isShuffling || _isDisposed || _isGameOver) {
-      _log.info(
-        'Hint skipped - processing=$isProcessing, shuffling=$isShuffling, disposed=$_isDisposed, gameOver=$_isGameOver',
-      );
       return;
     }
 
     _currentHints = gameController.getHintMove();
     if (_currentHints != null) {
-      _log.info('Hint found at ${_currentHints![0]} and ${_currentHints![1]}');
       Tile tileA =
           gameController.grid[_currentHints![0].row][_currentHints![0].col];
       Tile tileB =
