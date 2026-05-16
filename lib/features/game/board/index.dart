@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/palette.dart';
+import 'package:grimoji/features/game/board/models/sparkle_effect.dart';
 import 'package:grimoji/features/game/board/widgets/board_grid.dart';
 import 'package:grimoji/features/game/board/metrics.dart';
 import 'package:grimoji/features/game/board/widgets/tile_grid.dart';
 import 'package:grimoji/features/game/model/tile.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/level/state.dart';
+import 'package:lottie/lottie.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +27,8 @@ class _GameBoardState extends State<GameBoard> {
 
   Tile? _draggedTile;
   Offset? _dragStartPosition;
+  
+  final List<SparkleEffect> _sparkles = [];
 
   @override
   void initState() {
@@ -52,12 +57,32 @@ class _GameBoardState extends State<GameBoard> {
     }
   }
 
+  void _triggerSparkle(Offset localPosition) {
+    final sparkle = SparkleEffect(position: localPosition);
+    setState(() {
+      _sparkles.add(sparkle);
+    });
+
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) {
+        setState(() {
+          _sparkles.removeWhere((s) => s.id == sparkle.id);
+        });
+      }
+    });
+  }
+
   void onPanStart(DragStartDetails details, BuildContext contex,) {
     _log.info('Touch Detected');
     final metrics = context.read<BoardMetrics>();
     final levelstate = context.read<LevelState>();
 
     if (!metrics.isReady) return;
+
+    if (levelstate.gameState.isProcessing || levelstate.gameState.isShuffling) {
+      _triggerSparkle(details.localPosition);
+      return;
+    }
 
     int col = (details.localPosition.dx / metrics.tileWidth!).floor();
     int row = (details.localPosition.dy / metrics.tileHeight!).floor();
@@ -66,13 +91,13 @@ class _GameBoardState extends State<GameBoard> {
         row < levelstate.gameState.gameController.getRowCount() &&
         col >= 0 &&
         col < levelstate.gameState.gameController.getColCount()) {
-          levelstate.gameState.resetTimer();
+      levelstate.gameState.resetTimer();
       _draggedTile = levelstate.gameState.gameController.grid[row][col];
       _dragStartPosition = details.localPosition;
     }
   }
 
-void onPanUpdate(DragUpdateDetails details, LevelState levelState) {
+  void onPanUpdate(DragUpdateDetails details, LevelState levelState) {
     if (_draggedTile == null || _dragStartPosition == null) return;
 
     final dx = details.localPosition.dx - _dragStartPosition!.dx;
@@ -93,13 +118,13 @@ void onPanUpdate(DragUpdateDetails details, LevelState levelState) {
           targetRow < gameController.getRowCount() &&
           targetCol >= 0 &&
           targetCol < gameController.getColCount()) {
-          
-      levelState.gameState.resolveSwipe(
+        levelState.gameState.resolveSwipe(
           _draggedTile!.coordinate,
           TileCoordinate(row: targetRow, col: targetCol),
         );
       } else {
         _log.info('Swipe hit the boarder! Ignored.');
+        _triggerSparkle(details.localPosition);
       }
 
       _draggedTile = null;
@@ -165,10 +190,11 @@ void onPanUpdate(DragUpdateDetails details, LevelState levelState) {
                       calculatedSingleTileWidth / calculatedSingleTileHeight;
 
                   return GestureDetector(
-                    onPanStart: (details) => levelstate.gameState.isProcessing ? null : onPanStart(details, context),
+                    onPanStart: (details) => onPanStart(details, context),
                     onPanUpdate: (details) => onPanUpdate(details, levelstate),
                     child: Stack(
                       key: _boardKey,
+                      clipBehavior: Clip.none,
                       children: [
                         BoardGrid(
                           gridColumns: gridColumns,
@@ -178,6 +204,25 @@ void onPanUpdate(DragUpdateDetails details, LevelState levelState) {
                           palette: palette,
                         ),
                         TileGrid(),
+                        
+                        ..._sparkles.map((sparkle) {
+                          return Positioned(
+                            key: ValueKey(sparkle.id),
+                            left: sparkle.position.dx - 50,
+                            top: sparkle.position.dy - 50,
+                            child: IgnorePointer( 
+                              child: SizedBox(
+                                width: 100,
+                                height: 100,
+                                child: Lottie.asset(
+                                  'assets/lottie/stars.json',
+                                  repeat: false,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   );
