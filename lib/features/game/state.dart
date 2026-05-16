@@ -234,13 +234,13 @@ class GameState extends ChangeNotifier {
     TileCoordinate dCoord,
     TileCoordinate tCoord,
   ) async {
-    gameController.swapTiles(dCoord, tCoord);
-    notifyListeners();
-
     final decision = gameController.evaluateSwipe(dCoord, tCoord);
 
     if (decision.type == SwipeResult.invalid) {
       _log.info('Invalid swap - playing snap-back animation');
+      
+      gameController.swapTiles(dCoord, tCoord);
+      notifyListeners();
 
       await Future.delayed(swapAnimationTime);
       if (_isDisposed) return [];
@@ -255,6 +255,8 @@ class GameState extends ChangeNotifier {
       }
       return [];
     } else {
+      notifyListeners();
+      await Future.delayed(swapAnimationTime);
       if (_isDisposed) return [];
 
       if (decision.type == SwipeResult.specialBehavior) {

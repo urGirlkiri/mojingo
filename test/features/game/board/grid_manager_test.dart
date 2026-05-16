@@ -113,5 +113,43 @@ void main() {
       });
     });
 
+    group('Swap & Memory Tests', () {
+      test('swapTiles correctly moves tiles and updates coordinates via copyWith', () {
+        gridManager.gridTiles[0][0].emoji = Emojis.fire;
+        gridManager.gridTiles[0][1].emoji = Emojis.droplet;
+
+        final tileA = gridManager.gridTiles[0][0];
+        final tileB = gridManager.gridTiles[0][1];
+
+        final idA = tileA.id;
+        final idB = tileB.id;
+        final hashA = tileA.hashCode;
+        final hashB = tileB.hashCode;
+
+        gridManager.swapTiles(
+          TileCoordinate(row: 0, col: 0),
+          TileCoordinate(row: 0, col: 1),
+        );
+
+        final newTileA = gridManager.gridTiles[0][1];
+        final newTileB = gridManager.gridTiles[0][0]; 
+
+        expect(newTileA.emoji, Emojis.fire, reason: 'Tile A did not move to column 1');
+        expect(newTileB.emoji, Emojis.droplet, reason: 'Tile B did not move to column 0');
+
+        expect(newTileA.hashCode, isNot(equals(hashA)), reason: 'Tile A was mutated instead of copied!');
+        expect(newTileB.hashCode, isNot(equals(hashB)), reason: 'Tile B was mutated instead of copied!');
+
+        expect(newTileA.id, equals(idA), reason: 'Tile A lost its unique ID during copyWith');
+        expect(newTileB.id, equals(idB), reason: 'Tile B lost its unique ID during copyWith');
+
+        expect(newTileA.coordinate.row, 0);
+        expect(newTileA.coordinate.col, 1);
+        
+        expect(newTileB.coordinate.row, 0);
+        expect(newTileB.coordinate.col, 0);
+      });
+    });
+
   });
 }

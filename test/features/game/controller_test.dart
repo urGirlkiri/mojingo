@@ -88,5 +88,36 @@ void main() {
       );
       expect(() => controller.spawnTiles({}, dummyState), returnsNormally, reason: 'spawnTiles should execute');
     });
+
+    group('Swipe Evaluation Tests', () {
+      test('evaluateSwipe should REJECT invalid moves and NOT swap underlying grid data', () {
+        TestHelpers.genDeadLockGrid(controller);
+        
+        final decision = controller.evaluateSwipe(
+          TileCoordinate(row: 0, col: 0), 
+          TileCoordinate(row: 0, col: 1)
+        );
+
+        expect(decision.type, SwipeResult.invalid);
+
+      });
+
+      test('evaluateSwipe should ACCEPT valid Match-3s and PERMANENTLY swap underlying grid data', () {
+        controller.grid[0][0].emoji = Emojis.fire; 
+        controller.grid[0][1].emoji = Emojis.droplet; 
+        controller.grid[0][2].emoji = Emojis.fire;
+        controller.grid[0][3].emoji = Emojis.fire;
+
+        final decision = controller.evaluateSwipe(
+          TileCoordinate(row: 0, col: 0), 
+          TileCoordinate(row: 0, col: 1)
+        );
+
+        expect(decision.type, SwipeResult.match);
+
+        expect(controller.grid[0][0].emoji, Emojis.droplet, reason: 'Engine failed to commit the valid swap');
+        expect(controller.grid[0][1].emoji, Emojis.fire, reason: 'Engine failed to commit the valid swap');
+      });
+    });
   });
 }
