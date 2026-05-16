@@ -56,24 +56,17 @@ class GridManager {
     return candidate;
   }
 
-  void swapTiles(TileCoordinate A, TileCoordinate B) {
-    final targetRowA = B.row;
-    final targetColA = B.col;
-    final targetRowB = A.row;
-    final targetColB = A.col;
+  void swapTiles(TileCoordinate aCoord, TileCoordinate bCoord) {
+    Tile tileA = gridTiles[aCoord.row][aCoord.col];
+    Tile tileB = gridTiles[bCoord.row][bCoord.col];
 
-    Tile tileA = gridTiles[A.row][A.col];
-    Tile tileB = gridTiles[B.row][B.col];
+    gridTiles[bCoord.row][bCoord.col] = tileA.copyWith(
+      coordinate: TileCoordinate(row: bCoord.row, col: bCoord.col),
+    );
 
-    gridTiles[targetRowA][targetColA] = tileA; 
-    gridTiles[targetRowB][targetColB] = tileB; 
-
-    
-    tileA.coordinate.row = targetRowA;
-    tileA.coordinate.col = targetColA;
-
-    tileB.coordinate.row = targetRowB;
-    tileB.coordinate.col = targetColB;
+    gridTiles[aCoord.row][aCoord.col] = tileB.copyWith(
+      coordinate: TileCoordinate(row: aCoord.row, col: aCoord.col),
+    );
   }
 
   void triggerInitialFall() {

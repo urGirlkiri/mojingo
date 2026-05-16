@@ -35,11 +35,11 @@ class GameState extends ChangeNotifier {
 
   void resetTimer() {
     if (_isDisposed) return;
-    
+
     if (_isGameOver) {
       _log.info('Game Over - Timer disabled');
       _hintTimer?.cancel();
-      return; 
+      return;
     }
 
     _log.info('Timer reset - clearing hints and restarting countdown');
@@ -82,7 +82,7 @@ class GameState extends ChangeNotifier {
       _log.info('Game Over - swipe ignored');
       return;
     }
-    
+
     isProcessing = true;
     resetTimer();
     notifyListeners();
@@ -93,8 +93,8 @@ class GameState extends ChangeNotifier {
     );
 
     if (matchGroups.isEmpty) {
-      hasTargetCombo = false; 
-      
+      hasTargetCombo = false;
+
       isProcessing = false;
       if (!_isDisposed) {
         notifyListeners();
@@ -141,18 +141,18 @@ class GameState extends ChangeNotifier {
 
     if (!gameController.hasPossibleMoves()) {
       _log.info('NO MOVES LEFT!  Shuffling...');
-      await shuffleBoard(); 
+      await shuffleBoard();
     }
 
     _log.info('Processing After Turn Emoji Behaviors...');
     gameController.processTurnEndBehaviors();
-    notifyListeners(); 
+    notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 300)); 
+    await Future.delayed(const Duration(milliseconds: 300));
     if (_isDisposed) return;
 
-    hasTargetCombo = false; 
-    
+    hasTargetCombo = false;
+
     isProcessing = false;
     if (!_isDisposed) {
       notifyListeners();
@@ -190,7 +190,9 @@ class GameState extends ChangeNotifier {
   void _triggerHint() {
     _log.info('Hint timer fired - checking for hint move');
     if (isProcessing || isShuffling || _isDisposed || _isGameOver) {
-      _log.info('Hint skipped - processing=$isProcessing, shuffling=$isShuffling, disposed=$_isDisposed, gameOver=$_isGameOver');
+      _log.info(
+        'Hint skipped - processing=$isProcessing, shuffling=$isShuffling, disposed=$_isDisposed, gameOver=$_isGameOver',
+      );
       return;
     }
 
@@ -232,35 +234,36 @@ class GameState extends ChangeNotifier {
     TileCoordinate dCoord,
     TileCoordinate tCoord,
   ) async {
+    gameController.swapTiles(dCoord, tCoord);
+    notifyListeners();
+    
     final decision = gameController.evaluateSwipe(dCoord, tCoord);
 
     if (decision.type == SwipeResultType.invalid) {
-      _log.info('Invalid Move! Playing Look-Ahead Animation.');
-      
-      gameController.swapTiles(dCoord, tCoord);
-      notifyListeners();
+      _log.info('Invalid swap - playing snap-back animation');
+
       await Future.delayed(swapAnimationTime);
       if (_isDisposed) return [];
 
       gameController.swapTiles(tCoord, dCoord);
       notifyListeners();
-      await Future.delayed(swapAnimationTime);
-      
+
       if (!_isDisposed) {
         _log.info('Invalid swap complete - restarting hint timer');
         _clearHint();
         _startHintTimer();
       }
       return [];
-    } 
-    else {
-      notifyListeners();
-      await Future.delayed(swapAnimationTime);
+    } else {
       if (_isDisposed) return [];
 
       if (decision.type == SwipeResultType.specialBehavior) {
         _log.info('Special swipe behavior triggered!');
-        gameController.executeBehaviorActions(decision.actions, dCoord.row, dCoord.col);
+        gameController.executeBehaviorActions(
+          decision.actions,
+          dCoord.row,
+          dCoord.col,
+        );
         return [];
       }
 

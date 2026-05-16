@@ -17,9 +17,30 @@ class Tile {
   bool isFlying = false; 
   bool isHinting = false;
   
-
   Tile({required this.coordinate, required this.emoji, String? id, this.behavior})
     : id = id ?? const Uuid().v4();
+
+  Tile copyWith({
+    TileCoordinate? coordinate,
+    GameEmoji? emoji,
+    EmojiBehavior? behavior,
+  }) {
+    final newTile = Tile(
+      id: id,
+      coordinate: coordinate ?? this.coordinate,
+      emoji: emoji ?? this.emoji,
+      behavior: behavior ?? this.behavior,
+    );
+    
+    newTile.isExploding = isExploding;
+    newTile.isMerging = isMerging;
+    newTile.hasFlown = hasFlown;
+    newTile.isFlying = isFlying;
+    newTile.isHinting = isHinting;
+    newTile.hintPartner = hintPartner;
+    
+    return newTile;
+  }
 
   void reset() {
     isExploding = false;
@@ -34,6 +55,6 @@ class Tile {
     behavior = null;
   }
 
-@override
+  @override
   String toString() => 'Tile(${coordinate.row}, ${coordinate.col}: ${emoji.visual})';
 }
