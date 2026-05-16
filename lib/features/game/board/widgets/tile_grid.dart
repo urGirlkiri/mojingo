@@ -2,19 +2,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/constants.dart';
-import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/game/board/metrics.dart';
 import 'package:grimoji/animations/flight.dart';
-import 'package:grimoji/features/game/board/widgets/hit_nudge.dart';
+import 'package:grimoji/features/game/board/widgets/tile_widget.dart';
 import 'package:grimoji/features/level/state.dart';
 import 'package:grimoji/features/game/model/tile.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:grimoji/widgets/emoji_widget.dart';
 
 class TileGrid extends StatelessWidget {
-  static const movementDuration = Duration(milliseconds: 800);
   static const shuffleDuration = Duration(milliseconds: 600);
 
   const TileGrid({super.key});
@@ -103,14 +99,13 @@ class TileGrid extends StatelessWidget {
             : null;
 
         tileWidgets.add(
-          _buildAnimatedTile(
-            context,
-            tile,
-            leftPixel,
-            topPixel,
-            tWidth,
-            tHeight,
-            tile.emoji,
+          TileWidget(
+            tile: tile,
+            leftPixel: leftPixel,
+            topPixel: topPixel,
+            tWidth: tWidth,
+            tHeight: tHeight,
+            emoji: tile.emoji,
           ),
         );
       }
@@ -169,87 +164,6 @@ class TileGrid extends StatelessWidget {
               offset: const Offset(-8, 0),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTileContent(
-    BuildContext context,
-    Tile tile,
-    double tWidth,
-    double tHeight,
-    GameEmoji? emoji,
-  ) {
-    if (tile.hasFlown) {
-      return const SizedBox.shrink();
-    }
-
-    final palette = context.read<Palette>();
-
-    if (tile.isExploding) {
-      return Lottie.asset(
-        "assets/lottie/puff.json",
-        width: tWidth * 500,
-        height: tHeight * 500,
-        fit: BoxFit.cover,
-        animate: true,
-        frameRate: const FrameRate(60),
-        delegates: LottieDelegates(
-          values: [
-            ValueDelegate.colorFilter([
-              '**',
-            ], value: ColorFilter.mode(palette.trueWhite, BlendMode.srcATop)),
-          ],
-        ),
-      );
-    } else if (tile.isMerging && emoji != null) {
-      return Lottie.asset(
-        emoji.lottie,
-        width: tWidth,
-        height: tHeight,
-        fit: BoxFit.fill,
-        animate: true,
-        frameRate: const FrameRate(60),
-      );
-    } else {
-      Widget emojiUI = EmojiWidget.svg(
-        path: tile.emoji.svg,
-        size: tWidth * 0.8,
-      );
-
-      return HintNudge(
-        isHinting: tile.isHinting,
-        current: tile.coordinate,
-        partner: tile.hintPartner,
-        tileWidth: tWidth,
-        tileHeight: tHeight,
-        child: emojiUI,
-      );
-    }
-  }
-
-  Widget _buildAnimatedTile(
-    BuildContext context,
-    Tile tile,
-    double leftPixel,
-    double topPixel,
-    double tWidth,
-    double tHeight,
-    GameEmoji? emoji,
-  ) {
-    return AnimatedPositioned(
-      key: ValueKey(tile.id),
-      duration: movementDuration,
-      curve: Curves.easeOutCubic,
-      left: leftPixel + (tile.isExploding || tile.isMerging ? -20 : 0),
-      top: topPixel,
-      width: tWidth,
-      height: tHeight,
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Center(
-          child: _buildTileContent(context, tile, tWidth, tHeight, emoji),
         ),
       ),
     );

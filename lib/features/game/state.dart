@@ -227,7 +227,7 @@ class GameState extends ChangeNotifier {
 
     if (decision.type == SwipeResult.invalid) {
       _log.info('Invalid swap - playing snap-back animation');
-      
+
       gameController.swapTiles(dCoord, tCoord);
       notifyListeners();
 
@@ -245,7 +245,7 @@ class GameState extends ChangeNotifier {
       return [];
     } else {
       notifyListeners();
-      await Future.delayed(swapAnimationTime);
+      await Future.delayed(Duration(milliseconds: 100) );
       if (_isDisposed) return [];
 
       if (decision.type == SwipeResult.specialBehavior) {
@@ -276,9 +276,16 @@ class GameState extends ChangeNotifier {
             ? targetCoord
             : groupMatch.coordinates.first;
 
-        for (var coord in group.coordinates) {
+        for (var coord in groupMatch.coordinates) {
           final tile = gameController.grid[coord.row][coord.col];
-          coord == catalyst ? tile.isMerging = true : tile.isExploding = true;
+
+          tile.isMergePoint = coord == catalyst;
+
+          if (!tile.isMergePoint) {
+            tile.isMerging = true;
+            tile.coordinate.col = catalyst.col;
+            tile.coordinate.row = catalyst.row;
+          }
         }
       } else {
         for (var coord in groupMatch.coordinates) {

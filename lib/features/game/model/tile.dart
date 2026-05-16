@@ -13,6 +13,8 @@ class Tile {
 
   bool isExploding = false; 
   bool isMerging = false;
+  bool isMergePoint = false;
+
   bool hasFlown = false;
   bool isFlying = false; 
   bool isHinting = false;
@@ -38,6 +40,7 @@ class Tile {
     newTile.isFlying = isFlying;
     newTile.isHinting = isHinting;
     newTile.hintPartner = hintPartner;
+    newTile.isMergePoint = isMergePoint;
     
     return newTile;
   }
@@ -45,6 +48,7 @@ class Tile {
   void reset() {
     isExploding = false;
     isMerging = false;
+    isMergePoint = false;
     hasFlown = false; 
     isFlying = false; 
     isHinting = false;   
