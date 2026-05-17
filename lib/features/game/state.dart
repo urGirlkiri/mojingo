@@ -89,8 +89,14 @@ class GameState extends ChangeNotifier {
       dCoord,
       tCoord,
     );
+    
     if (matchedGroups.isEmpty) {
-      await _finalizeTurnLifecycle();
+      hasTargetCombo = false;
+      isProcessing = false;
+      if (!isDisposed) {
+        notifyListeners();
+        assistant.resetTimer();
+      }
       return;
     }
 

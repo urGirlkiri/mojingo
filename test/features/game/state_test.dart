@@ -102,6 +102,8 @@ void main() {
           onComboFinished: () => false,
         );
 
+        TestHelpers.genDeadLockGrid(state.gameController);
+
         state.gameController.grid[0][0].emoji = Emojis.droplet;
         state.gameController.grid[0][1].emoji = Emojis.droplet;
         state.gameController.grid[1][0].emoji = Emojis.fire;
