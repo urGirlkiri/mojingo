@@ -53,8 +53,17 @@ class TileWidget extends StatelessWidget {
     final displayEmoji = tile.morphTarget ?? tile.emoji;
 
     Widget emojiUI = AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 400),
       transitionBuilder: (Widget child, Animation<double> animation) {
+        if (tile.isTransmuting) {
+          return RotationTransition(
+            turns: Tween<double>(begin: -0.5, end: 0.0).animate(animation),
+            child: FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(scale: animation, child: child),
+            ),
+          );
+        }
         return FadeTransition(
           opacity: animation,
           child: ScaleTransition(scale: animation, child: child),
@@ -130,17 +139,17 @@ class TileWidget extends StatelessWidget {
                   maxHeight: tHeight * 30,
                   child: Transform.translate(
                     offset: const Offset(1.0, 200.0),
-                  child: Transform.rotate(
+                    child: Transform.rotate(
                       angle: 180,
-                    child: Lottie.asset(
-                      "assets/lottie/explosion.json",
+                      child: Lottie.asset(
+                        "assets/lottie/explosion.json",
                         width: tWidth * 10,
                         height: tHeight * 10,
-                      fit: BoxFit.cover,
-                      animate: true,
-                      repeat: false,
+                        fit: BoxFit.cover,
+                        animate: true,
+                        repeat: false,
+                      ),
                     ),
-                  ),
                   ),
                 )
               : OverflowBox(

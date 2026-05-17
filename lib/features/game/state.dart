@@ -101,11 +101,12 @@ class GameState extends ChangeNotifier {
     bool isFirstMatch = true;
 
     while (true) {
-      
       bool hasMatches = true;
       while (hasMatches) {
-        List<MatchGroup> matchedGroups = MatchDetector.findMatchedGroups(gameController.grid);
-        
+        List<MatchGroup> matchedGroups = MatchDetector.findMatchedGroups(
+          gameController.grid,
+        );
+
         matchedGroups.removeWhere((group) {
           return group.coordinates.any((c) {
             final tile = gameController.grid[c.row][c.col];
@@ -115,65 +116,96 @@ class GameState extends ChangeNotifier {
 
         if (matchedGroups.isEmpty) {
           hasMatches = false;
-          break; 
+          break;
         }
-
         _categorizeAnimations(matchedGroups, isFirstMatch, targetCoordinate);
         notifyListeners();
+
         await Future.delayed(clearAnimationTime);
         if (_isDisposed) return;
 
-        final Set<TileCoordinate> allMatchedCoords = matchedGroups.expand((g) => g.coordinates).toSet();
-        gameController.spawnTiles(
+        final Set<TileCoordinate> allMatchedCoords = matchedGroups
+            .expand((g) => g.coordinates)
+            .toSet();
+
+        Set<TileCoordinate> reactionDestroyed = gameController.spawnTiles(
           allMatchedCoords,
           this,
           mergePoint: isFirstMatch ? targetCoordinate : null,
         );
 
-        await Future.delayed(const Duration(milliseconds: 400));
+        notifyListeners();
+
+        bool hasAoE = reactionDestroyed.any(
+          (coord) => !allMatchedCoords.any(
+            (c) => c.row == coord.row && c.col == coord.col,
+          ),
+        );
+        bool hasTransmutations = gameController.grid.any(
+          (row) => row.any((t) => t.isTransmuting),
+        );
+
+        if (hasAoE || hasTransmutations) {
+          await Future.delayed(clearAnimationTime);
+          if (_isDisposed) return;
+
+          for (int r = 0; r < gameController.getRowCount(); r++) {
+            for (int c = 0; c < gameController.getColCount(); c++) {
+              gameController.grid[r][c].isTransmuting = false;
+            }
+          }
+        }
+
+        gameController.gridManager.applyGravity(reactionDestroyed);
+
+        gameController.collectFlyingTiles();
+
+        notifyListeners();
+        await Future.delayed(const Duration(milliseconds: 50));
         if (_isDisposed) return;
 
-        bool collected = gameController.collectFlyingTiles();
-        if (collected) {
-          notifyListeners();
-        }
         gameController.triggerInitialFall();
         notifyListeners();
 
         await Future.delayed(gravityAnimationTime);
         if (_isDisposed) return;
-        
-        isFirstMatch = false; 
+
+        isFirstMatch = false;
       }
 
       List<Tile> primedBombs = gameController.getTriggeredBombs();
-      
+
       if (primedBombs.isEmpty) {
-        break; 
+        break;
       }
 
       Tile activeBomb = primedBombs.first;
-      _log.info('Detonating Bomb at ${activeBomb.coordinate}');
-      
+
       activeBomb.isTriggered = false;
       activeBomb.isExploding = true;
       notifyListeners();
-      
-      await Future.delayed(const Duration(milliseconds: 200)); 
-      
-      Set<TileCoordinate> blastedCoords = gameController.executeBlastRadius(activeBomb.coordinate);
+
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      Set<TileCoordinate> blastedCoords = gameController.executeBlastRadius(
+        activeBomb.coordinate,
+      );
       notifyListeners();
-      
-      await Future.delayed(clearAnimationTime); 
-      if (_isDisposed) return;
-      
-      gameController.gridManager.applyGravity(blastedCoords);
-      gameController.triggerInitialFall();
-      notifyListeners();
-      
-      await Future.delayed(gravityAnimationTime);
+
+      await Future.delayed(clearAnimationTime);
       if (_isDisposed) return;
 
+      gameController.gridManager.applyGravity(blastedCoords);
+
+      notifyListeners();
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (_isDisposed) return;
+
+      gameController.triggerInitialFall();
+      notifyListeners();
+
+      await Future.delayed(gravityAnimationTime);
+      if (_isDisposed) return;
     }
 
     if (!gameController.hasPossibleMoves()) {
@@ -312,7 +344,8 @@ class GameState extends ChangeNotifier {
       final recipe = RecipeBook.getRecipeFor(groupMatch.emoji);
       final reaction = RecipeBook.getReactionFor(groupMatch.emoji);
 
-      if (recipe != null && groupMatch.coordinates.length >= recipe.requiredAmount) {
+      if (recipe != null &&
+          groupMatch.coordinates.length >= recipe.requiredAmount) {
         TileCoordinate catalyst =
             (isFirstMatch && groupMatch.coordinates.contains(targetCoord))
             ? targetCoord
@@ -327,7 +360,7 @@ class GameState extends ChangeNotifier {
             tile.coordinate.col = catalyst.col;
             tile.coordinate.row = catalyst.row;
           } else {
-            tile.morphTarget = recipe.yields; 
+            tile.morphTarget = recipe.yields;
           }
         }
       } else if (reaction != null && reaction.type == ReactionType.explosive) {

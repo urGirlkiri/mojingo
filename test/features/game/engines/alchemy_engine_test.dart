@@ -245,12 +245,17 @@ void main() {
         TileCoordinate(row: 0, col: 1),
       };
 
-      alchemyEngine.processMatches(matchCoords, mockState);
+      final destroyedTiles = alchemyEngine.processMatches(matchCoords, mockState);
 
       expect(
-        gridManager.gridTiles[0][0].emoji,
-        isNot(equals(Emojis.fire)),
-        reason: 'Fire tiles should be destroyed and replaced',
+        destroyedTiles,
+        contains(TileCoordinate(row: 0, col: 0)),
+        reason: 'Fire tiles should be marked for destruction',
+      );
+      expect(
+        destroyedTiles,
+        contains(TileCoordinate(row: 0, col: 1)),
+        reason: 'Fire tiles should be marked for destruction',
       );
     });
   });

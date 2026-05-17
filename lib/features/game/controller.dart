@@ -159,8 +159,8 @@ class GameController {
     return _gridManager.collectFlyingTiles();
   }
 
-  void spawnTiles(Set<TileCoordinate> matches, GameState state, {TileCoordinate? mergePoint}) {
-    alchemy.processMatches(matches, state, mergePoint: mergePoint);
+  Set<TileCoordinate> spawnTiles(Set<TileCoordinate> matches, GameState state, {TileCoordinate? mergePoint}) {
+    return alchemy.processMatches(matches, state, mergePoint: mergePoint);
   }
 
   void processTurnEndBehaviors() {

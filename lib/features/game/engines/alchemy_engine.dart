@@ -26,7 +26,7 @@ class AlchemyEngine {
     required this.getAoERadiusForType,
   });
 
-  void processMatches(
+  Set<TileCoordinate> processMatches(
     Set<TileCoordinate> matches,
     GameState state, {
     TileCoordinate? mergePoint,
@@ -42,9 +42,11 @@ class AlchemyEngine {
       mergePoint,
     );
 
-    tilesToDestroy.removeWhere((coord) => transmutedTiles.contains(coord));
+    tilesToDestroy.removeWhere((coord) => 
+      transmutedTiles.any((t) => t.row == coord.row && t.col == coord.col)
+    );
 
-    gridManager.applyGravity(tilesToDestroy);
+    return tilesToDestroy; 
   }
 
   void _processMatches(
@@ -176,12 +178,13 @@ class AlchemyEngine {
 
             if (resultingEmoji != null) {
               targetTile.emoji = resultingEmoji;
-              targetTile.reset();
+              targetTile.reset(); 
+              targetTile.isTransmuting = true; 
               transmutedTiles.add(targetCoord);
               _log.fine('Reacted ${targetTile.emoji.visual} at $targetCoord');
               
-            } else if (!coords.any((m) => m.row == targetCoord.row && m.col == targetCoord.col)) {
-              
+            } else if (!coords.any((m) => m.row == targetCoord.row && m.col == targetCoord.col) &&
+                       !transmutedTiles.any((t) => t.row == targetCoord.row && t.col == targetCoord.col)) {
               final targetReaction = getReactionFor(targetTile.emoji);
               if (targetReaction != null && targetReaction.type == ReactionType.explosive) {
                 targetTile.isTriggered = true;

@@ -82,7 +82,6 @@ class _GameBoardState extends State<GameBoard> {
   }
 
   void onPanStart(DragStartDetails details, BuildContext contex,) {
-    _log.info('Touch Detected');
     final metrics = context.read<BoardMetrics>();
     final levelstate = context.read<LevelState>();
 
