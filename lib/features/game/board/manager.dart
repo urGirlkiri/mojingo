@@ -194,6 +194,7 @@ class GridManager {
     int radius = 2,
   }) {
     Set<TileCoordinate> destroyedTiles = {};
+    final transformations = RecipeBook.getTransformationsForType(ReactionType.explosive);
 
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
@@ -209,8 +210,14 @@ class GridManager {
           if (isExplosive && (r != center.row || c != center.col)) {
             tile.isTriggered = true;
           } else {
-            tile.isExploding = true;
-            destroyedTiles.add(TileCoordinate(row: r, col: c));
+            final resultingEmoji = transformations[tile.emoji];
+            if (resultingEmoji != null) {
+              tile.emoji = resultingEmoji;
+              tile.isTransmuting = true;
+            } else {
+              tile.isExploding = true;
+              destroyedTiles.add(TileCoordinate(row: r, col: c));
+            }
           }
         }
       }

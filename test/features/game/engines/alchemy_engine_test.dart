@@ -132,14 +132,26 @@ void main() {
 
         expect(
           destroyed.contains(TileCoordinate(row: 3, col: 3)),
+          isFalse,
+          reason: 'Ocean should NOT be in destroyed set - it transforms to salt',
+        );
+
+        expect(
+          gridManager.gridTiles[3][3].isTransmuting,
           isTrue,
-          reason: 'Ocean should be in destroyed set from blast radius',
+          reason: 'Ocean should be marked as transmuting',
         );
 
         expect(
           gridManager.gridTiles[3][3].isExploding,
-          isTrue,
-          reason: 'Ocean should be marked as exploding',
+          isFalse,
+          reason: 'Ocean should NOT be marked as exploding',
+        );
+
+        expect(
+          gridManager.gridTiles[3][3].emoji,
+          equals(Emojis.salt),
+          reason: 'Ocean should transform into salt',
         );
       },
     );
@@ -464,10 +476,21 @@ void main() {
           reason:
               'Center bomb SHOULD be in destroyed set so gravity removes it',
         );
+        // Rock should transform to volcano when hit by explosive!
+        expect(
+          gridManager.gridTiles[4][3].emoji,
+          equals(Emojis.volcano),
+          reason: 'Adjacent rock should transform into volcano',
+        );
+        expect(
+          gridManager.gridTiles[4][3].isTransmuting,
+          isTrue,
+          reason: 'Adjacent rock should be marked as transmuting',
+        );
         expect(
           gridManager.gridTiles[4][3].isExploding,
-          isTrue,
-          reason: 'Adjacent rock should be destroyed',
+          isFalse,
+          reason: 'Adjacent rock should NOT be marked as exploding',
         );
       },
     );
