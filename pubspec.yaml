@@ -49,6 +49,7 @@ flutter:
     - assets/images/map/
     - assets/images/tab/
     - assets/images/level/
+    - assets/images/grimoire/
     - assets/emojis/lottie/
     - assets/emojis/svg/
     - assets/lottie/
