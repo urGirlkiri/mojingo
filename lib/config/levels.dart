@@ -64,6 +64,8 @@ const gameLevels = [
       Emojis.crab,
     ],
     type: LevelType.puzzle,
+        skipAutoPlayer: true,
+
   ),
 
   GameLevel(
