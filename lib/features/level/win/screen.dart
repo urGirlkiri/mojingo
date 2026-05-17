@@ -6,7 +6,7 @@ import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/config/routes.dart';
 import 'package:grimoji/features/level/widgets/confetti.dart';
 import 'package:grimoji/features/level/win/flying_star.dart';
-import 'package:lottie/lottie.dart'; 
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 class WinGameScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _WinGameScreenState extends State<WinGameScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     Future.delayed(const Duration(milliseconds: 3500), () {
       if (mounted) {
         final nextLevelNumber = widget.level + 1;
@@ -68,17 +68,20 @@ class _WinGameScreenState extends State<WinGameScreen> {
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
                           shadows: [
-                            Shadow(color: palette.midnight, offset: const Offset(4, 4), blurRadius: 5),
+                            Shadow(
+                              color: palette.midnight,
+                              offset: const Offset(4, 4),
+                              blurRadius: 5,
+                            ),
                           ],
                         ),
                       ),
                     );
                   },
                 ),
-                
-                
-                const SizedBox(height: 40), 
-                
+
+                const SizedBox(height: 40),
+
                 SizedBox(
                   height: 200,
                   width: double.infinity,
@@ -90,12 +93,13 @@ class _WinGameScreenState extends State<WinGameScreen> {
                     ],
                   ),
                 ),
-                
-                Lottie.asset(
-                  'assets/lottie/star-witch.json', 
-                  height: 250, 
-                  fit: BoxFit.contain,
-                  animate: true,
+
+                Flexible(
+                  child: Lottie.asset(
+                    'assets/lottie/star-witch.json',
+                    fit: BoxFit.contain,
+                    animate: true,
+                  ),
                 ),
               ],
             ),

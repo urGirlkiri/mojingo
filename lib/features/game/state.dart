@@ -328,14 +328,15 @@ class GameState extends ChangeNotifier {
   }
 
   void _triggerComboAnnouncement() {
-    if (currentComboMultiplier == 1)
+    if (currentComboMultiplier == 1) {
       announcer.announce("Wicked!");
-    else if (currentComboMultiplier == 2)
+    } else if (currentComboMultiplier == 2) {
       announcer.announce("Diabolical!");
-    else if (currentComboMultiplier == 3)
+    } else if (currentComboMultiplier == 3) {
       announcer.announce("Sorcery!");
-    else if (currentComboMultiplier >= 4)
+    } else if (currentComboMultiplier >= 4) {
       announcer.announce("MAGICAL!!");
+    }
   }
 
   void _flagFlyingTargetEmoji(Set<TileCoordinate> coordinates) {

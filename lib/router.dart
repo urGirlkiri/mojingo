@@ -81,6 +81,17 @@ final router = GoRouter(
             ),
           ],
         ),
+
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.marketRoute,
+              name: Routes.bounties,
+              builder: (context, state) =>
+                  const Scaffold(body: Center(child: Text("Recipes"))),
+            ),
+          ],
+        ),
       ],
     ),
 
