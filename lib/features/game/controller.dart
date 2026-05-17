@@ -25,7 +25,7 @@ class GameController {
     
     alchemy = AlchemyEngine(
       gridManager: _gridManager,
-      getRecipe: RecipeBook.getRecipeFor,
+      getRecipes: RecipeBook.getRecipesFor,
       getReactionFor: RecipeBook.getReactionFor,
       getTransformationsForType: RecipeBook.getTransformationsForType,
       getAoERadiusForType: RecipeBook.getAoERadiusForType,
@@ -45,6 +45,7 @@ class GameController {
   int getColCount() => GridManager.cols;
 
   void initialize() {
+    RecipeBook.initialize();
     _gridManager.initialize();
   }
 

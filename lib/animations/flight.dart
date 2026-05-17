@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';
-import 'package:logging/logging.dart';
 
 class TargetFlightAnimator {
   static void launch({
@@ -10,21 +9,17 @@ class TargetFlightAnimator {
     required GlobalKey targetKey,
     required GameEmoji emoji,
   }) {
-    final Logger log = Logger("TargetFlightAnimator");
     if (targetKey.currentContext == null) {
-      log.info("ABORTED: Cannot find the Target Key Context!");
       return;
     }
 
     final RenderBox? targetBox =
         targetKey.currentContext?.findRenderObject() as RenderBox?;
     if (targetBox == null) {
-      log.info("ABORTED: Cannot find the Target RenderBox!");
       return;
     }
 
     final Offset endOffset = targetBox.localToGlobal(Offset.zero);
-    log.info("LAUNCHED! Flying from $startOffset to $endOffset");
 
     late OverlayEntry entry;
 

@@ -17,17 +17,36 @@ class RecipeBook {
     ElementalReactions(),
   ];
 
-  static final Map<GameEmoji, Recipe> _recipeCache = {
-    for (var recipe in allRecipes) recipe.ingredient: recipe
-  };
-
+  static final Map<GameEmoji, List<Recipe>> _recipeCache = {};
   static final Map<GameEmoji, Reaction> _triggerCache = {};
+  static bool _isInitialized = false;
 
-  static Recipe? getRecipeFor(GameEmoji emoji) {
+  static void _ensureInitialized() {
+    if (_isInitialized) return;
+    _isInitialized = true;
+    
+    for (var recipe in allRecipes) {
+      _recipeCache.putIfAbsent(recipe.ingredient, () => []).add(recipe);
+    }
+    
+    for (var list in _recipeCache.values) {
+      list.sort((a, b) => b.requiredAmount.compareTo(a.requiredAmount));
+    }
+
+    for (final reaction in allReactions) {
+      for (final trigger in reaction.triggers) {
+        _triggerCache[trigger] = reaction;
+      }
+    }
+  }
+
+  static List<Recipe>? getRecipesFor(GameEmoji emoji) {
+    _ensureInitialized();
     return _recipeCache[emoji]; 
   }
 
   static Reaction? getReactionFor(GameEmoji emoji) {
+    _ensureInitialized();
     return _triggerCache[emoji];
   }
 
@@ -46,10 +65,12 @@ class RecipeBook {
   }
 
   static void initialize() {
-    for (final reaction in allReactions) {
-      for (final trigger in reaction.triggers) {
-        _triggerCache[trigger] = reaction;
-      }
-    }
+    _ensureInitialized();
+  }
+
+  static Recipe? getRecipeFor(GameEmoji emoji) {
+    _ensureInitialized();
+    final recipes = _recipeCache[emoji];
+    return recipes?.isNotEmpty == true ? recipes!.first : null;
   }
 }

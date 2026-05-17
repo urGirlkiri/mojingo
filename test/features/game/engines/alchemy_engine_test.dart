@@ -44,7 +44,7 @@ void main() {
 
       alchemyEngine = AlchemyEngine(
         gridManager: gridManager,
-        getRecipe: RecipeBook.getRecipeFor,
+        getRecipes: RecipeBook.getRecipesFor,
         getReactionFor: RecipeBook.getReactionFor,
         getTransformationsForType: RecipeBook.getTransformationsForType,
         getAoERadiusForType: RecipeBook.getAoERadiusForType,
@@ -240,13 +240,13 @@ void main() {
     test('Should NOT merge when match size is less than requiredAmount', () {
       alchemyEngine = AlchemyEngine(
         gridManager: gridManager,
-        getRecipe: (emoji) {
+        getRecipes: (emoji) {
           if (emoji == Emojis.fire) {
-            return const Recipe(
+            return [const Recipe(
               ingredient: Emojis.fire,
               requiredAmount: 4,
               yields: Emojis.bomb,
-            );
+            )];
           }
           return null;
         },
@@ -308,7 +308,7 @@ void main() {
 
       alchemy = AlchemyEngine(
         gridManager: gridManager,
-        getRecipe: RecipeBook.getRecipeFor,
+        getRecipes: RecipeBook.getRecipesFor,
         getReactionFor: RecipeBook.getReactionFor,
         getTransformationsForType: RecipeBook.getTransformationsForType,
         getAoERadiusForType: RecipeBook.getAoERadiusForType,
@@ -410,7 +410,7 @@ void main() {
 
       alchemy = AlchemyEngine(
         gridManager: gridManager,
-        getRecipe: RecipeBook.getRecipeFor,
+        getRecipes: RecipeBook.getRecipesFor,
         getReactionFor: RecipeBook.getReactionFor,
         getTransformationsForType: RecipeBook.getTransformationsForType,
         getAoERadiusForType: RecipeBook.getAoERadiusForType,
