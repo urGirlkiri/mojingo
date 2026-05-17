@@ -8,72 +8,32 @@ import 'package:grimoji/features/alchemy/reactions/reaction.dart';
 import 'package:grimoji/features/game/controller.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';
-import 'package:grimoji/features/game/model/swipe_detector.dart';
 import 'package:grimoji/features/game/model/tile.dart';
+import 'package:grimoji/features/game/board/announcer.dart';
+import 'package:grimoji/features/game/assistant.dart';
 import 'package:logging/logging.dart';
 
 class GameState extends ChangeNotifier {
   final void Function(GameEmoji, int) onEmojiDestroyed;
   final bool Function() onComboFinished;
-
   late final GameController gameController;
   final Logger _log = Logger('GameState');
-  Timer? _hintTimer;
+
+  late final BoardAnnouncer announcer;
+  late final BoardAssistant assistant;
 
   bool isProcessing = false;
   bool hasTargetCombo = false;
-  bool _isDisposed = false;
   bool isShuffling = false;
-  bool _isGameOver = false;
-
   bool isPaused = false;
+  bool isDisposed = false;
+  bool isGameOver = false;
 
   int currentComboMultiplier = 0;
 
-  String? activeAnnouncement;
-  int announcementToken = 0;
-
-  void announce(String phrase) {
-    activeAnnouncement = phrase;
-    announcementToken++;
-    notifyListeners();
-
-    final currentToken = announcementToken;
-    Future.delayed(const Duration(milliseconds: 1400), () {
-      if (!_isDisposed && announcementToken == currentToken) {
-        activeAnnouncement = null;
-        notifyListeners();
-      }
-    });
-  }
-
-  List<TileCoordinate>? _currentHints;
-
-  Future<void> _waitIfPaused() async {
-    while (isPaused) {
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-  }
-
-  void _startHintTimer() {
-    _hintTimer?.cancel();
-    _hintTimer = Timer(const Duration(seconds: 5), _triggerHint);
-  }
-
-  void resetTimer() {
-    if (_isDisposed) return;
-
-    if (_isGameOver) {
-      _hintTimer?.cancel();
-      return;
-    }
-
-    _clearHint();
-    if (!isProcessing && !isShuffling) {
-      _startHintTimer();
-    }
-    notifyListeners();
-  }
+  String? get activeAnnouncement => announcer.activeAnnouncement;
+  int get announcementToken => announcer.announcementToken;
+  double get shuffleProgress => assistant.shuffleProgress;
 
   GameState({
     required GameLevel level,
@@ -82,260 +42,272 @@ class GameState extends ChangeNotifier {
   }) {
     gameController = GameController(level);
     gameController.initialize();
+    announcer = BoardAnnouncer(this);
+    assistant = BoardAssistant(this);
+  }
+
+  void updateUI() {
+    if (!isDisposed) notifyListeners();
+  }
+
+  void setShufflingFlag(bool value) {
+    isShuffling = value;
   }
 
   void startInitialDrop() {
     gameController.triggerInitialFall();
     notifyListeners();
-    resetTimer();
+    assistant.resetTimer();
   }
 
   void setGameOver() {
-    _isGameOver = true;
-    _hintTimer?.cancel();
+    isGameOver = true;
+    assistant.cancelHintTimer();
     isProcessing = false;
     notifyListeners();
   }
 
+  void resetTimer() {
+    assistant.resetTimer();
+  }
+
+  Future<void> shuffleBoard() {
+    return assistant.shuffleBoard();
+  }
+
   Future<void> resolveSwipe(
-    TileCoordinate draggedCoordinate,
-    TileCoordinate targetCoordinate,
+    TileCoordinate dCoord,
+    TileCoordinate tCoord,
   ) async {
-    if (_isGameOver || isPaused) {
-      return;
-    }
+    if (isGameOver || isPaused) return;
 
     isProcessing = true;
-    resetTimer();
+    assistant.resetTimer();
     notifyListeners();
 
-    List<MatchGroup> matchedGroups = await _attemptSwap(
-      draggedCoordinate,
-      targetCoordinate,
+    List<MatchGroup> matchedGroups = await assistant.attemptSwap(
+      dCoord,
+      tCoord,
     );
-
     if (matchedGroups.isEmpty) {
-      hasTargetCombo = false;
-
-      isProcessing = false;
-      if (!_isDisposed) {
-        notifyListeners();
-        resetTimer();
-      }
+      await _finalizeTurnLifecycle();
       return;
     }
 
-    activeAnnouncement = null;
-
-    bool isFirstMatch = true;
+    announcer.clear();
+    currentComboMultiplier = 0;
+    bool turnHadAlchemy = false;
+    bool turnHadCalamity = false;
 
     while (true) {
-      await _waitIfPaused();
+      int comboBeforeCascade = currentComboMultiplier;
 
-      bool hasMatches = true;
-      while (hasMatches) {
-        await _waitIfPaused();
+      bool cascadeOccurred = await _executeCascadePhase(tCoord);
+      if (isDisposed) return;
 
-        List<MatchGroup> matchedGroups = MatchDetector.findMatchedGroups(
-          gameController.grid,
-        );
-
-        matchedGroups.removeWhere((group) {
-          return group.coordinates.any((c) {
-            final tile = gameController.grid[c.row][c.col];
-            return tile.isTriggered || tile.isExploding || tile.isMerging;
-          });
-        });
-
-        if (matchedGroups.isEmpty) {
-          hasMatches = false;
-          break;
-        }
-
-        if (!isFirstMatch) {
-          currentComboMultiplier++;
-        }
-
-        _categorizeAnimations(matchedGroups, isFirstMatch, targetCoordinate);
-        notifyListeners();
-
-        await Future.delayed(clearAnimationTime);
-        if (_isDisposed) return;
-
-        final Set<TileCoordinate> allMatchedCoords = matchedGroups
-            .expand((g) => g.coordinates)
-            .toSet();
-
-        Set<TileCoordinate> reactionDestroyed = gameController.spawnTiles(
-          allMatchedCoords,
-          this,
-          mergePoint: isFirstMatch ? targetCoordinate : null,
-        );
-
-        for (var coord in reactionDestroyed) {
-          final tile = gameController.grid[coord.row][coord.col];
-          if (tile.emoji == gameController.level.targetEmoji) {
-            tile.isFlying = true;
-          }
-        }
-
-        notifyListeners();
-
-        bool hasAoE = reactionDestroyed.any(
-          (coord) => !allMatchedCoords.any(
-            (c) => c.row == coord.row && c.col == coord.col,
-          ),
-        );
-        bool hasTransmutations = gameController.grid.any(
-          (row) => row.any((t) => t.isTransmuting),
-        );
-
-        bool containsRecipeMerge = matchedGroups.any(
-          (g) => RecipeBook.getRecipeFor(g.emoji) != null,
-        );
-        if ((hasAoE || hasTransmutations) &&
-            (containsRecipeMerge || hasTransmutations)) {
-              Future.delayed(const Duration(milliseconds: 500), () {
-                announce("Alchemy!");
-              });
-        }
-
-        if (hasAoE || hasTransmutations) {
-          await Future.delayed(clearAnimationTime);
-          if (_isDisposed) return;
-
-          for (int r = 0; r < gameController.getRowCount(); r++) {
-            for (int c = 0; c < gameController.getColCount(); c++) {
-              gameController.grid[r][c].isTransmuting = false;
-            }
-          }
-        } else {
-          await Future.delayed(const Duration(milliseconds: 100));
-          if (_isDisposed) return;
-        }
-
-        gameController.gridManager.applyGravity(reactionDestroyed);
-
-        gameController.collectFlyingTiles();
-
-        notifyListeners();
-        await Future.delayed(const Duration(milliseconds: 50));
-        if (_isDisposed) return;
-
-        gameController.triggerInitialFall();
-        notifyListeners();
-
-        await Future.delayed(gravityAnimationTime);
-        if (_isDisposed) return;
-
-        isFirstMatch = false;
+      if (cascadeOccurred && currentComboMultiplier > comboBeforeCascade) {
+        turnHadAlchemy = true;
       }
 
       List<Tile> primedBombs = gameController.getTriggeredBombs();
-
       if (primedBombs.isNotEmpty) {
-        await _waitIfPaused();
-
-        Future.delayed(const Duration(milliseconds: 500), () {
-          announce("Calamity!");
-        });
-
-        Set<TileCoordinate> allBlastedCoords = {};
-        Set<TileCoordinate> allTransformedCoords = {};
-
-        final detonatedBombs = <Tile>{};
-
-        bool chainReaction = true;
-        while (chainReaction) {
-          await _waitIfPaused();
-
-          chainReaction = false;
-          final currentBombs = List<Tile>.from(primedBombs);
-
-          for (Tile activeBomb in currentBombs) {
-            if (!activeBomb.isTriggered) continue;
-
-            detonatedBombs.add(activeBomb);
-
-            if (activeBomb.emoji == gameController.level.targetEmoji) {
-              resolveEmoji(activeBomb.emoji, 1);
-            }
-
-            activeBomb.isTriggered = false;
-            activeBomb.isExploding = true;
-
-            final blastResult = gameController.executeBlastRadius(
-              activeBomb.coordinate,
-            );
-            allBlastedCoords.addAll(blastResult.destroyed);
-            allTransformedCoords.addAll(blastResult.transformed);
-          }
-
-          primedBombs = gameController.getTriggeredBombs();
-          if (primedBombs.isNotEmpty) {
-            chainReaction = true;
-          }
+        if (currentComboMultiplier > 0) {
+          _triggerComboAnnouncement();
+          currentComboMultiplier = 0;
+        } else if (turnHadAlchemy) {
+          announcer.announce("Alchemy!");
+          turnHadAlchemy = false;
         }
+      }
 
-        for (var coord in allBlastedCoords) {
-          final tile = gameController.grid[coord.row][coord.col];
-          if (tile.emoji == gameController.level.targetEmoji) {
-            tile.isFlying = true;
-          }
-        }
+      bool detonationOccurred = await _executeDetonatorPhase();
+      if (isDisposed) return;
+      if (detonationOccurred) {
+        turnHadCalamity = true;
+      }
 
-        notifyListeners();
-
-        await Future.delayed(clearAnimationTime);
-        if (_isDisposed) return;
-
-        for (var coord in allTransformedCoords) {
-          final tile = gameController.grid[coord.row][coord.col];
-          resolveEmoji(tile.emoji, 1);
-          if (tile.emoji == gameController.level.targetEmoji) {
-            tile.isFlying = true;
-          }
-        }
-
-        for (int r = 0; r < gameController.getRowCount(); r++) {
-          for (int c = 0; c < gameController.getColCount(); c++) {
-            gameController.grid[r][c].isTransmuting = false;
-          }
-        }
-
-        gameController.gridManager.applyGravity(allBlastedCoords);
-        gameController.collectFlyingTiles();
-
-        notifyListeners();
-        await Future.delayed(const Duration(milliseconds: 50));
-        if (_isDisposed) return;
-
-        gameController.triggerInitialFall();
-        notifyListeners();
-
-        await Future.delayed(gravityAnimationTime);
-        if (_isDisposed) return;
-      } else {
+      if (!cascadeOccurred && !detonationOccurred) {
         break;
       }
     }
 
     if (currentComboMultiplier > 0) {
-      if (currentComboMultiplier == 1) {
-        announce("Wicked!");
-      } else if (currentComboMultiplier == 2) {
-        announce("Diabolical!");
-      } else if (currentComboMultiplier == 3) {
-        announce("Sorcery!");
-      } else if (currentComboMultiplier >= 4) {
-        announce("MAGICAL!!");
-      }
-      currentComboMultiplier = 0;
+      _triggerComboAnnouncement();
+    } else if (turnHadCalamity) {
+      announcer.announce("Calamity!");
+    } else if (turnHadAlchemy) {
+      announcer.announce("Alchemy!");
     }
 
+    await _finalizeTurnLifecycle();
+  }
+
+  Future<bool> _executeCascadePhase(TileCoordinate targetCoordinate) async {
+    bool isFirstMatch = true;
+    bool executionOccurred = false;
+
+    while (true) {
+      await _waitIfPaused();
+      List<MatchGroup> matchedGroups = MatchDetector.findMatchedGroups(
+        gameController.grid,
+      );
+
+      matchedGroups.removeWhere(
+        (group) => group.coordinates.any((c) {
+          final tile = gameController.grid[c.row][c.col];
+          return tile.isTriggered || tile.isExploding || tile.isMerging;
+        }),
+      );
+
+      if (matchedGroups.isEmpty) break;
+
+      executionOccurred = true;
+
+      if (!isFirstMatch) {
+        currentComboMultiplier++;
+      }
+
+      _categorizeAnimations(matchedGroups, isFirstMatch, targetCoordinate);
+      notifyListeners();
+      await Future.delayed(clearAnimationTime);
+      if (isDisposed) return false;
+
+      final Set<TileCoordinate> allMatchedCoords = matchedGroups
+          .expand((g) => g.coordinates)
+          .toSet();
+      Set<TileCoordinate> reactionDestroyed = gameController.spawnTiles(
+        allMatchedCoords,
+        this,
+        mergePoint: isFirstMatch ? targetCoordinate : null,
+      );
+
+      _flagFlyingTargetEmoji(reactionDestroyed);
+
+      Set<TileCoordinate> mergedFlyingTargets = {};
+      for (int r = 0; r < gameController.getRowCount(); r++) {
+        for (int c = 0; c < gameController.getColCount(); c++) {
+          final tile = gameController.grid[r][c];
+          if (tile.isFlying &&
+              !reactionDestroyed.any((cd) => cd.row == r && cd.col == c)) {
+            mergedFlyingTargets.add(TileCoordinate(row: r, col: c));
+          }
+        }
+      }
+      notifyListeners();
+
+      await _evaluateAlchemicalJuice(
+        matchedGroups,
+        allMatchedCoords,
+        reactionDestroyed,
+      );
+
+      reactionDestroyed.addAll(mergedFlyingTargets);
+
+      gameController.gridManager.applyGravity(reactionDestroyed);
+
+      for (int r = 0; r < gameController.getRowCount(); r++) {
+        for (int c = 0; c < gameController.getColCount(); c++) {
+          gameController.grid[r][c].isFlying = false;
+        }
+      }
+
+      notifyListeners();
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (isDisposed) return false;
+
+      gameController.triggerInitialFall();
+      notifyListeners();
+      await Future.delayed(gravityAnimationTime);
+      if (isDisposed) return false;
+
+      isFirstMatch = false;
+    }
+
+    return executionOccurred;
+  }
+
+  Future<bool> _executeDetonatorPhase() async {
+    bool executionOccurred = false;
+
+    while (true) {
+      List<Tile> primedBombs = gameController.getTriggeredBombs();
+      if (primedBombs.isEmpty) break;
+
+      executionOccurred = true;
+      await _waitIfPaused();
+
+      Set<TileCoordinate> allBlastedCoords = {};
+      Set<TileCoordinate> allTransformedCoords = {};
+      bool chainReaction = true;
+
+      while (chainReaction) {
+        await _waitIfPaused();
+        chainReaction = false;
+        final currentBombs = List<Tile>.from(primedBombs);
+
+        for (Tile activeBomb in currentBombs) {
+          if (!activeBomb.isTriggered) continue;
+          if (activeBomb.emoji == gameController.level.targetEmoji) {
+            resolveEmoji(activeBomb.emoji, 1);
+          }
+
+          activeBomb.isTriggered = false;
+          activeBomb.isExploding = true;
+
+          final blastResult = gameController.executeBlastRadius(
+            activeBomb.coordinate,
+          );
+          allBlastedCoords.addAll(blastResult.destroyed);
+          allTransformedCoords.addAll(blastResult.transformed);
+        }
+
+        primedBombs = gameController.getTriggeredBombs();
+        if (primedBombs.isNotEmpty) chainReaction = true;
+      }
+
+      _flagFlyingTargetEmoji(allBlastedCoords);
+      notifyListeners();
+      await Future.delayed(clearAnimationTime);
+      if (isDisposed) return false;
+
+      Set<TileCoordinate> targetFlyingTransforms = {};
+      for (var coord in allTransformedCoords) {
+        final tile = gameController.grid[coord.row][coord.col];
+        resolveEmoji(tile.emoji, 1);
+        if (tile.emoji == gameController.level.targetEmoji) {
+          tile.isFlying = true;
+          targetFlyingTransforms.add(coord);
+        }
+      }
+
+      allBlastedCoords.addAll(targetFlyingTransforms);
+
+      _clearTransmutingMatrices();
+      gameController.gridManager.applyGravity(allBlastedCoords);
+
+      for (int r = 0; r < gameController.getRowCount(); r++) {
+        for (int c = 0; c < gameController.getColCount(); c++) {
+          gameController.grid[r][c].isFlying = false;
+        }
+      }
+
+      notifyListeners();
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (isDisposed) return false;
+
+      gameController.triggerInitialFall();
+      notifyListeners();
+      await Future.delayed(gravityAnimationTime);
+      if (isDisposed) return false;
+    }
+
+    return executionOccurred;
+  }
+
+  Future<void> _finalizeTurnLifecycle() async {
     if (!gameController.hasPossibleMoves()) {
-      _log.info('NO MOVES LEFT!  Shuffling...');
-      await shuffleBoard();
+      _log.info('NO MOVES LEFT! Shuffling...');
+      await assistant.shuffleBoard();
     }
 
     _log.info('Processing After Turn Emoji Behaviors...');
@@ -343,120 +315,69 @@ class GameState extends ChangeNotifier {
     notifyListeners();
 
     await Future.delayed(const Duration(milliseconds: 300));
-    if (_isDisposed) return;
+    if (isDisposed) return;
 
     hasTargetCombo = false;
-
     isProcessing = false;
-    if (!_isDisposed) {
+
+    if (!isDisposed) {
       notifyListeners();
-      resetTimer();
+      assistant.resetTimer();
       onComboFinished();
     }
   }
 
-  double shuffleProgress = 1.0;
+  void _triggerComboAnnouncement() {
+    if (currentComboMultiplier == 1)
+      announcer.announce("Wicked!");
+    else if (currentComboMultiplier == 2)
+      announcer.announce("Diabolical!");
+    else if (currentComboMultiplier == 3)
+      announcer.announce("Sorcery!");
+    else if (currentComboMultiplier >= 4)
+      announcer.announce("MAGICAL!!");
+  }
 
-  Future<void> shuffleBoard() async {
-    _log.info('Shuffling Board...');
-
-    shuffleProgress = 0.0;
-    isShuffling = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    gameController.shuffleGrid();
-
-    shuffleProgress = 1.0;
-    notifyListeners();
-
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    isShuffling = false;
-    if (!_isDisposed) {
-      notifyListeners();
-      resetTimer();
+  void _flagFlyingTargetEmoji(Set<TileCoordinate> coordinates) {
+    for (var coord in coordinates) {
+      final tile = gameController.grid[coord.row][coord.col];
+      if (tile.emoji == gameController.level.targetEmoji) {
+        tile.isFlying = true;
+      }
     }
   }
 
-  void _triggerHint() {
-    if (isProcessing || isShuffling || _isDisposed || _isGameOver) {
-      return;
-    }
+  Future<void> _evaluateAlchemicalJuice(
+    List<MatchGroup> groups,
+    Set<TileCoordinate> matches,
+    Set<TileCoordinate> destroyed,
+  ) async {
+    bool hasAoE = destroyed.any(
+      (coord) => !matches.any((c) => c.row == coord.row && c.col == coord.col),
+    );
+    bool hasTransmutations = gameController.grid.any(
+      (row) => row.any((t) => t.isTransmuting),
+    );
 
-    _currentHints = gameController.getHintMove();
-    if (_currentHints != null) {
-      Tile tileA =
-          gameController.grid[_currentHints![0].row][_currentHints![0].col];
-      Tile tileB =
-          gameController.grid[_currentHints![1].row][_currentHints![1].col];
-
-      tileA.isHinting = true;
-      tileA.hintPartner = tileB.coordinate;
-
-      tileB.isHinting = true;
-      tileB.hintPartner = tileA.coordinate;
-
-      notifyListeners();
+    if (hasAoE || hasTransmutations) {
+      await Future.delayed(clearAnimationTime);
+      _clearTransmutingMatrices();
     } else {
-      shuffleBoard();
+      await Future.delayed(const Duration(milliseconds: 100));
     }
   }
 
-  void _clearHint() {
-    _hintTimer?.cancel();
-    _currentHints = null;
-
+  void _clearTransmutingMatrices() {
     for (int r = 0; r < gameController.getRowCount(); r++) {
       for (int c = 0; c < gameController.getColCount(); c++) {
-        gameController.grid[r][c].isHinting = false;
-        gameController.grid[r][c].hintPartner = null;
+        gameController.grid[r][c].isTransmuting = false;
       }
     }
-    notifyListeners();
   }
 
-  Future<List<MatchGroup>> _attemptSwap(
-    TileCoordinate dCoord,
-    TileCoordinate tCoord,
-  ) async {
-    final decision = gameController.evaluateSwipe(dCoord, tCoord);
-
-    if (decision.type == SwipeResult.invalid) {
-      _log.info('Invalid swap - playing snap-back animation');
-
-      gameController.swapTiles(dCoord, tCoord);
-      notifyListeners();
-
-      await Future.delayed(swapAnimationTime);
-      if (_isDisposed) return [];
-
-      gameController.swapTiles(tCoord, dCoord);
-      notifyListeners();
-
-      if (!_isDisposed) {
-        _log.info('Invalid swap complete - restarting hint timer');
-        _clearHint();
-        _startHintTimer();
-      }
-      return [];
-    } else {
-      notifyListeners();
-      await Future.delayed(Duration(milliseconds: 100));
-      if (_isDisposed) return [];
-
-      if (decision.type == SwipeResult.specialBehavior) {
-        _log.info('Special swipe behavior triggered!');
-        gameController.executeBehaviorActions(
-          decision.actions,
-          dCoord.row,
-          dCoord.col,
-        );
-        return [];
-      }
-
-      return decision.matches;
+  Future<void> _waitIfPaused() async {
+    while (isPaused) {
+      await Future.delayed(const Duration(milliseconds: 100));
     }
   }
 
@@ -499,9 +420,7 @@ class GameState extends ChangeNotifier {
   }
 
   void resolveEmoji(GameEmoji emoji, int count) {
-    if (emoji == gameController.level.targetEmoji) {
-      hasTargetCombo = true;
-    }
+    if (emoji == gameController.level.targetEmoji) hasTargetCombo = true;
     onEmojiDestroyed(emoji, count);
     notifyListeners();
   }
@@ -513,8 +432,8 @@ class GameState extends ChangeNotifier {
 
   @override
   void dispose() {
-    _isDisposed = true;
-    _hintTimer?.cancel();
+    isDisposed = true;
+    assistant.cancelHintTimer();
     isProcessing = false;
     super.dispose();
   }

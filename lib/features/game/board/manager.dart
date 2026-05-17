@@ -125,6 +125,7 @@ class GridManager {
 
       for (int r = 0; r < rows; r++) {
         gridTiles[r][c] = newColumn[r];
+        gridTiles[r][c].coordinate.col = c;
       }
     }
   }
