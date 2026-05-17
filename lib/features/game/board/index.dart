@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/game/board/models/sparkle_effect.dart';
+import 'package:grimoji/features/game/board/widgets/announcer.dart';
 import 'package:grimoji/features/game/board/widgets/board_grid.dart';
 import 'package:grimoji/features/game/board/metrics.dart';
 import 'package:grimoji/features/game/board/widgets/tile_grid.dart';
@@ -172,73 +173,84 @@ class _GameBoardState extends State<GameBoard> {
           child: SizedBox(
             width: constrainedBoardWidth,
             height: proportionalBoardHeight,
-            child: Container(
-              padding: EdgeInsets.all(isSmallScreen ? 4.0 : 8.0),
-              clipBehavior: Clip.hardEdge,
-              decoration: ShapeDecoration(
-                color: palette.mist,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: LayoutBuilder(
-                builder: (context, gridAreaConstraints) {
-                  int horizontalGapsCount = gridColumns - 1;
-                  int verticalGapsCount = gridRows - 1;
-
-                  final double calculatedSingleTileWidth =
-                      (gridAreaConstraints.maxWidth -
-                          (tileSpacingGap * horizontalGapsCount)) /
-                      gridColumns;
-                  final double calculatedSingleTileHeight =
-                      (gridAreaConstraints.maxHeight -
-                          (tileSpacingGap * verticalGapsCount)) /
-                      gridRows;
-
-                  final double dynamicTileAspectRatio =
-                      calculatedSingleTileWidth / calculatedSingleTileHeight;
-
-                  return GestureDetector(
-                    onPanStart: (details) => onPanStart(details, context),
-                    onPanUpdate: (details) => onPanUpdate(details, levelstate),
-                    onPanEnd: (details) => _clearDrag(), 
-                    onPanCancel: () => _clearDrag(),     
-                    child: Stack(
-                      key: _boardKey,
-                      clipBehavior: Clip.none,
-                      children: [
-                        BoardGrid(
-                          gridColumns: gridColumns,
-                          totalTiles: totalTiles,
-                          aspectRatio: dynamicTileAspectRatio,
-                          firstTileKey: _tileKey,
-                          palette: palette,
-                        ),
-                        TileGrid(activeTileId: _draggedTile?.id),
-                        
-                        ..._sparkles.map((sparkle) {
-                          return Positioned(
-                            key: ValueKey(sparkle.id),
-                            left: sparkle.position.dx - 50,
-                            top: sparkle.position.dy - 50,
-                            child: IgnorePointer( 
-                              child: SizedBox(
-                                width: 100,
-                                height: 100,
-                                child: Lottie.asset(
-                                  'assets/lottie/stars.json',
-                                  repeat: false,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(isSmallScreen ? 4.0 : 8.0),
+                  clipBehavior: Clip.hardEdge,
+                  decoration: ShapeDecoration(
+                    color: palette.mist,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                  );
-                },
-              ),
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, gridAreaConstraints) {
+                      int horizontalGapsCount = gridColumns - 1;
+                      int verticalGapsCount = gridRows - 1;
+
+                      final double calculatedSingleTileWidth =
+                          (gridAreaConstraints.maxWidth -
+                              (tileSpacingGap * horizontalGapsCount)) /
+                          gridColumns;
+                      final double calculatedSingleTileHeight =
+                          (gridAreaConstraints.maxHeight -
+                              (tileSpacingGap * verticalGapsCount)) /
+                          gridRows;
+
+                      final double dynamicTileAspectRatio =
+                          calculatedSingleTileWidth / calculatedSingleTileHeight;
+
+                      return GestureDetector(
+                        onPanStart: (details) => onPanStart(details, context),
+                        onPanUpdate: (details) => onPanUpdate(details, levelstate),
+                        onPanEnd: (details) => _clearDrag(), 
+                        onPanCancel: () => _clearDrag(),     
+                        child: Stack(
+                          key: _boardKey,
+                          clipBehavior: Clip.none,
+                          children: [
+                            BoardGrid(
+                              gridColumns: gridColumns,
+                              totalTiles: totalTiles,
+                              aspectRatio: dynamicTileAspectRatio,
+                              firstTileKey: _tileKey,
+                              palette: palette,
+                            ),
+                            TileGrid(activeTileId: _draggedTile?.id),
+                            
+                            ..._sparkles.map((sparkle) {
+                              return Positioned(
+                                key: ValueKey(sparkle.id),
+                                left: sparkle.position.dx - 50,
+                                top: sparkle.position.dy - 50,
+                                child: IgnorePointer( 
+                                  child: SizedBox(
+                                    width: 100,
+                                    height: 100,
+                                    child: Lottie.asset(
+                                      'assets/lottie/stars.json',
+                                      repeat: false,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                if (levelstate.gameState.activeAnnouncement != null)
+                  AnnouncerWidget(
+                    phrase: levelstate.gameState.activeAnnouncement!,
+                    animationToken: levelstate.gameState.announcementToken,
+                  ),
+              ],
             ),
           ),
         );

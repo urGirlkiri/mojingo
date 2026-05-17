@@ -28,6 +28,25 @@ class GameState extends ChangeNotifier {
 
   bool isPaused = false;
 
+  int currentComboMultiplier = 0;
+
+  String? activeAnnouncement;
+  int announcementToken = 0;
+
+  void announce(String phrase) {
+    activeAnnouncement = phrase;
+    announcementToken++;
+    notifyListeners();
+
+    final currentToken = announcementToken;
+    Future.delayed(const Duration(milliseconds: 1400), () {
+      if (!_isDisposed && announcementToken == currentToken) {
+        activeAnnouncement = null;
+        notifyListeners();
+      }
+    });
+  }
+
   List<TileCoordinate>? _currentHints;
 
   Future<void> _waitIfPaused() async {
@@ -106,6 +125,8 @@ class GameState extends ChangeNotifier {
       return;
     }
 
+    activeAnnouncement = null;
+
     bool isFirstMatch = true;
 
     while (true) {
@@ -130,6 +151,11 @@ class GameState extends ChangeNotifier {
           hasMatches = false;
           break;
         }
+
+        if (!isFirstMatch) {
+          currentComboMultiplier++;
+        }
+
         _categorizeAnimations(matchedGroups, isFirstMatch, targetCoordinate);
         notifyListeners();
 
@@ -163,6 +189,16 @@ class GameState extends ChangeNotifier {
         bool hasTransmutations = gameController.grid.any(
           (row) => row.any((t) => t.isTransmuting),
         );
+
+        bool containsRecipeMerge = matchedGroups.any(
+          (g) => RecipeBook.getRecipeFor(g.emoji) != null,
+        );
+        if ((hasAoE || hasTransmutations) &&
+            (containsRecipeMerge || hasTransmutations)) {
+              Future.delayed(const Duration(milliseconds: 500), () {
+                announce("Alchemy!");
+              });
+        }
 
         if (hasAoE || hasTransmutations) {
           await Future.delayed(clearAnimationTime);
@@ -200,6 +236,10 @@ class GameState extends ChangeNotifier {
       if (primedBombs.isNotEmpty) {
         await _waitIfPaused();
 
+        Future.delayed(const Duration(milliseconds: 500), () {
+          announce("Calamity!");
+        });
+
         Set<TileCoordinate> allBlastedCoords = {};
         Set<TileCoordinate> allTransformedCoords = {};
 
@@ -234,20 +274,6 @@ class GameState extends ChangeNotifier {
           primedBombs = gameController.getTriggeredBombs();
           if (primedBombs.isNotEmpty) {
             chainReaction = true;
-          }
-        }
-
-        _log.info(
-          'MEGA BLAST: Checking ${primedBombs.length} triggered bombs, ${detonatedBombs.length} detonated',
-        );
-        for (Tile bomb in primedBombs) {
-          _log.info(
-            'MEGA BLAST: Checking bomb at (${bomb.coordinate.row}, ${bomb.coordinate.col}), isTriggered=${bomb.isTriggered}, isExploding=${bomb.isExploding}',
-          );
-          if (!detonatedBombs.contains(bomb) &&
-              bomb.emoji == gameController.level.targetEmoji) {
-            _log.info('MEGA BLAST: Counting bomb that never detonated');
-            resolveEmoji(bomb.emoji, 1);
           }
         }
 
@@ -292,6 +318,19 @@ class GameState extends ChangeNotifier {
       } else {
         break;
       }
+    }
+
+    if (currentComboMultiplier > 0) {
+      if (currentComboMultiplier == 1) {
+        announce("Wicked!");
+      } else if (currentComboMultiplier == 2) {
+        announce("Diabolical!");
+      } else if (currentComboMultiplier == 3) {
+        announce("Sorcery!");
+      } else if (currentComboMultiplier >= 4) {
+        announce("MAGICAL!!");
+      }
+      currentComboMultiplier = 0;
     }
 
     if (!gameController.hasPossibleMoves()) {
