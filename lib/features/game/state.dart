@@ -187,15 +187,26 @@ class GameState extends ChangeNotifier {
 
       await Future.delayed(const Duration(milliseconds: 200));
 
-      Set<TileCoordinate> blastedCoords = gameController.executeBlastRadius(
+      final blastResult = gameController.executeBlastRadius(
         activeBomb.coordinate,
       );
+
+      Set<TileCoordinate> blastedCoords = blastResult.destroyed;
+
+      for (var coord in blastResult.transformed) {
+        final tile = gameController.grid[coord.row][coord.col];
+        resolveEmoji(tile.emoji, 1);
+        if (tile.emoji == gameController.level.targetEmoji) {
+          tile.isFlying = true;
+        }
+      }
       notifyListeners();
 
       await Future.delayed(clearAnimationTime);
       if (_isDisposed) return;
 
       gameController.gridManager.applyGravity(blastedCoords);
+      gameController.collectFlyingTiles();
 
       notifyListeners();
       await Future.delayed(const Duration(milliseconds: 50));

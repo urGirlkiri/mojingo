@@ -125,15 +125,21 @@ void main() {
           reason: 'The bomb should be primed (isTriggered) for detonation',
         );
 
-        Set<TileCoordinate> destroyed = gridManager.executeBlastRadius(
+        final blastResult = gridManager.executeBlastRadius(
           TileCoordinate(row: 3, col: 2),
           radius: 1,
         );
 
         expect(
-          destroyed.contains(TileCoordinate(row: 3, col: 3)),
+          blastResult.destroyed.contains(TileCoordinate(row: 3, col: 3)),
           isFalse,
           reason: 'Ocean should NOT be in destroyed set - it transforms to salt',
+        );
+
+        expect(
+          blastResult.transformed.contains(TileCoordinate(row: 3, col: 3)),
+          isTrue,
+          reason: 'Ocean should be in transformed set',
         );
 
         expect(
@@ -422,13 +428,13 @@ void main() {
       gridManager.gridTiles[4][3].emoji = Emojis.droplet;
       gridManager.gridTiles[4][4].emoji = Emojis.bomb;
 
-      Set<TileCoordinate> destroyed = gridManager.executeBlastRadius(
+      final blastResult = gridManager.executeBlastRadius(
         center,
         radius: 2,
       );
 
       expect(
-        destroyed.contains(TileCoordinate(row: 4, col: 3)),
+        blastResult.destroyed.contains(TileCoordinate(row: 4, col: 3)),
         isTrue,
         reason: 'Droplet should be in the destroyed set',
       );
@@ -439,7 +445,7 @@ void main() {
       );
 
       expect(
-        destroyed.contains(TileCoordinate(row: 4, col: 4)),
+        blastResult.destroyed.contains(TileCoordinate(row: 4, col: 4)),
         isFalse,
         reason: 'Caught Bomb should NOT be in the destroyed set',
       );
@@ -459,7 +465,7 @@ void main() {
         gridManager.gridTiles[4][2].emoji = Emojis.bomb;
         gridManager.gridTiles[4][3].emoji = Emojis.rock;
 
-        Set<TileCoordinate> destroyed = gridManager.executeBlastRadius(
+        final blastResult = gridManager.executeBlastRadius(
           center,
           radius: 1,
         );
@@ -471,7 +477,7 @@ void main() {
               'Center bomb should not be triggered (it is destroyed instead)',
         );
         expect(
-          destroyed.contains(center),
+          blastResult.destroyed.contains(center),
           isTrue,
           reason:
               'Center bomb SHOULD be in destroyed set so gravity removes it',

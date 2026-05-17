@@ -189,11 +189,12 @@ class GridManager {
     return bombs;
   }
 
-  Set<TileCoordinate> executeBlastRadius(
+  ({Set<TileCoordinate> destroyed, Set<TileCoordinate> transformed}) executeBlastRadius(
     TileCoordinate center, {
     int radius = 2,
   }) {
     Set<TileCoordinate> destroyedTiles = {};
+    Set<TileCoordinate> transformedTiles = {};
     final transformations = RecipeBook.getTransformationsForType(ReactionType.explosive);
 
     for (int r = 0; r < rows; r++) {
@@ -214,6 +215,7 @@ class GridManager {
             if (resultingEmoji != null) {
               tile.emoji = resultingEmoji;
               tile.isTransmuting = true;
+              transformedTiles.add(TileCoordinate(row: r, col: c));
             } else {
               tile.isExploding = true;
               destroyedTiles.add(TileCoordinate(row: r, col: c));
@@ -222,6 +224,6 @@ class GridManager {
         }
       }
     }
-    return destroyedTiles;
+    return (destroyed: destroyedTiles, transformed: transformedTiles);
   }
 }

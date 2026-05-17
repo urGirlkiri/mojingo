@@ -200,7 +200,7 @@ class GameController {
 
   List<Tile> getTriggeredBombs() => _gridManager.getTriggeredBombs();
   
-  Set<TileCoordinate> executeBlastRadius(TileCoordinate center, {int radius = 2}) {
+  ({Set<TileCoordinate> destroyed, Set<TileCoordinate> transformed}) executeBlastRadius(TileCoordinate center, {int radius = 2}) {
     return _gridManager.executeBlastRadius(center, radius: radius);
   }
 }
