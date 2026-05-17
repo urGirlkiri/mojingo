@@ -190,18 +190,22 @@ class GridManager {
   }
 
   ({Set<TileCoordinate> destroyed, Set<TileCoordinate> transformed}) executeBlastRadius(
-    TileCoordinate center, {
-    int radius = 2,
-  }) {
+    TileCoordinate center,
+  ) {
     Set<TileCoordinate> destroyedTiles = {};
     Set<TileCoordinate> transformedTiles = {};
     final transformations = RecipeBook.getTransformationsForType(ReactionType.explosive);
 
+    final centerTile = gridTiles[center.row][center.col];
+    final centerReaction = RecipeBook.getReactionFor(centerTile.emoji);
+    final radius = centerReaction?.aoeRadius ?? 1;
+
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
-        final distance = (r - center.row).abs() + (c - center.col).abs();
+        final rowDist = (r - center.row).abs();
+        final colDist = (c - center.col).abs();
 
-        if (distance <= radius) {
+        if (rowDist <= radius && colDist <= radius) {
           final tile = gridTiles[r][c];
 
           final reaction = RecipeBook.getReactionFor(tile.emoji);
