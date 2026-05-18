@@ -13,57 +13,61 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final levelState = context.watch<LevelState>();
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: ShapeDecoration(
-            color: palette.mist,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(40),
+    return SizedBox(
+      width: double.infinity,
+      height: 230,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: ShapeDecoration(
+              color: palette.mist,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
             ),
-          ),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInfoBox('Time', levelState.secondsRemaining.toString()),
-                const SizedBox(width: 16),
-                _buildTargetBox(
-                  levelState.level.targetEmoji,
-                  levelState.targetIconKey,
-                  levelState.gameState.hasTargetCombo,
-                  levelState.isPaused,
-                ),
-                const SizedBox(width: 16),
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: ShapeDecoration(
-                    color: palette.dusk,
-                    shape: CircleBorder(
-                      side: BorderSide(width: 3, color: palette.dusk),
-                    ),
-                    image: const DecorationImage(
-                      image: AssetImage("assets/mascot/wizard.png"),
-                      fit: BoxFit.cover,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoBox('Time', levelState.secondsRemaining.toString()),
+                  const SizedBox(width: 16),
+                  _buildTargetBox(
+                    levelState.level.targetEmoji,
+                    levelState.targetIconKey,
+                    levelState.gameState.hasTargetCombo,
+                    levelState.isPaused,
+                  ),
+                  const SizedBox(width: 16),
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: ShapeDecoration(
+                      color: palette.dusk,
+                      shape: CircleBorder(
+                        side: BorderSide(width: 3, color: palette.dusk),
+                      ),
+                      image: const DecorationImage(
+                        image: AssetImage("assets/mascot/wizard.png"),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 24),
-        _buildTargetProgress(
-          levelState.level.number.toString(),
-          levelState.progress,
-          levelState.gameState.hasTargetCombo,
-          levelState.isPaused,
-        ),
-      ],
+          const SizedBox(height: 24),
+          _buildTargetProgress(
+            levelState.level.number.toString(),
+            levelState.progress,
+            levelState.gameState.hasTargetCombo,
+            levelState.isPaused,
+          ),
+        ],
+      ),
     );
   }
 

@@ -178,12 +178,12 @@ class _GameBoardState extends State<GameBoard> {
               alignment: Alignment.center,
               children: [
                 Container(
-                  padding: EdgeInsets.all(isSmallScreen ? 4.0 : 8.0),
+                  padding: EdgeInsets.all(isSmallScreen ? 6.0 : 8.0),
                   clipBehavior: Clip.hardEdge,
                   decoration: ShapeDecoration(
                     color: palette.mist,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: LayoutBuilder(
