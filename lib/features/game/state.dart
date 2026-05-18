@@ -173,19 +173,37 @@ class GameState extends ChangeNotifier {
         currentComboMultiplier++;
       }
 
+      final List<Set<TileCoordinate>> safeMatchGroups = [];
+      final List<TileCoordinate> catalysts = [];
+
+      for (var groupMatch in matchedGroups) {
+        final safeCoords = groupMatch.coordinates.map((c) => TileCoordinate(row: c.row, col: c.col)).toSet();
+        safeMatchGroups.add(safeCoords);
+
+        TileCoordinate catalyst = (isFirstMatch && safeCoords.any((c) => c.row == targetCoordinate.row && c.col == targetCoordinate.col))
+            ? targetCoordinate
+            : safeCoords.first;
+        catalysts.add(catalyst);
+      }
+
       _categorizeAnimations(matchedGroups, isFirstMatch, targetCoordinate);
       notifyListeners();
       await Future.delayed(clearAnimationTime);
       if (isDisposed) return false;
 
-      final Set<TileCoordinate> allMatchedCoords = matchedGroups
-          .expand((g) => g.coordinates)
-          .toSet();
-      Set<TileCoordinate> reactionDestroyed = gameController.spawnTiles(
-        allMatchedCoords,
-        this,
-        mergePoint: isFirstMatch ? targetCoordinate : null,
-      );
+      Set<TileCoordinate> reactionDestroyed = {};
+      final Set<TileCoordinate> allMatchedCoords = {};
+
+      for (int i = 0; i < safeMatchGroups.length; i++) {
+        final safeCoords = safeMatchGroups[i];
+        allMatchedCoords.addAll(safeCoords);
+
+        reactionDestroyed.addAll(gameController.spawnTiles(
+          safeCoords,
+          this,
+          mergePoint: catalysts[i],
+        ));
+      }
 
       _flagFlyingTargetEmoji(reactionDestroyed);
 
@@ -258,7 +276,6 @@ class GameState extends ChangeNotifier {
           }
 
           activeBomb.isTriggered = false;
-          activeBomb.isExploding = true;
 
           final blastResult = gameController.executeBlastRadius(
             activeBomb.coordinate,

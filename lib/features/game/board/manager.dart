@@ -221,6 +221,7 @@ class GridManager {
             final resultingEmoji = transformations[tile.emoji];
             if (resultingEmoji != null) {
               tile.emoji = resultingEmoji;
+              tile.reset(); 
               tile.isTransmuting = true;
               transformedTiles.add(TileCoordinate(row: r, col: c));
             } else {
