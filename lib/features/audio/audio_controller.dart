@@ -11,8 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 
-import '../app/app_lifecycle.dart';
-import '../../features/settings/controller.dart';
+import '../../config/app/app_lifecycle.dart';
+import '../settings/controller.dart';
 import 'songs.dart';
 import 'sounds.dart';
 

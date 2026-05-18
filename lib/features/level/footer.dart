@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:grimoji/config/audio/audio_controller.dart';
-import 'package:grimoji/config/audio/sounds.dart';
+import 'package:grimoji/features/audio/audio_controller.dart';
+import 'package:grimoji/features/audio/sounds.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/features/level/state.dart';

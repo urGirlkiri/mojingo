@@ -5,8 +5,8 @@ import 'package:grimoji/config/routes.dart';
 import 'package:grimoji/widgets/neon_logo.dart';
 import 'package:provider/provider.dart';
 
-import '../config/audio/audio_controller.dart';
-import '../config/audio/sounds.dart';
+import 'audio/audio_controller.dart';
+import 'audio/sounds.dart';
 import '../widgets/pill_button.dart';
 import '../widgets/responsive_screen.dart';
 import 'settings/controller.dart';

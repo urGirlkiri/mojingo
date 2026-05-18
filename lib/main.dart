@@ -19,7 +19,7 @@ import 'package:grimoji/features/settings/persistence/settings_data.dart';
 import 'package:grimoji/features/alchemy/recipe_book.dart';
 
 import 'config/app/app_lifecycle.dart';
-import 'config/audio/audio_controller.dart';
+import 'features/audio/audio_controller.dart';
 import 'features/settings/controller.dart';
 import 'config/palette.dart';
 
