@@ -16,6 +16,8 @@ class SettingsController {
 
   final SettingsPersistence _store;
 
+  late final Future<void> initialized;
+
   ValueNotifier<bool> audioOn = ValueNotifier(true);
 
   ValueNotifier<bool> soundsOn = ValueNotifier(true);
@@ -33,7 +35,7 @@ class SettingsController {
     : _store = store ?? HiveSettingsPersistence(
         box: Hive.box<SettingsData>('settings'),
       ) {
-    _loadStateFromPersistence();
+    initialized = _loadStateFromPersistence();
   }
 
   void toggleAudioOn() {

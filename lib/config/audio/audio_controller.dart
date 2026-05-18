@@ -150,13 +150,15 @@ class AudioController {
     settingsController.sfxVolume.addListener(_volumeHandler);
     settingsController.musicVolume.addListener(_volumeHandler);
 
-    if (settingsController.audioOn.value && settingsController.musicOn.value) {
-      if (kIsWeb) {
-        _log.info('On the web, music can only start after user interaction.');
-      } else {
-        _playCurrentSongInPlaylist();
+    settingsController.initialized.then((_) {
+      if (settingsController.audioOn.value && settingsController.musicOn.value) {
+        if (kIsWeb) {
+          _log.info('On the web, music can only start after user interaction.');
+        } else {
+          _playCurrentSongInPlaylist();
+        }
       }
-    }
+    });
   }
 
   void _audioOnHandler() {
