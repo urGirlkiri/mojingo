@@ -246,9 +246,12 @@ class _GameBoardState extends State<GameBoard> {
                   ),
                 ),
                 if (levelstate.gameState.activeAnnouncement != null)
-                  AnnouncerWidget(
-                    phrase: levelstate.gameState.activeAnnouncement!,
-                    animationToken: levelstate.gameState.announcementToken,
+                  OverflowBox(
+                    maxWidth: constrainedBoardWidth,
+                    child: AnnouncerWidget(
+                      phrase: levelstate.gameState.activeAnnouncement!,
+                      animationToken: levelstate.gameState.announcementToken,
+                    ),
                   ),
               ],
             ),
