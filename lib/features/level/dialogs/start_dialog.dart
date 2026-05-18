@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:grimoji/config/levels/game_level.dart';
 import 'package:grimoji/features/audio/audio_controller.dart';
 import 'package:grimoji/features/audio/sounds.dart';
-import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/config/routes.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';

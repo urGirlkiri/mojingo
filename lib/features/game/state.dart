@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:grimoji/config/constants.dart';
 import 'package:grimoji/config/emojis.dart';
-import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/config/levels/game_level.dart';
 import 'package:grimoji/features/alchemy/recipe_book.dart';
 import 'package:grimoji/features/alchemy/reactions/reaction.dart';
 import 'package:grimoji/features/game/controller.dart';

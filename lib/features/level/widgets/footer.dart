@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:grimoji/config/levels/game_level.dart';
 import 'package:grimoji/features/audio/audio_controller.dart';
 import 'package:grimoji/features/audio/sounds.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/features/level/state.dart';
-import 'package:grimoji/config/levels.dart';
 import 'package:grimoji/features/level/dialogs/pause_dialog.dart';
 import 'package:grimoji/widgets/emoji_widget.dart';
 import 'package:logging/logging.dart';

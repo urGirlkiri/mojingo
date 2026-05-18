@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:grimoji/config/emojis.dart';
-import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/config/levels/game_level.dart';
+import 'package:grimoji/config/levels/index.dart';
 import 'package:grimoji/features/game/board/manager.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';
 import 'package:grimoji/features/game/model/match_detector.dart';

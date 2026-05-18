@@ -5,14 +5,14 @@ import 'package:grimoji/features/grimoire/screen.dart';
 
 import 'package:grimoji/features/main_menu.dart';
 import 'package:grimoji/features/map/screen.dart';
-import 'package:grimoji/features/map/level_fail/screen.dart';
-import 'package:grimoji/features/map/level_hint/screen.dart';
+import 'package:grimoji/features/level/fail_screen/screen.dart';
+import 'package:grimoji/features/level/hint_screen/screen.dart';
 import 'package:grimoji/features/settings/screen.dart';
 import 'package:grimoji/widgets/layout_scaffold.dart';
 
 import 'package:grimoji/features/level/screen.dart';
-import 'package:grimoji/features/level/win/screen.dart';
-import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/features/level/win_screen/screen.dart';
+import 'package:grimoji/config/levels/index.dart';
 
 final _routerNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -20,7 +20,7 @@ final router = GoRouter(
   navigatorKey: _routerNavigatorKey,
   initialLocation: Routes.homeRoute,
   // redirect: (BuildContext context, GoRouterState state) {
-  //   return '/map/play/3';
+  //   return '/map/play/2';
   // },
   routes: [
     StatefulShellRoute.indexedStack(

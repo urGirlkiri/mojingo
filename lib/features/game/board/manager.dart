@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/config/levels/game_level.dart';
 import 'package:grimoji/config/emojis.dart';
 import 'package:grimoji/features/game/model/tile.dart';
 import 'package:grimoji/features/game/model/coordinate.dart';

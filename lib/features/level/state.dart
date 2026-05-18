@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:grimoji/config/emojis.dart';
-import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/config/levels/game_level.dart';
+import 'package:grimoji/config/levels/index.dart';
 import 'package:grimoji/features/game/state.dart';
 import 'package:logging/logging.dart';
 

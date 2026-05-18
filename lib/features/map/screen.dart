@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:game_levels_scrolling_map/game_levels_scrolling_map.dart';
 import 'package:game_levels_scrolling_map/model/point_model.dart';
-import 'package:grimoji/config/levels.dart';
+import 'package:grimoji/config/levels/game_level.dart';
+import 'package:grimoji/config/levels/index.dart';
 import 'package:grimoji/config/palette.dart';
 import 'package:grimoji/features/level/controller.dart';
 import 'package:grimoji/features/map/widgets/level_node.dart';
