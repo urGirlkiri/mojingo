@@ -44,6 +44,14 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  fonts:
+    - family: Eagle Lake
+      fonts:
+        - asset: assets/fonts/EagleLake-Regular.ttf
+    - family: Caudex
+      fonts:
+        - asset: assets/fonts/Caudex-Regular.ttf
+
   assets:
     - assets/images/
     - assets/images/map/
